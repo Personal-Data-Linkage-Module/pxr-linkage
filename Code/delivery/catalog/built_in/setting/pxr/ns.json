@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/setting/pxr",
+    "description": "流通制御によるPXRポータルのグローバル設定を定義するための名前空間です。"
+}

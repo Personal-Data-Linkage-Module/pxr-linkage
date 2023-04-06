@@ -1,0 +1,113 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/book/policy",
+        "name": "共有の基本方針",
+        "description": "My-Condition-Bookの共有の基本方針の定義です。",
+        "_code": {
+            "_value": 71,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "actor-category",
+                "type": {
+                    "of": "code",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/category/share/actor",
+                            "catalog/built_in/category/share/actor",
+                            "catalog/ext/<ext_name>/category/share/actor"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "共有先のワークフロープロバイダーのカテゴリ"
+            },
+            {
+                "key": "workflow-category",
+                "type": {
+                    "of": "code",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/category/service",
+                            "catalog/built_in/category/service",
+                            "catalog/ext/<ext_name>/category/service"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "共有先のワークフローのカテゴリ"
+            },
+            {
+                "key": "required-licence",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/licence",
+                            "catalog/built_in/licence",
+                            "catalog/ext/<ext_name>/licence"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "共有先のWF職員が保有している必要のあるライセンス"
+            },
+            {
+                "key": "data-category",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/category/data",
+                            "catalog/built_in/category/data",
+                            "catalog/ext/<ext_name>/category/data"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "選択した共有するデータカテゴリ"
+            },
+            {
+                "key": "data-type",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/thing",
+                            "catalog/built_in/thing",
+                            "catalog/ext/<ext_name>/thing",
+                            "catalog/model/event",
+                            "catalog/built_in/event",
+                            "catalog/ext/<ext_name>/event",
+                            "catalog/model/document",
+                            "catalog/built_in/document",
+                            "catalog/ext/<ext_name>/document",
+                            "catalog/model/ctoken",
+                            "catalog/built_in/ctoken",
+                            "catalog/ext/<ext_name>/ctoken"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "共有するデータ種"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

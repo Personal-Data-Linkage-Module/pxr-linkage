@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/category/data",
+    "description": "個人向けのデータカテゴリを定義するための名前空間です。"
+}

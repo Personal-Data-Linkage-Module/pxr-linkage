@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/format",
+        "name": "yyyyMMddTHHmmZ形式",
+        "description": "時刻の値フォーマット（yyyyMMddTHHmmZ形式）の定義です。",
+        "_code": {
+            "_value": 90,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/format",
+        "name": ".nnnnnnnnne5",
+        "description": "有効数字の値フォーマット（整数部5桁、小数部4桁）の定義です。",
+        "_code": {
+            "_value": 10050,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

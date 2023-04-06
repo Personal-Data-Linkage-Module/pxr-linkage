@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/thing/qa",
+    "description": "質問を定義するための名前空間です。"
+}

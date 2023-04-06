@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/auth/member",
+        "name": "オペレーター追加",
+        "description": "運営メンバーの追加操作が可能。",
+        "_code": {
+            "_value": 139,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 76,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "auth-name",
+                "value": "add"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

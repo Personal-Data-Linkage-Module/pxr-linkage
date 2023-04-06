@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/app/sharing-restriction",
+    "description": "アプリケーションが蓄積可能なデータの共有制限を定義するための名前空間です。"
+}

@@ -1,0 +1,70 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/category/data",
+        "name": "データカテゴリ",
+        "description": "データカテゴリの定義です。",
+        "_code": {
+            "_value": 67,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "thing",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/thing/*",
+                            "catalog/built_in/thing/*",
+                            "catalog/ext/<ext_name>/thing/*"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "データカテゴリに含まれるモノ"
+            },
+            {
+                "key": "event",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/event/*",
+                            "catalog/built_in/event/*",
+                            "catalog/ext/<ext_name>/event/*"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "データカテゴリに含まれるイベント"
+            },
+            {
+                "key": "document",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/document/*",
+                            "catalog/built_in/document/*",
+                            "catalog/ext/<ext_name>/document/*"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "データカテゴリに含まれるドキュメント"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

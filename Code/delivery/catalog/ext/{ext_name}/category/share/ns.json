@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/category/share",
+    "description": "共有に関連するカテゴリを定義するための名前空間です。"
+}

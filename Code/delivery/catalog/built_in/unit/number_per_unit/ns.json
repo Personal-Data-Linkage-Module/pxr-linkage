@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/unit/number_per_unit",
+    "description": "単位当たりの数を定義するための名前空間です。"
+}

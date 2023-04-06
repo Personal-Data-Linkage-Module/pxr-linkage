@@ -1,0 +1,31 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/cmatrix/4/4",
+        "name": "モノを発生させたアクター識別子列",
+        "description": "CMatrixのモノを発生させたアクター識別子列の定義です。",
+        "_code": {
+            "_value": 96,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "@value",
+                "type": {
+                    "of": "code",
+                    "cmatrix": {
+                        "index": "4_4_1",
+                        "reserved": true
+                    },
+                    "_code": null,
+                    "candidate": null
+                }
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

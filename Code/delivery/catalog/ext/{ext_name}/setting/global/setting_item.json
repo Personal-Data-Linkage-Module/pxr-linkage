@@ -1,0 +1,212 @@
+{
+    "catalogItem": {
+        "ns": "catalog/ext/<ext_name>/setting/global",
+        "name": "グローバル設定",
+        "description": "全体のグローバル設定の定義です。",
+        "_code": {
+            "_value": <global_setting_code>,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 160,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "management_password_similarity_check",
+                "value": <management_password_similarity_check>
+            },
+            {
+                "key": "pxr_id_prefix",
+                "value": "<pxr_id_prefix>"
+            },
+            {
+                "key": "pxr_id_suffix",
+                "value": "<pxr_id_suffix>"
+            },
+            {
+                "key": "pxr_id_password_similarity_check",
+                "value": <pxr_id_password_similarity_check>
+            },
+            {
+                "key": "identity-verification-expiration",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<identity-verification-expiration_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <identity-verification-expiration_value>
+                    }
+                ]
+            },
+            {
+                "key": "password-expiration",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<password-expiration_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <password-expiration_value>
+                    }
+                ]
+            },
+            {
+                "key": "password-generations-number",
+                "value": <password-generations-number>
+            },
+            {
+                "key": "session-expiration",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<session-expiration_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <session-expiration_value>
+                    }
+                ]
+            },
+            {
+                "key": "account-lock-count",
+                "value": <account-lock-count>
+            },
+            {
+                "key": "account-lock-release-time",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<account-lock-release-time_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <account-lock-release-time_value>
+                    }
+                ]
+            },
+            {
+                "key": "login_sms_message",
+                "value": "<login_sms_message>"
+            },
+            {
+                "key": "book_create_sms_message",
+                "value": "<book_create_sms_message>"
+            },
+            {
+                "key": "personal_disassociation",
+                "value": <personal_disassociation>
+            },
+            {
+                "key": "personal_two-step_verification",
+                "value": <personal_two-step_verification>
+            },
+            {
+                "key": "personal_share_basic_policy",
+                "value": <personal_share_basic_policy>
+            },
+            {
+                "key": "personal_account_delete",
+                "value": <personal_account_delete>
+            },
+            {
+                "key": "use_app-p",
+                "value": <use_app-p>
+            },
+            {
+                "key": "use_share",
+                "value": <use_share>
+            },
+            {
+                "key": "region-tou_re-consent_notification_interval",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<region-tou_re-consent_notification_interval_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <region-tou_re-consent_notification_interval_value>
+                    }
+                ]
+            },
+            {
+                "key": "platform-tou_re-consent_notification_interval",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<platform-tou_re-consent_notification_interval_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <platform-tou_re-consent_notification_interval_value>
+                    }
+                ]
+            },
+            {
+                "key": "use_region_service_operation",
+                "value": <use_region_service_operation>
+            },
+            {
+                "key": "min_period_for_platform-tou_re-consent",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<min_period_for_platform-tou_re-consent_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <min_period_for_platform-tou_re-consent_value>
+                    }
+                ]
+            },
+            {
+                "key": "min_period_for_region-tou_re-consent",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<min_period_for_region-tou_re-consent_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <min_period_for_region-tou_re-consent_value>
+                    }
+                ]
+            },
+            {
+                "key": "book_deletion_pending_term",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<book_deletion_pending_term_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <book_deletion_pending_term_value>
+                    }
+                ]
+            },
+            {
+                "key": "data_download_term_expiration",
+                "value": [
+                    {
+                        "key": "type",
+                        "value": "<data_download_term_expiration_type>"
+                    },
+                    {
+                        "key": "value",
+                        "value": <data_download_term_expiration_value>
+                    }
+                ]
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

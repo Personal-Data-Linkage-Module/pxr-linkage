@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/book/access-log",
+    "description": "My-Condition-Bookに関するアクセスログを定義するための名前空間です。"
+}

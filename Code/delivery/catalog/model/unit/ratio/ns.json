@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/unit/ratio",
+    "description": "割合の単位を定義するための名前空間です。"
+}

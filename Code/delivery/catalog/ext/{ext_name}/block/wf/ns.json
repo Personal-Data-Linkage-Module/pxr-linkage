@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/block/wf",
+    "description": "ワークフロープロバイダー用PXR-Blockを定義するための名前空間です。"
+}

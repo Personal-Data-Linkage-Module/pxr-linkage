@@ -1,0 +1,77 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/wf/workflow",
+        "name": "ワークフロー",
+        "description": "ワークフローの定義です。",
+        "_code": {
+            "_value": 46,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "store",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 44,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "ワークフローが蓄積可能なデータの定義"
+            },
+            {
+                "key": "share",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 45,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "ワークフローが提供する状態共有機能の定義"
+            },
+            {
+                "key": "information-site",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "ワークフローの情報サイト"
+            },
+            {
+                "key": "region-alliance",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 48,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "参加している領域運営サービスプロバイダーのリージョンコード配列"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

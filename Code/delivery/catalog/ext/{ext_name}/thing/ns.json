@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/thing",
+    "description": "モノを定義するための名前空間です。"
+}

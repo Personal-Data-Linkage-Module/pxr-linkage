@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/person/item-type",
+    "description": "個人属性の項目種別を定義するための名前空間です。"
+}

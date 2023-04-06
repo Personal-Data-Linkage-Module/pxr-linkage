@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/force",
+        "name": "N",
+        "description": "力の単位Nの定義です。(kg*m/s2)",
+        "_code": {
+            "_value": 20034,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

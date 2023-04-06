@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/pressure",
+        "name": "mmHg",
+        "description": "水銀柱ミリメートルmmHgの定義です。",
+        "_code": {
+            "_value": 20010,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

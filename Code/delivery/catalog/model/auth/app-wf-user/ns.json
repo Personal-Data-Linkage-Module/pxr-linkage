@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/auth/app-wf-user",
+    "description": "操作権（アプリケーションおよびワークフロー利用者管理）を定義するための名前空間です。"
+}

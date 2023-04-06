@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/number_per_unit",
+        "name": "回転/分",
+        "description": "1分あたりの回転数(rpm)の単位の定義です。",
+        "_code": {
+            "_value": 20022,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

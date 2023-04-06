@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/auth/app-wf-user",
+        "name": "利用者作成",
+        "description": "利用者ID連携操作が可能。",
+        "_code": {
+            "_value": 148,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 76,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "auth-name",
+                "value": "create"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

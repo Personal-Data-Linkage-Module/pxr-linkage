@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/format",
+        "name": "HHmm形式",
+        "description": "時刻の値フォーマット（HHmm形式）の定義です。",
+        "_code": {
+            "_value": 81,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,29 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/person/item-type",
+        "name": "個人属性の項目種別の定義です",
+        "description": "個人属性の項目種別の定義です。",
+        "_code": {
+            "_value": 133,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "input-pattern",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "入力パターン"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

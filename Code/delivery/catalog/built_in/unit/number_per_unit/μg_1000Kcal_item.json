@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/number_per_unit",
+        "name": "μg/1000Kcal",
+        "description": "1000Kcalあたりのμgの単位の定義です。",
+        "_code": {
+            "_value": 20058,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

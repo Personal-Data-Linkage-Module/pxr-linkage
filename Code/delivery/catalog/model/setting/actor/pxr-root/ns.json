@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/setting/actor/pxr-root",
+    "description": "流通制御による流通制御サービスプロバイダーのアクター個別設定を定義するための名前空間です。"
+}

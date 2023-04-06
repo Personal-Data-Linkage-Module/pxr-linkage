@@ -1,0 +1,110 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/thing/qa",
+        "name": "複数回答選択式の質問",
+        "description": "複数回答選択式の質問の定義です。",
+        "_code": {
+            "_value": 57,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 55,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "candidate",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/qualitative/*",
+                            "catalog/built_in/qualitative/*",
+                            "catalog/ext/<ext_name>/qualitative/*"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "回答候補"
+            },
+            {
+                "key": "answer",
+                "type": {
+                    "of": "inner",
+                    "inner": "Answer"
+                },
+                "description": "回答"
+            },
+            {
+                "key": "qa-group",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 112,
+                            "_ver": 1
+                        }
+                    },
+                    "cmatrix": {
+                        "index": "4_2_1_2",
+                        "reserved": false
+                    }
+                },
+                "description": "質問グループ"
+            },
+            {
+                "key": "qa-group-branch-number",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null,
+                    "cmatrix": {
+                        "index": "4_2_1_3",
+                        "reserved": false
+                    }
+                },
+                "description": "質問グループ枝番"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "Answer",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "qualitative",
+                        "type": {
+                            "of": "code[]",
+                            "_code": null,
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/qualitative/qa",
+                                    "catalog/built_in/qualitative/qa",
+                                    "catalog/ext/<ext_name>/qualitative/qa"
+                                ],
+                                "_code": null
+                            },
+                            "cmatrix": {
+                                "index": "4_2_1_1_(n)",
+                                "reserved": false
+                            }
+                        },
+                        "description": "定性値"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

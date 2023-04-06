@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/app/store",
+    "description": "アプリケーションが蓄積可能なデータを定義するための名前空間です。"
+}

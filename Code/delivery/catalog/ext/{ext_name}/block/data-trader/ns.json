@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/block/data-trader",
+    "description": "データ取引サービスプロバイダー用PXR-Blockを定義するための名前空間です。"
+}

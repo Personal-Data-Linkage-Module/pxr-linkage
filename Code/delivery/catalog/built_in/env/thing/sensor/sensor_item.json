@@ -1,0 +1,54 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/env/thing/sensor",
+        "name": "モノに関する環境情報（センサー）",
+        "description": "モノに関する環境情報（センサー）の定義です。",
+        "_code": {
+            "_value": 30003,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "id",
+                "type": {
+                    "of": "string",
+                    "cmatrix": {
+                        "index": "_1",
+                        "reserved": false
+                    },
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "センサー識別子"
+            },
+            {
+                "key": "code",
+                "type": {
+                    "of": "code",
+                    "cmatrix": {
+                        "index": "_2",
+                        "reserved": false
+                    },
+                    "candidate": null
+                },
+                "description": "センサー種別"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": [
+        {
+            "key": {
+                "_value": 30004,
+                "_ver": 1
+            },
+            "value": {},
+            "description": "センサー属性"
+        }
+    ]
+}

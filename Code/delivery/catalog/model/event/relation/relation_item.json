@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/event/relation",
+        "name": "他人との関係性が変化する",
+        "description": "他人との関係性が変化すること",
+        "_code": {
+            "_value": 54,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 53,
+            "_ver": 1
+        }
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

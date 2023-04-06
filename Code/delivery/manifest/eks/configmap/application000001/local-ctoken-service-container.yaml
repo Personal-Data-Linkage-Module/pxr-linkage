@@ -1,0 +1,788 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application000001-local-ctoken-service-container-config-map
+  namespace: <namespace>
+data:
+  config.json: |
+    {
+      "operator": {
+        "session": "http://localhost:3000/operator/session"
+      },
+      "cTokenLedger": {
+        "local": "http://localhost:3003/pxr-block-proxy/?from_path=%2Flocal-ctoken&block=$pxr-root-block&path=%2Fctoken-ledger%2Flocal"
+      },
+      "bookManageUrl": "http://localhost:3003/pxr-block-proxy/?from_path=%2Flocal-ctoken&block=$pxr-root-block&path=%2Fbook-manage",
+      "timezone": "Asia/Tokyo"
+    }
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3009
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000  # 同時実行数しきい値
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストボディが空です",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "FAILED_TAKE_SESSION": "セッション情報の取得に失敗しました",
+      "FAILED_CONNECT_TO_OPERATOR": "オペレーターサービスとの接続に失敗しました",
+      "FAILED_CONNECT_TO_CTOKEN_LEDGER": "CToken台帳サービスとの接続に失敗しました",
+      "FAILED_CTOKEN_LEDGER_LOCAL": "Local-CToken差分登録に失敗しました",
+      "NOT_EXIST_ROWHASH": "行ハッシュが存在しません",
+      "REQUEST_MISS_REQUIRED": "リクエスト内容に必須値が存在しません",
+      "REQUEST_INVALID_CODE_OBJECT": "リクエストされたコードオブジェクトは、不正な形式です",
+      "ALL_ARRAY_IS_EMPTY": "全ての配列が空である事は期待していません",
+      "FAILED_SAVE_ENTITY": "データベースへのデータ登録に失敗しました",
+      "FAILED_STORE_EVENT": "蓄積イベント通知APIの呼び出しに失敗しました",
+      "validation": {
+        "isArray": "配列ではありません",
+        "arrayNotEmpty": "この配列は空を期待しません",
+        "isBoolean": "真偽値ではありません",
+        "isBooleanString": "真偽値への変換に失敗しました",
+        "isDate": "日付型ではありません",
+        "isDateString": "日付型への変換に失敗しました",
+        "isEmail": "Emailアドレスではありません",
+        "isEmpty": "この値は空である必要があります",
+        "isNumber": "数値ではありません",
+        "isNumberString": "数値への変換に失敗しました",
+        "isNotEmpty": "この値は空を期待しません",
+        "isUuid": "UUIDではありません",
+        "isString": "文字列ではありません",
+        "isObject": "JSONではありません",
+        "isDefined": "この値は必須値です",
+        "min": "最小値を下回っています",
+        "max": "最大値を上回っています"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "local-ctoken",
+        "version": "1.0",
+        "description": "Local-CTokenサービス"
+      },
+      "servers": [
+        {
+          "url": "/local-ctoken/local-ctoken"
+        }
+      ],
+      "paths": {
+        "/": {
+          "post": {
+            "tags": [
+              "CToken登録"
+            ],
+            "description": "ローカルで生成されたCTokenを登録します。",
+            "requestBody": {
+              "description": "登録するCToken",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "description": "CToken追加のリクエストボディ",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "add": {
+                          "type": "object",
+                          "properties": {
+                            "1_1": {
+                              "type": "string",
+                              "description": "利用者ID"
+                            },
+                            "document": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "_1_1": {
+                                    "type": "string",
+                                    "description": "ドキュメント識別子"
+                                  },
+                                  "_1_2_1": {
+                                    "type": "number",
+                                    "description": "ドキュメントカタログコード"
+                                  },
+                                  "_1_2_2": {
+                                    "type": "number",
+                                    "description": "ドキュメントカタログバージョン"
+                                  },
+                                  "_2_1": {
+                                    "type": "string",
+                                    "description": "ドキュメント作成時間"
+                                  },
+                                  "_3_1_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                  },
+                                  "_3_1_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                  },
+                                  "_3_2_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                  },
+                                  "_3_2_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                  },
+                                  "_3_5_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                  },
+                                  "_3_5_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                  }
+                                }
+                              }
+                            },
+                            "event": {
+                              "type": "object",
+                              "properties": {
+                                "3_1_1": {
+                                  "type": "string",
+                                  "description": "イベント識別子"
+                                },
+                                "3_1_2_1": {
+                                  "type": "number",
+                                  "description": "イベントカタログコード"
+                                },
+                                "3_1_2_2": {
+                                  "type": "number",
+                                  "description": "イベントカタログバージョン"
+                                },
+                                "3_2_1": {
+                                  "type": "string",
+                                  "description": "イベント開始時間"
+                                },
+                                "3_2_2": {
+                                  "type": "string",
+                                  "description": "イベント終了時間"
+                                },
+                                "3_5_1_1": {
+                                  "type": "number",
+                                  "description": "イベント登録アクターカタログバージョン"
+                                },
+                                "3_5_1_2": {
+                                  "type": "number",
+                                  "description": "イベント登録アクターカタログバージョン"
+                                },
+                                "3_5_2_1": {
+                                  "type": "number",
+                                  "description": "イベント登録ワークフローカタログバージョン"
+                                },
+                                "3_5_2_2": {
+                                  "type": "number",
+                                  "description": "イベント登録ワークフローカタログバージョン"
+                                },
+                                "3_5_5_1": {
+                                  "type": "number",
+                                  "description": "イベント登録アプリケーションカタログバージョン"
+                                },
+                                "3_5_5_2": {
+                                  "type": "number",
+                                  "description": "イベント登録アプリケーションカタログバージョン"
+                                }
+                              }
+                            },
+                            "thing": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "4_1_1": {
+                                    "type": "string",
+                                    "description": "モノ識別子"
+                                  },
+                                  "4_1_2_1": {
+                                    "type": "number",
+                                    "description": "モノカタログコード"
+                                  },
+                                  "4_1_2_2": {
+                                    "type": "number",
+                                    "description": "モノカタログバージョン"
+                                  },
+                                  "4_4_1_1": {
+                                    "type": "number",
+                                    "description": "モノ登録アクターカタログバージョン"
+                                  },
+                                  "4_4_1_2": {
+                                    "type": "number",
+                                    "description": "モノ登録アクターカタログバージョン"
+                                  },
+                                  "4_4_2_1": {
+                                    "type": "number",
+                                    "description": "モノ登録ワークフローカタログバージョン"
+                                  },
+                                  "4_4_2_2": {
+                                    "type": "number",
+                                    "description": "モノ登録ワークフローカタログバージョン"
+                                  },
+                                  "4_4_5_1": {
+                                    "type": "number",
+                                    "description": "モノ登録アプリケーションカタログバージョン"
+                                  },
+                                  "4_4_5_2": {
+                                    "type": "number",
+                                    "description": "モノ登録アプリケーションカタログバージョン"
+                                  },
+                                  "rowHash": {
+                                    "type": "string",
+                                    "description": "行ハッシュ"
+                                  },
+                                  "rowHashCreateAt": {
+                                    "type": "string",
+                                    "description": "行ハッシュ作成時間"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "update": {
+                          "type": "object",
+                          "properties": {
+                            "1_1": {
+                              "type": "string",
+                              "description": "利用者ID"
+                            },
+                            "document": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "_1_1": {
+                                    "type": "string",
+                                    "description": "ドキュメント識別子"
+                                  },
+                                  "_1_2_1": {
+                                    "type": "number",
+                                    "description": "ドキュメントカタログコード"
+                                  },
+                                  "_1_2_2": {
+                                    "type": "number",
+                                    "description": "ドキュメントカタログバージョン"
+                                  },
+                                  "_2_1": {
+                                    "type": "string",
+                                    "description": "ドキュメント作成時間"
+                                  },
+                                  "_3_1_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                  },
+                                  "_3_1_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                  },
+                                  "_3_2_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                  },
+                                  "_3_2_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                  },
+                                  "_3_5_1": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                  },
+                                  "_3_5_2": {
+                                    "type": "number",
+                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                  }
+                                }
+                              }
+                            },
+                            "event": {
+                              "type": "object",
+                              "properties": {
+                                "3_1_1": {
+                                  "type": "string",
+                                  "description": "イベント識別子"
+                                },
+                                "3_1_2_1": {
+                                  "type": "number",
+                                  "description": "イベントカタログコード"
+                                },
+                                "3_1_2_2": {
+                                  "type": "number",
+                                  "description": "イベントカタログバージョン"
+                                },
+                                "3_2_1": {
+                                  "type": "string",
+                                  "description": "イベント開始時間"
+                                },
+                                "3_2_2": {
+                                  "type": "string",
+                                  "description": "イベント終了時間"
+                                },
+                                "3_5_1_1": {
+                                  "type": "number",
+                                  "description": "イベント登録アクターカタログバージョン"
+                                },
+                                "3_5_1_2": {
+                                  "type": "number",
+                                  "description": "イベント登録アクターカタログバージョン"
+                                },
+                                "3_5_2_1": {
+                                  "type": "number",
+                                  "description": "イベント登録ワークフローカタログバージョン"
+                                },
+                                "3_5_2_2": {
+                                  "type": "number",
+                                  "description": "イベント登録ワークフローカタログバージョン"
+                                },
+                                "3_5_5_1": {
+                                  "type": "number",
+                                  "description": "イベント登録アプリケーションカタログバージョン"
+                                },
+                                "3_5_5_2": {
+                                  "type": "number",
+                                  "description": "イベント登録アプリケーションカタログバージョン"
+                                }
+                              }
+                            },
+                            "thing": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "4_1_1": {
+                                    "type": "string",
+                                    "description": "モノ識別子"
+                                  },
+                                  "4_1_2_1": {
+                                    "type": "number",
+                                    "description": "モノカタログコード"
+                                  },
+                                  "4_1_2_2": {
+                                    "type": "number",
+                                    "description": "モノカタログバージョン"
+                                  },
+                                  "4_4_1_1": {
+                                    "type": "number",
+                                    "description": "モノ登録アクターカタログバージョン"
+                                  },
+                                  "4_4_1_2": {
+                                    "type": "number",
+                                    "description": "モノ登録アクターカタログバージョン"
+                                  },
+                                  "4_4_2_1": {
+                                    "type": "number",
+                                    "description": "モノ登録ワークフローカタログバージョン"
+                                  },
+                                  "4_4_2_2": {
+                                    "type": "number",
+                                    "description": "モノ登録ワークフローカタログバージョン"
+                                  },
+                                  "4_4_5_1": {
+                                    "type": "number",
+                                    "description": "モノ登録アプリケーションカタログバージョン"
+                                  },
+                                  "4_4_5_2": {
+                                    "type": "number",
+                                    "description": "モノ登録アプリケーションカタログバージョン"
+                                  },
+                                  "rowHash": {
+                                    "type": "string",
+                                    "description": "行ハッシュ"
+                                  },
+                                  "rowHashCreateAt": {
+                                    "type": "string",
+                                    "description": "行ハッシュ作成時間"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "delete": {
+                          "type": "object",
+                          "properties": {
+                            "1_1": {
+                              "type": "string",
+                              "description": "利用者ID"
+                            },
+                            "document": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "2_n_1_1": {
+                                    "type": "string",
+                                    "description": "ドキュメント識別子"
+                                  }
+                                }
+                              }
+                            },
+                            "event": {
+                              "type": "object",
+                              "properties": {
+                                "3_1_1": {
+                                  "type": "string",
+                                  "description": "イベント識別子"
+                                }
+                              }
+                            },
+                            "thing": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "4_1_1": {
+                                    "type": "string",
+                                    "description": "モノ識別子"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "add": [
+                      {
+                        "1_1": "test.user.id",
+                        "document": [
+                          {
+                            "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                            "2_n_1_2_1": 1099999,
+                            "2_n_1_2_2": 1,
+                            "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                            "2_n_3_1_1": 1000004,
+                            "2_n_3_1_2": 1,
+                            "2_n_3_2_1": 1000007,
+                            "2_n_3_2_2": 1,
+                            "2_n_3_5_1": null,
+                            "2_n_3_5_2": null
+                          }
+                        ],
+                        "event": {
+                          "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                          "3_1_2_1": 1000008,
+                          "3_1_2_2": 1,
+                          "3_2_1": "2020-07-01T00:00:00.000+0900",
+                          "3_2_2": "2020-07-01T00:00:00.000+0900",
+                          "3_5_1_1": 1000004,
+                          "3_5_1_2": 1,
+                          "3_5_2_1": 1000007,
+                          "3_5_2_2": 1,
+                          "3_5_5_1": null,
+                          "3_5_5_2": null
+                        },
+                        "thing": [
+                          {
+                            "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                            "4_1_2_1": 1000011,
+                            "4_1_2_2": 1,
+                            "4_4_1_1": 1000004,
+                            "4_4_1_2": 1,
+                            "4_4_2_1": 1000007,
+                            "4_4_2_2": 1,
+                            "4_4_5_1": null,
+                            "4_4_5_2": null,
+                            "rowHash": "rowHash...",
+                            "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                          }
+                        ]
+                      }
+                    ],
+                    "update": [
+                      {
+                        "1_1": "test.user.id",
+                        "document": [
+                          {
+                            "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                            "2_n_1_2_1": 1099999,
+                            "2_n_1_2_2": 1,
+                            "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                            "2_n_3_1_1": 1000004,
+                            "2_n_3_1_2": 1,
+                            "2_n_3_2_1": 1000007,
+                            "2_n_3_2_2": 1,
+                            "2_n_3_5_1": null,
+                            "2_n_3_5_2": null
+                          }
+                        ],
+                        "event": {
+                          "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                          "3_1_2_1": 1000008,
+                          "3_1_2_2": 1,
+                          "3_2_1": "2020-07-01T00:00:00.000+0900",
+                          "3_2_2": "2020-07-01T00:00:00.000+0900",
+                          "3_5_1_1": 1000004,
+                          "3_5_1_2": 1,
+                          "3_5_2_1": 1000007,
+                          "3_5_2_2": 1,
+                          "3_5_5_1": null,
+                          "3_5_5_2": null
+                        },
+                        "thing": [
+                          {
+                            "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                            "4_1_2_1": 1000011,
+                            "4_1_2_2": 1,
+                            "4_4_1_1": 1000004,
+                            "4_4_1_2": 1,
+                            "4_4_2_1": 1000007,
+                            "4_4_2_2": 1,
+                            "4_4_5_1": null,
+                            "4_4_5_2": null,
+                            "rowHash": "rowHash...",
+                            "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                          }
+                        ]
+                      }
+                    ],
+                    "delete": [
+                      {
+                        "1_1": "test.user.id",
+                        "document": [
+                          {
+                            "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                          }
+                        ],
+                        "event": {
+                          "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                        },
+                        "thing": [
+                          {
+                            "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "CToken登録に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "CToken登録のレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "結果"
+                        }
+                      }
+                    },
+                    "example": {
+                      "result": "success"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ledger": {
+          "post": {
+            "tags": [
+              "CToken台帳連携"
+            ],
+            "description": "Local-CMatrix差分を取得してLocal-CToken-Storeを更新し、CToken台帳へLocal-CToken差分を連携します。",
+            "requestBody": {
+              "description": "登録するCToken",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CToken追加のリクエストボディ",
+                    "properties": {
+                      "offset": {
+                        "type": "integer",
+                        "description": "開始位置"
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "対象件数"
+                      }
+                    }
+                  },
+                  "example": {
+                    "offset": 0,
+                    "count": 1000
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "取得に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "CToken登録のレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "結果"
+                        }
+                      }
+                    },
+                    "example": {
+                      "result": "success"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ledger/count": {
+          "get": {
+            "tags": [
+              "CToken台帳連携対象件数"
+            ],
+            "description": "Local-CMatrix差分を取得してLocal-CToken-Storeを更新し、CToken台帳へLocal-CToken差分を連携します。",
+            "responses": {
+              "200": {
+                "description": "取得に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "CToken登録のレスポンスボディ",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "description": "対象件数"
+                        }
+                      }
+                    },
+                    "example": {
+                      "count": 1000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_local_ctoken",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": false
+    }

@@ -1,0 +1,58 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+# 必須情報：
+# 　AWSリソース：
+# 　　Security Group名
+# 　　AWS Certificate Manager ARN
+# 　　AWS WAF
+# 　設定情報：
+# 　　Ingressオブジェクトの名前
+# 　　名前空間名
+# 　　FQDN
+# 　　パス
+# 　　サービス名
+# 　　サービスポート
+#
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: <AWS Certificate Manager 証明書ARN>
+    alb.ingress.kubernetes.io/security-groups: <セキュリティグループ名>
+    alb.ingress.kubernetes.io/wafv2-acl-arn: <WAF ACL ARN>
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2019-08
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=120
+  name: pxr-ingress
+  namespace: <namespace>
+spec:
+  rules:
+  - host: application000001.domain.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: application000001-service
+          servicePort: 80
+  - host: region000001.domain.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: region000001-service
+          servicePort: 80
+  - host: root.domain.com
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: root-service
+          servicePort: 80
+ 

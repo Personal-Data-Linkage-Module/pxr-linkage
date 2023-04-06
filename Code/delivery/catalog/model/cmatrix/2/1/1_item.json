@@ -1,0 +1,32 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/cmatrix/2/1",
+        "name": "ドキュメント識別子列",
+        "description": "CMatrixのドキュメント識別子列の定義です。",
+        "_code": {
+            "_value": 14,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "@value",
+                "type": {
+                    "of": "string",
+                    "cmatrix": {
+                        "index": "2_1_1",
+                        "reserved": true
+                    },
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                }
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

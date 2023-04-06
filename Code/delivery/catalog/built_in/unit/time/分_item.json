@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/time",
+        "name": "分",
+        "description": "分の時刻の単位sの定義です。",
+        "_code": {
+            "_value": 20037,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

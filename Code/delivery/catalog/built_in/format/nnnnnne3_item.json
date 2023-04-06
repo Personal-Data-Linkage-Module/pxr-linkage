@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/format",
+        "name": ".nnnnnne3",
+        "description": "有効数字の値フォーマット（整数部3桁、小数部3桁）の定義です。",
+        "_code": {
+            "_value": 10024,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/book/policy",
+    "description": "My-Condition-Bookに関する方針を定義するための名前空間です。"
+}

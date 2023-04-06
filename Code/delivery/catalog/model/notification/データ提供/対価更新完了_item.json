@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/データ提供",
+        "name": "対価更新完了",
+        "description": "データ提供の対価更新完了の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 174,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

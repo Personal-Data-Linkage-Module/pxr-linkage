@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: root-book-end-of-use-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 2
+  schedule: "10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: book-end-of-use-batch
+            image: ＜ECRのDNS名＞/pxross1:book-end-of-use-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/bookEndOfUse.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: book-end-of-use-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: book-end-of-use-batch-config
+            configMap:
+              name: root-book-end-of-use-batch-container-config-map

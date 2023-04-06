@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: region000001-cooperate-region-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cooperate-region-batch
+            image: ＜ECRのDNS名＞/pxross1:cooperate-region-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/cooperateRegion.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: cooperate-region-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: cooperate-region-batch-config
+            configMap:
+              name: region000001-cooperate-region-batch-container-config-map

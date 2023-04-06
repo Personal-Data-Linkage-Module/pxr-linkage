@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: application000001-book-delete-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
+  schedule: "0 8 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: book-delete-batch
+            image: ＜ECRのDNS名＞/pxross1:book-delete-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/deleteBook.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: book-delete-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: book-delete-batch-config
+            configMap:
+              name: application000001-book-delete-batch-container-config-map

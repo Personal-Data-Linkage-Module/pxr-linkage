@@ -1,0 +1,35 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/person/identification",
+        "name": "本人性確認事項",
+        "description": "本人性確認事項の定義です。",
+        "_code": {
+            "_value": 107,
+            "_ver": 1
+        },
+        "inherit": {
+            "_value": 106,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "verification-ratio",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": {
+                        "_value": 20009,
+                        "_ver": 1
+                    },
+                    "candidate": null
+                },
+                "description": "本人性の検証率"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

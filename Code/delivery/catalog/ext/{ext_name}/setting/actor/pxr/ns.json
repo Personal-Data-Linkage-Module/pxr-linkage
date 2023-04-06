@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/setting/actor/pxr",
+    "description": "流通制御によるPXRポータルの個別設定を定義するための名前空間です。"
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/attribute/constraint/store",
+    "description": "カタログ属性（蓄積制約）を定義するための名前空間です。"
+}

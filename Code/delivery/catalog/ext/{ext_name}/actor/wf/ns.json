@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/actor/wf",
+    "description": "ワークフロープロバイダーを定義するための名前空間です。"
+}

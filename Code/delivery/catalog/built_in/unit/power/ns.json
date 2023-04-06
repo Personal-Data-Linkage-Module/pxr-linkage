@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/unit/power",
+    "description": "仕事率・工率・電力・放射束を定義するための名前空間です。"
+}

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/other",
+        "name": "N*s",
+        "description": "力積の単位の定義です。(N*s)",
+        "_code": {
+            "_value": 20036,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/qualitative/relation/trust",
+        "name": "信託元",
+        "description": "My-Condition-Bookの管理に関する信託関係の候補値（信託元、受益人）の定義です。",
+        "_code": {
+            "_value": 9,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

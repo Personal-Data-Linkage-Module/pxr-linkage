@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/提携申請",
+        "name": "否認",
+        "description": "提携申請の否認の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 125,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

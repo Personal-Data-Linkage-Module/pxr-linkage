@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/format",
+    "description": "値のフォーマットを定義するための名前空間です。"
+}

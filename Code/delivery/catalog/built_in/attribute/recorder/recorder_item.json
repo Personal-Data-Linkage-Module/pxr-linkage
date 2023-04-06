@@ -1,0 +1,55 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/attribute/recorder",
+        "name": "recorder",
+        "description": "レコーダー製品情報の定義です。attributeに設定されます。key名は[recorder]です。",
+        "_code": {
+            "_value": 30018,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "company",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/attribute/env/thing/recorder/company/*",
+                            "catalog/built_in/attribute/env/thing/recorder/company/*",
+                            "catalog/ext/<ext_name>/attribute/env/thing/recorder/company/*"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "製造メーカー"
+            },
+            {
+                "key": "manufacturing-name",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "製品名"
+            },
+            {
+                "key": "model-number",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "レコーダー型番"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

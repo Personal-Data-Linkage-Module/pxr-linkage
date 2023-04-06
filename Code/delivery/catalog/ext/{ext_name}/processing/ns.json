@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/processing",
+    "description": "データ加工処理を定義するための名前空間です。"
+}

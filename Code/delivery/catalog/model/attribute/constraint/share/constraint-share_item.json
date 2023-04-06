@@ -1,0 +1,61 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/attribute/constraint/share",
+        "name": "constraint-share",
+        "description": "共有制約（共有するか/しないか）の定義です。attributeに設定されます。key名は[constraint-share]です。",
+        "_code": {
+            "_value": 63,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "permit",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "共有の可否（設定がない場合は、true）"
+            },
+            {
+                "key": "target-actor",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/actor/app",
+                            "catalog/ext/<ext_name>/actor/app",
+                            "catalog/model/actor/wf",
+                            "catalog/ext/<ext_name>/actor/wf"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "許可する共有先の設定（共有先を限定したい場合に設定する）"
+            },
+            {
+                "key": "required-licence",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/licence",
+                            "catalog/built_in/licence",
+                            "catalog/ext/<ext_name>/licence"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "共有先のWF職員が保持しておかなければならないライセンス"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

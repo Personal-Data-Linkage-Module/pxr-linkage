@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/notification/情報口座",
+    "description": "情報口座の通知カテゴリを定義するための名前空間です。"
+}

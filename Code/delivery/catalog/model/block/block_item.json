@@ -1,0 +1,109 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/block",
+        "name": "PXR-Block",
+        "description": "PXR-Blockの定義です。",
+        "_code": {
+            "_value": 29,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "id",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null
+                },
+                "description": "PXR-Block識別子"
+            },
+            {
+                "key": "assigned-organization",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null
+                },
+                "description": "割当アクター名"
+            },
+            {
+                "key": "base-url",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null
+                },
+                "description": "PXR-BlockのベースURL"
+            },
+            {
+                "key": "service-name",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null
+                },
+                "description": "PXR-Blockのサービス名"
+            },
+            {
+                "key": "actor-type",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": {
+                        "value": [
+                            "pxr-root",
+                            "region-root",
+                            "app",
+                            "wf",
+                            "data-trader",
+                            "consumer"
+                        ]
+                    }
+                },
+                "description": "このPXR-Blockを保有する組織の種別"
+            },
+            {
+                "key": "assignment-status",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": {
+                        "value": [
+                            "assigned",
+                            "unassigned"
+                        ]
+                    }
+                },
+                "description": "割当状態"
+            },
+            {
+                "key": "first-login-url",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "初回ログインURL"
+            },
+            {
+                "key": "pxr-portal-first-login-url",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "個人向けポータル初回ログインURL"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

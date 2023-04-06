@@ -1,0 +1,529 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/setting/global",
+        "name": "setting",
+        "description": "システム全体のグローバル設定の定義です。",
+        "_code": {
+            "_value": 160,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "terms_of_service",
+                "type": {
+                    "of": "item",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "利用規約"
+            },
+            {
+                "key": "help_contact",
+                "type": {
+                    "of": "item",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "ヘルプ・問い合わせ"
+            },
+            {
+                "key": "management_id_format",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "運営ポータル群のIDフォーマット"
+            },
+            {
+                "key": "management_id_format_errormessage",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "運営ポータル群のIDフォーマットエラーメッセージ"
+            },
+            {
+                "key": "management_password_format",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "運営ポータル群のパスワードフォーマット"
+            },
+            {
+                "key": "management_password_format_errormessage",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "運営ポータル群のパスワードフォーマットエラーメッセージ"
+            },
+            {
+                "key": "management_password_similarity_check",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "運営ポータル群のパスワード類似性チェックを行う"
+            },
+            {
+                "key": "pxr_id_prefix",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDのprefix"
+            },
+            {
+                "key": "pxr_id_suffix",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDのsuffix"
+            },
+            {
+                "key": "pxr_id_format",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDフォーマット"
+            },
+            {
+                "key": "pxr_id_format_errormessage",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDフォーマットエラーメッセージ"
+            },
+            {
+                "key": "pxr_id_password_format",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDのパスワードフォーマット"
+            },
+            {
+                "key": "pxr_id_password_format_errormessage",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "PXR-IDのパスワードフォーマットエラーメッセージ"
+            },
+            {
+                "key": "pxr_id_password_similarity_check",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "PXR-IDのパスワード類似性チェックを行う"
+            },
+            {
+                "key": "identity-verification-expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "本人性確認コード有効期限"
+            },
+            {
+                "key": "password-expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "パスワード有効期限"
+            },
+            {
+                "key": "password-generations-number",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "パスワード世代管理数"
+            },
+            {
+                "key": "session-expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "セッション有効期限"
+            },
+            {
+                "key": "account-lock-count",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "アカウントロックまでの試行上限回数"
+            },
+            {
+                "key": "account-lock-release-time",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "アカウントロック解除までの時間"
+            },
+            {
+                "key": "one-time-login-code-expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "ワンタイムログインコード有効期限"
+            },
+            
+            {
+                "key": "login_sms_message",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "個人ポータルログイン時SMSメッセージ内容"
+            },
+            {
+                "key": "book_create_sms_message",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "Book作成時SMSメッセージ内容"
+            },
+            {
+                "key": "management_initial_login_description",
+                "type": {
+                    "of": "item",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "運営ポータル：初回ログインURL通知文書説明文"
+            },
+
+            {
+                "key": "personal_disassociation",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "個人ポータル：連携解除可否設定"
+            },
+            {
+                "key": "personal_two-step_verification",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "個人ポータル：2段階認証解除可否設定"
+            },
+            {
+                "key": "personal_share_basic_policy",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "個人ポータル：共有の基本方針可否設定"
+            },
+            {
+                "key": "personal_account_delete",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "個人ポータル：アカウント削除の可否設定"
+            },
+
+            {
+                "key": "open_book_automatically",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "自動Book開設フラグ"
+            },
+
+            {
+                "key": "use_app-p",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "アプリケーションプロバイダーの使用設定"
+            },
+ 
+            {
+                "key": "use_share",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "共有の使用設定"
+            },
+            {
+                "key": "use_supply",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "提供の使用設定"
+            },
+            {
+                "key": "book-open-code-expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "Book開設申請コード有効期限"
+            },
+            {
+                "key": "book-open-notification-interval",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "Book開設申請通知間隔"
+            },
+            {
+                "key": "region-tou_re-consent_notification_interval",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "リージョン利用規約通知間隔"
+            },
+            {
+                "key": "platform-tou_re-consent_notification_interval",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "プラットフォーム利用規約通知間隔"
+            },
+            {
+                "key": "use_id_connect",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "IDコネクトの使用設定"
+            },
+            {
+                "key": "use_region_service_operation",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "リージョンサービス運用の設定"
+            },
+            {
+                "key": "min_period_for_platform-tou_re-consent",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "プラットフォーム利用規約の再同意期限の最低期間"
+            },
+            {
+                "key": "min_period_for_region-tou_re-consent",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "リージョン利用規約の再同意期限の最低期間"
+            },
+            {
+                "key": "presigned_url_expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "S3署名付きURLの有効期限"
+            },
+            {
+                "key": "book_deletion_pending_term",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "Book削除保留期間"
+            },
+            {
+                "key": "data_download_term_expiration",
+                "type": {
+                    "of": "inner",
+                    "inner": "Expiration"
+                },
+                "description": "署名付きURLによるデータ出力有効期間"
+            }
+            
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "Expiration",
+            "description": "有効期限設定",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "type",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": {
+                                "value": [
+                                    "month",
+                                    "day",
+                                    "hour",
+                                    "minute",
+                                    "second"
+                                ]
+                            }
+                        },
+                        "description": "設定種別"
+                    },
+                    {
+                        "key": "value",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "設定値"
+                    }
+                ]
+            },
+            "inner": null
+        },
+        {
+            "name": "SearchTargetNs",
+            "description": "検索対象ネームスペース",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "name",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "名称"
+                    },
+                    {
+                        "key": "ns",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "ネームスペース"
+                    }
+                ]
+            },
+            "inner": null
+        },
+
+        {
+            "name": "ServiceCategoryForDataCategory",
+            "description": "データカテゴリ用サービスカテゴリ",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "service",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/category/service",
+                                    "catalog/built_in/category/service",
+                                    "catalog/ext/<ext_name>/category/service"
+                                ],
+                                "_code": null,
+                                "base": null
+                            },
+                            "cmatrix": null
+                        },
+                        "description": "サービスカテゴリのカタログコード"
+                    },
+                    {
+                        "key": "dataCategory",
+                        "type": {
+                            "of": "code[]",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/category/data",
+                                    "catalog/built_in/category/data",
+                                    "catalog/ext/<ext_name>/category/data"
+                                ],
+                                "_code": null,
+                                "base": null
+                            },
+                            "cmatrix": null
+                        },
+                        "description": "対象データカテゴリ"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

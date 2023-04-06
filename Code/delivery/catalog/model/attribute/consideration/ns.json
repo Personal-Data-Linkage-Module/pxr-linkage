@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/attribute/consideration",
+    "description": "カタログ属性（対価）を定義するための名前空間です。"
+}

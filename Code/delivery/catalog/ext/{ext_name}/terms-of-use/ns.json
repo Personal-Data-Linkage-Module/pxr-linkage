@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/terms-of-use",
+    "description": "利用規約を定義するための名前空間です。"
+}

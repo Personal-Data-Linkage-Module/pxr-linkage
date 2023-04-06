@@ -1,0 +1,156 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/data-supply-contract",
+        "name": "データ提供契約申込書",
+        "description": "データ提供契約申込書の定義です。",
+        "_code": {
+            "_value": 95,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "dataTrader",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 38,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "対象のデータ取引SP"
+            },
+            {
+                "key": "title",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "データ提供契約申込のタイトル"
+            },
+            {
+                "key": "purpose",
+                "type": {
+                    "of": "item[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "利用目的"
+            },
+            {
+                "key": "targetCondition",
+                "type": {
+                    "of": "item",
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 68,
+                            "_ver": null
+                        }
+                    }
+                },
+                "description": "対象者条件"
+            },
+            {
+                "key": "dataType",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "DataType",
+                    "candidate": null
+                },
+                "description": "契約で取得するデータ種/量"
+            },
+            {
+                "key": "isDraft",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "下書きフラグ"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "DataType",
+            "description": "契約で取得するデータ種/量",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "code",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/thing",
+                                    "catalog/built_in/thing",
+                                    "catalog/ext/<ext_name>/thing",
+                                    "catalog/model/event",
+                                    "catalog/built_in/event",
+                                    "catalog/ext/<ext_name>/event",
+                                    "catalog/model/document",
+                                    "catalog/built_in/document",
+                                    "catalog/ext/<ext_name>/document"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "対象データ種別"
+                    },
+                    {
+                        "key": "rate",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "レート"
+                    },
+                    {
+                        "key": "min",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "契約履行に必要な最小データ量"
+                    },
+                    {
+                        "key": "max",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "契約履行が可能な最大データ量"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

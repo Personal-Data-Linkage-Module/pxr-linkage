@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/block",
+    "description": "PXR-Blockを定義するための名前空間です。"
+}

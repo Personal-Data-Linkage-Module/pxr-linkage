@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/qualitative/experience",
+    "description": "あり・なし（有無）の候補値を定義するための名前空間です。"
+}

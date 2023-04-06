@@ -1,0 +1,32 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/cmatrix/3/5",
+        "name": "ワークフロー職員識別子列",
+        "description": "CMatrixのワークフロー職員識別子列の定義です。",
+        "_code": {
+            "_value": 25,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "@value",
+                "type": {
+                    "of": "string",
+                    "cmatrix": {
+                        "index": "3_5_4",
+                        "reserved": true
+                    },
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                }
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

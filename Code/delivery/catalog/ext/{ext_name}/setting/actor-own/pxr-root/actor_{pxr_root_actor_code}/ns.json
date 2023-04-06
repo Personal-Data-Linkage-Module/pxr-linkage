@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/setting/actor-own/pxr-root/actor_<pxr_root_actor_code>",
+    "description": "<pxr_root_name>によるアクター個別設定を定義するための名前空間です。"
+}

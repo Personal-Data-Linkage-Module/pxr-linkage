@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: application000001-delete-user-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
+  schedule: "45 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: delete-user-batch
+            image: ＜ECRのDNS名＞/pxross1:delete-user-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/deleteUser.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: delete-user-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: delete-user-batch-config
+            configMap:
+              name: application000001-delete-user-batch-container-config-map

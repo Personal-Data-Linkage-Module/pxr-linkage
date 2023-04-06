@@ -1,0 +1,35 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/attribute/constraint/store",
+        "name": "constraint-store",
+        "description": "蓄積制約（必要ライセンス）の定義です。attributeに設定されます。key名は[constraint-store]です。",
+        "_code": {
+            "_value": 86,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "required-licence",
+                "type": {
+                    "of": "code[]",
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/licence",
+                            "catalog/built_in/licence",
+                            "catalog/ext/<ext_name>/licence"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "蓄積必要ライセンス（蓄積するオペレーターのライセンスを限定したい場合に設定する）"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

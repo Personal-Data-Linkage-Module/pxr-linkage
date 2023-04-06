@@ -1,0 +1,83 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/setting/actor-own/pxr-root",
+        "name": "setting",
+        "description": "アクターによる流通制御サービスプロバイダーのアクター個別設定の定義です。",
+        "_code": {
+            "_value": 161,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "use_user_information",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "利用者管理情報使用設定"
+            },
+            {
+                "key": "pxr-root-deployment-name",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "流通制御サービスプロバイダーの連絡先部署の呼称"
+            },
+            {
+                "key": "email-address",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "流通制御サービスプロバイダーの連絡先Eメールアドレス"
+            },
+            {
+                "key": "tel-number",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "流通制御サービスプロバイダーの連絡先電話番号"
+            },
+            {
+                "key": "address",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "流通制御サービスプロバイダーの住所"
+            },
+            {
+                "key": "information-site",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "流通制御サービスプロバイダーの情報サイト"
+            },
+            {
+                "key": "use_multifactor_authentication",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "2要素認証"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

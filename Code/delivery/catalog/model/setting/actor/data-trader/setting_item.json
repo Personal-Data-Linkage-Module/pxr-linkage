@@ -1,0 +1,325 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/setting/actor/data-trader",
+        "name": "setting",
+        "description": "流通制御によるデータ取引サービスプロバイダーのアクター個別設定の定義です。",
+        "_code": {
+            "_value": 115,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "certify-consumer",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "Consumer認定権限有無"
+            },
+            {
+                "key": "create-book",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "Book開設権限有無"
+            },
+            {
+                "key": "auth-group",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "Auth-group",
+                    "candidate": null
+                },
+                "description": "操作権グループの配列"
+            }
+        ],
+        "value": [
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "運営メンバー管理"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 139
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 140
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 141
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "Book開設"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 142
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "情報口座開設"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 143
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "アクター認定"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 144
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 147
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "カタログ管理"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 149
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "提携申請"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 152
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 153
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "auth-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "編集"
+                    },
+                    {
+                        "key": "auth",
+                        "value": [
+                            {
+                                "key": "_value",
+                                "value": 155
+                            },
+                            {
+                                "key": "_ver",
+                                "value": 1
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "inner": [
+        {
+            "name": "Auth-group",
+            "description": "操作権グループ",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "title",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null,
+                            "cmatrix": null
+                        },
+                        "description": "操作権グループタイトル"
+                    },
+                    {
+                        "key": "auth",
+                        "type": {
+                            "of": "code[]",
+                            "_code": null,
+                            "candidate": {
+                                "ns": null,
+                                "_code": [
+                                    {
+                                        "_value": 139,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 140,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 141,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 142,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 143,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 144,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 147,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 149,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 152,
+                                        "_ver": 1
+                                    },
+                                    {
+                                        "_value": 153,
+                                        "_ver": 1
+                                    }
+                                ],
+                                "base": null
+                            }
+                        },
+                        "description": "操作権の配列"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

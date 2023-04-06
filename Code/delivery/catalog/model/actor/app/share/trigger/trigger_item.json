@@ -1,0 +1,566 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/app/share/trigger",
+        "name": "共有トリガー定義",
+        "description": "アプリケーションの状態共有機能に関する共有トリガーの定義です。",
+        "_code": {
+            "_value": 214,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "share",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "状態共有機能コード"
+            },
+            {
+                "key": "id",
+                "type": {
+                    "of": "string[]",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "状態共有機能UUID配列"
+            },
+            {
+                "key": "startCondition",
+                "type": {
+                    "of": "inner",
+                    "inner": "StartCondition"
+                },
+                "description": "開始条件"
+            },
+            {
+                "key": "endCondition",
+                "type": {
+                    "of": "inner",
+                    "inner": "EndCondition"
+                },
+                "description": "終了条件"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "StartCondition",
+            "description": "開始条件",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "document",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Document"
+                        },
+                        "description": "判定対象ドキュメント"
+                    },
+                    {
+                        "key": "event",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Event"
+                        },
+                        "description": "判定対象イベント"
+                    },
+                    {
+                        "key": "thing",
+                        "type": {
+                            "of": "code[]",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/built_in/thing/*",
+                                    "catalog/ext/<ext_name>/thing/*"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "判定対象モノ"
+                    },
+                    {
+                        "key": "period",
+                        "type": {
+                            "of": "inner",
+                            "inner": "Period"
+                        },
+                        "description": "判定対象期間"
+                    },
+                    {
+                        "key": "decisionAPI",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": null,
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "判定API"
+                    }
+                ]
+            },
+            "inner": [
+                {
+                    "name": "Document",
+                    "description": "判定対象ドキュメント",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/document/*",
+                                            "catalog/ext/<ext_name>/document/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象データ種別コード"
+                            },
+                            {
+                                "key": "event",
+                                "type": {
+                                    "of": "inner[]",
+                                    "inner": "DocEvent"
+                                },
+                                "description": "判定対象イベント"
+                            }
+                        ]
+                    },
+                    "inner": [
+                        {
+                            "name": "DocEvent",
+                            "description": "判定対象イベント",
+                            "template": {
+                                "inherit": null,
+                                "prop": [
+                                    {
+                                        "key": "code",
+                                        "type": {
+                                            "of": "code",
+                                            "candidate": {
+                                                "ns": [
+                                                    "catalog/built_in/event/*",
+                                                    "catalog/ext/<ext_name>/event/*"
+                                                ],
+                                                "_code": null,
+                                                "base": null
+                                            }
+                                        },
+                                        "description": "判定対象イベント"
+                                    },
+                                    {
+                                        "key": "thing",
+                                        "type": {
+                                            "of": "code[]",
+                                            "candidate": {
+                                                "ns": [
+                                                    "catalog/built_in/thing/*",
+                                                    "catalog/ext/<ext_name>/thing/*"
+                                                ],
+                                                "_code": null,
+                                                "base": null
+                                            }
+                                        },
+                                        "description": "判定対象のモノ"
+                                    }
+                                ]
+                            },
+                            "inner": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Event",
+                    "description": "判定対象イベント",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/event/*",
+                                            "catalog/ext/<ext_name>/event/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象データ種別コード"
+                            },
+                            {
+                                "key": "thing",
+                                "type": {
+                                    "of": "code[]",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/thing/*",
+                                            "catalog/ext/<ext_name>/thing/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象のモノ"
+                            }
+                        ]
+                    },
+                    "inner": null
+                },
+                {
+                    "name": "Period",
+                    "description": "判定対象期間",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "specification",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "all",
+                                            "specification"
+                                        ]
+                                    }
+                                },
+                                "description": "判定対象期間"
+                            },
+                            {
+                                "key": "unit",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "month",
+                                            "day",
+                                            "hour",
+                                            "minute",
+                                            "second"
+                                        ]
+                                    }
+                                },
+                                "description": "設定単位"
+                            },
+                            {
+                                "key": "value",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "設定値"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "EndCondition",
+            "description": "終了条件",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "exitMethod",
+                        "type": {
+                            "of": "inner",
+                            "inner": "ExitMethod"
+                        },
+                        "description": "終了方法"
+                    },
+                    {
+                        "key": "document",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Document"
+                        },
+                        "description": "判定対象ドキュメント"
+                    },
+                    {
+                        "key": "event",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Event"
+                        },
+                        "description": "判定対象イベント"
+                    },
+                    {
+                        "key": "thing",
+                        "type": {
+                            "of": "code[]",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/built_in/thing/*",
+                                    "catalog/ext/<ext_name>/thing/*"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "判定対象モノ"
+                    },
+                    {
+                        "key": "period",
+                        "type": {
+                            "of": "inner",
+                            "inner": "Period"
+                        },
+                        "description": "判定対象期間"
+                    },
+                    {
+                        "key": "decisionAPI",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": null,
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "判定API"
+                    }
+                ]
+            },
+            "inner": [
+                {
+                    "name": "ExitMethod",
+                    "description": "終了方法",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "specification",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "priod",
+                                            "api"
+                                        ]
+                                    }
+                                },
+                                "description": "終了方法"
+                            },
+                            {
+                                "key": "days",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "設定日数"
+                            },
+                            {
+                                "key": "hours",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "設定時間数"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Document",
+                    "description": "判定対象ドキュメント",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/document/*",
+                                            "catalog/ext/<ext_name>/document/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象データ種別コード"
+                            },
+                            {
+                                "key": "event",
+                                "type": {
+                                    "of": "inner[]",
+                                    "inner": "DocEvent"
+                                },
+                                "description": "判定対象イベント"
+                            }
+                        ]
+                    },
+                    "inner": [
+                        {
+                            "name": "DocEvent",
+                            "description": "判定対象イベント",
+                            "template": {
+                                "inherit": null,
+                                "prop": [
+                                    {
+                                        "key": "code",
+                                        "type": {
+                                            "of": "code",
+                                            "candidate": {
+                                                "ns": [
+                                                    "catalog/built_in/event/*",
+                                                    "catalog/ext/<ext_name>/event/*"
+                                                ],
+                                                "_code": null,
+                                                "base": null
+                                            }
+                                        },
+                                        "description": "判定対象イベント"
+                                    },
+                                    {
+                                        "key": "thing",
+                                        "type": {
+                                            "of": "code[]",
+                                            "candidate": {
+                                                "ns": [
+                                                    "catalog/built_in/thing/*",
+                                                    "catalog/ext/<ext_name>/thing/*"
+                                                ],
+                                                "_code": null,
+                                                "base": null
+                                            }
+                                        },
+                                        "description": "判定対象のモノ"
+                                    }
+                                ]
+                            },
+                            "inner": null
+                        }
+                    ]
+                },
+                {
+                    "name": "Event",
+                    "description": "判定対象イベント",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/event/*",
+                                            "catalog/ext/<ext_name>/event/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象データ種別コード"
+                            },
+                            {
+                                "key": "thing",
+                                "type": {
+                                    "of": "code[]",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/thing/*",
+                                            "catalog/ext/<ext_name>/thing/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "判定対象のモノ"
+                            }
+                        ]
+                    },
+                    "inner": null
+                },
+                {
+                    "name": "Period",
+                    "description": "判定対象期間",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "specification",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "all",
+                                            "specification"
+                                        ]
+                                    }
+                                },
+                                "description": "判定対象期間"
+                            },
+                            {
+                                "key": "unit",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "month",
+                                            "day",
+                                            "hour",
+                                            "minute",
+                                            "second"
+                                        ]
+                                    }
+                                },
+                                "description": "設定単位"
+                            },
+                            {
+                                "key": "value",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "設定値"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "attribute": null
+}

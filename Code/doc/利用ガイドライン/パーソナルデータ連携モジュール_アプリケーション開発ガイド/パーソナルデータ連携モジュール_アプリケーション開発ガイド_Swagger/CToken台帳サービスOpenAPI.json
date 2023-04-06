@@ -1,0 +1,1464 @@
+# Copyright(c) NEC Corporation 2022. All rights reserved.
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "CToken台帳サービス",
+        "version": "1.0",
+        "description": "CToken台帳の管理を行います。"
+    },
+    "servers": [
+        {
+            "url": "/ctoken-ledger"
+        }
+    ],
+    "paths": {
+        "/": {
+            "post": {
+                "tags": [
+                    "CToken取得"
+                ],
+                "description": "CTokenの件数を検索します。",
+                "requestBody": {
+                    "description": "検索条件",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "createAt": {
+                                        "type": "object",
+                                        "properties": {
+                                            "start": {
+                                                "type": "string",
+                                                "description": "検索対象開始時刻（YYYY-MM-DDThh:mm:ss+09:00）。この時刻は含む。"
+                                            },
+                                            "end": {
+                                                "type": "string",
+                                                "description": "検索対象終了時刻（YYYY-MM-DDThh:mm:ss+09:00）。この時刻は含まない。"
+                                            }
+                                        }
+                                    },
+                                    "offset": {
+                                        "type": "number",
+                                        "description": "検索開始データ位置。default: 0"
+                                    },
+                                    "limit": {
+                                        "type": "number",
+                                        "description": "検索件数。default: 10"
+                                    },
+                                    "document": {
+                                        "type": "array",
+                                        "description": "ドキュメントカタログコード配列（設定した場合、event, thing, identifierは設定不可）",
+                                        "items": [
+                                            "#/components/schemas/_code"
+                                        ]
+                                    },
+                                    "event": {
+                                        "type": "array",
+                                        "description": "モノカタログコード配列（設定した場合、document, thing, identifierは設定不可）",
+                                        "items": [
+                                            "#/components/schemas/_code"
+                                        ]
+                                    },
+                                    "thing": {
+                                        "type": "array",
+                                        "description": "モノカタログコード配列（設定した場合、document, event, identifierは設定不可）",
+                                        "items": {
+                                            "$ref": "#/components/schemas/_code"
+                                        }
+                                    },
+                                    "identifier": {
+                                        "type": "object",
+                                        "properties": {
+                                            "document": {
+                                                "type": "array",
+                                                "description": "ドキュメント識別子配列（設定した場合、document, event, thing, identifier.event, identifier.thingは設定不可）",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "event": {
+                                                "type": "array",
+                                                "description": "イベント識別子配列（設定した場合、document, event, thing, identifier.document, identifier.thingは設定不可）",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "thing": {
+                                                "type": "array",
+                                                "description": "モノ識別子配列（設定した場合、document, event, thing, identifier.document, identifier.eventは設定不可）",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "ドキュメントカタログコード指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "document": [
+                                            {
+                                                "_value": 9999999,
+                                                "_ver": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "イベントカタログコード指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "event": [
+                                            {
+                                                "_value": 9999999,
+                                                "_ver": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "モノカタログコード指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "thing": [
+                                            {
+                                                "_value": 9999999,
+                                                "_ver": 1
+                                            }
+                                        ]
+                                    }
+                                },
+                                "ドキュメント識別子指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "identifier": {
+                                            "document": [
+                                                "b8a254ab-dc82-6e08-8677-edb8c9666aea"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "イベント識別子指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "identifier": {
+                                            "event": [
+                                                "b8a254ab-dc82-6e08-8677-edb8c9666aea"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "モノ識別子指定": {
+                                    "value": {
+                                        "createAt": {
+                                            "start": "2020-01-01T00:00:00.000+0900",
+                                            "end": "2021-01-01T00:00:00.000+0900"
+                                        },
+                                        "offset": 0,
+                                        "limit": 10,
+                                        "identifier": {
+                                            "thing": [
+                                                "b8a254ab-dc82-6e08-8677-edb8c9666aea"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "成功時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "document": {
+                                            "type": "array",
+                                            "description": "ドキュメントCToken配列",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ctoken"
+                                            }
+                                        },
+                                        "event": {
+                                            "type": "array",
+                                            "description": "イベントCToken配列",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ctoken"
+                                            }
+                                        },
+                                        "thing": {
+                                            "type": "array",
+                                            "description": "モノCToken配列",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ctoken"
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "ドキュメントの場合": {
+                                        "value": {
+                                            "document": [
+                                                {
+                                                    "actor": {
+                                                        "_value": 1000438,
+                                                        "_ver": 1
+                                                    },
+                                                    "wf": {
+                                                        "_value": 1000481,
+                                                        "_ver": 1
+                                                    },
+                                                    "createdAt": "2020-01-01T00:00:00.000+0900",
+                                                    "_code": {
+                                                        "_value": 1099999,
+                                                        "_ver": 1
+                                                    },
+                                                    "identifer": "32dede2c-91ab-79c3-53d7-d4d042e08431"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "イベントの場合": {
+                                        "value": {
+                                            "event": [
+                                                {
+                                                    "actor": {
+                                                        "_value": 1000438,
+                                                        "_ver": 1
+                                                    },
+                                                    "wf": {
+                                                        "_value": 1000481,
+                                                        "_ver": 1
+                                                    },
+                                                    "createdAt": "2020-01-01T00:00:00.000+0900",
+                                                    "_code": {
+                                                        "_value": 1099999,
+                                                        "_ver": 1
+                                                    },
+                                                    "identifer": "32dede2c-91ab-79c3-53d7-d4d042e08431"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "モノの場合": {
+                                        "value": {
+                                            "thing": [
+                                                {
+                                                    "actor": {
+                                                        "_value": 1000438,
+                                                        "_ver": 1
+                                                    },
+                                                    "wf": {
+                                                        "_value": 1000481,
+                                                        "_ver": 1
+                                                    },
+                                                    "createdAt": "2020-01-01T00:00:00.000+0900",
+                                                    "_code": {
+                                                        "_value": 1099999,
+                                                        "_ver": 1
+                                                    },
+                                                    "identifer": "32dede2c-91ab-79c3-53d7-d4d042e08431"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディがJSON以外です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが、JSON形式ではありません"
+                                        }
+                                    },
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが空です"
+                                        }
+                                    },
+                                    "リクエストボディが配列です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが配列であることを許容しません"
+                                        }
+                                    },
+                                    "2つ以上のデータ種を指定しています": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "指定できるのは、ドキュメント、イベント、モノのいずれか1つです。"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "日付指定プロパティが日付型ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "日付型ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "配列指定プロパティが配列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "配列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "個人はPxR-IDの設定ができません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "PXR-IDは指定できません"
+                                        }
+                                    },
+                                    "オペレーターのアクターコードでカタログが取得できません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "アクターが存在しません"
+                                        }
+                                    },
+                                    "CTokenの取得が可能なアクターではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "取得可能アクターではありません"
+                                        }
+                                    },
+                                    "カタログの取得に失敗しました": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "カタログサービスからのカタログ取得に失敗しました"
+                                        }
+                                    },
+                                    "カタログサービスへの接続に失敗しました": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "カタログサービスへの接続に失敗しました"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/count": {
+            "post": {
+                "tags": [
+                    "CToken件数検索"
+                ],
+                "summary": "CToken件数検索",
+                "description": "CTokenの件数を検索します。",
+                "requestBody": {
+                    "description": "検索条件",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "検索条件のリクエストボディ",
+                                "properties": {
+                                    "createAt": {
+                                        "type": "object",
+                                        "description": "CToken作成時間",
+                                        "properties": {
+                                            "start": {
+                                                "type": "string",
+                                                "description": "検索開始CToken作成時間"
+                                            },
+                                            "end": {
+                                                "type": "string",
+                                                "description": "検索終了CToken作成時間"
+                                            }
+                                        }
+                                    },
+                                    "pxrId": {
+                                        "type": "string",
+                                        "description": "PxR-ID"
+                                    },
+                                    "document": {
+                                        "$ref": "#/components/schemas/_codeOnlyValue"
+                                    },
+                                    "event": {
+                                        "$ref": "#/components/schemas/_codeOnlyValue"
+                                    },
+                                    "thing": {
+                                        "$ref": "#/components/schemas/_codeOnlyValue"
+                                    }
+                                },
+                                "example": {
+                                    "createAt": {
+                                        "start": "2020-01-01T00:00:00.000+0900",
+                                        "end": "2020-09-01T00:00:00.000+0900"
+                                    },
+                                    "pxrId": null,
+                                    "document": [],
+                                    "event": [],
+                                    "thing": []
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "取得に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "description": "CToken件数結果",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ctokenCount"
+                                    }
+                                },
+                                "example": [
+                                    {
+                                        "pxrId": "test.---.co.jp",
+                                        "ctoken": {
+                                            "actor": {
+                                                "_value": 1000004
+                                            },
+                                            "app": null,
+                                            "wf": {
+                                                "_value": 1000007
+                                            },
+                                            "event": [
+                                                {
+                                                    "_code": {
+                                                        "_value": 1000008
+                                                    },
+                                                    "count": 5
+                                                }
+                                            ],
+                                            "thing": [
+                                                {
+                                                    "_code": {
+                                                        "_value": 1000011
+                                                    },
+                                                    "count": 20
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "リクエストでデータ種を複数指定しています": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "指定できるのはドキュメント、イベント、モノのいずれか1つです。"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "日付指定プロパティが日付ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "日付型ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "配列指定プロパティが配列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "配列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "空不可プロパティが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は空を期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "取得可能アクターではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "取得可能アクターではありません"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/local": {
+            "post": {
+                "tags": [
+                    "Local-CToken差分登録"
+                ],
+                "summary": "CToken差分登録",
+                "description": "各Blockで登録されたCTokenを登録します",
+                "requestBody": {
+                    "description": "登録するCToken",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "description": "CToken追加のリクエストボディ",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "1_1": {
+                                            "type": "string",
+                                            "description": "利用者ID"
+                                        },
+                                        "cmatrix": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "3_1_1": {
+                                                        "type": "string",
+                                                        "description": "イベント識別子"
+                                                    },
+                                                    "3_1_2_1": {
+                                                        "type": "number",
+                                                        "description": "イベントカタログコード"
+                                                    },
+                                                    "3_1_2_2": {
+                                                        "type": "number",
+                                                        "description": "イベントカタログバージョン"
+                                                    },
+                                                    "3_2_1": {
+                                                        "type": "string",
+                                                        "description": "イベント開始時間"
+                                                    },
+                                                    "3_2_2": {
+                                                        "type": "string",
+                                                        "description": "イベント終了時間"
+                                                    },
+                                                    "3_5_1_1": {
+                                                        "type": "number",
+                                                        "description": "イベント登録アクターカタログバージョン"
+                                                    },
+                                                    "3_5_1_2": {
+                                                        "type": "number",
+                                                        "description": "イベント登録アクターカタログバージョン"
+                                                    },
+                                                    "3_5_2_1": {
+                                                        "type": "number",
+                                                        "description": "イベント登録ワークフローカタログバージョン"
+                                                    },
+                                                    "3_5_2_2": {
+                                                        "type": "number",
+                                                        "description": "イベント登録ワークフローカタログバージョン"
+                                                    },
+                                                    "3_5_5_1": {
+                                                        "type": "number",
+                                                        "description": "イベント登録アプリケーションカタログバージョン"
+                                                    },
+                                                    "3_5_5_2": {
+                                                        "type": "number",
+                                                        "description": "イベント登録アプリケーションカタログバージョン"
+                                                    },
+                                                    "4_1_1": {
+                                                        "type": "string",
+                                                        "description": "モノ識別子"
+                                                    },
+                                                    "4_1_2_1": {
+                                                        "type": "number",
+                                                        "description": "モノカタログコード"
+                                                    },
+                                                    "4_1_2_2": {
+                                                        "type": "number",
+                                                        "description": "モノカタログバージョン"
+                                                    },
+                                                    "4_4_1_1": {
+                                                        "type": "number",
+                                                        "description": "モノ登録アクターカタログバージョン"
+                                                    },
+                                                    "4_4_1_2": {
+                                                        "type": "number",
+                                                        "description": "モノ登録アクターカタログバージョン"
+                                                    },
+                                                    "4_4_2_1": {
+                                                        "type": "number",
+                                                        "description": "モノ登録ワークフローカタログバージョン"
+                                                    },
+                                                    "4_4_2_2": {
+                                                        "type": "number",
+                                                        "description": "モノ登録ワークフローカタログバージョン"
+                                                    },
+                                                    "4_4_5_1": {
+                                                        "type": "number",
+                                                        "description": "モノ登録アプリケーションカタログバージョン"
+                                                    },
+                                                    "4_4_5_2": {
+                                                        "type": "number",
+                                                        "description": "モノ登録アプリケーションカタログバージョン"
+                                                    },
+                                                    "rowHash": {
+                                                        "type": "string",
+                                                        "description": "行ハッシュ"
+                                                    },
+                                                    "rowHashCreateAt": {
+                                                        "type": "string",
+                                                        "description": "行ハッシュ作成時間"
+                                                    },
+                                                    "document": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "_1_1": {
+                                                                    "type": "string",
+                                                                    "description": "ドキュメント識別子"
+                                                                },
+                                                                "_1_2_1": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメントカタログコード"
+                                                                },
+                                                                "_1_2_2": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメントカタログバージョン"
+                                                                },
+                                                                "_2_1": {
+                                                                    "type": "string",
+                                                                    "description": "ドキュメント作成時間"
+                                                                },
+                                                                "_3_1_1": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                                                },
+                                                                "_3_1_2": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録アクターカタログバージョン"
+                                                                },
+                                                                "_3_2_1": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                                },
+                                                                "_3_2_2": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                                },
+                                                                "_3_5_1": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                                },
+                                                                "_3_5_2": {
+                                                                    "type": "number",
+                                                                    "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "add": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "4b9b2192-d2fc-0818-86b7-6b17eee1380e",
+                                                "2_n_1_2_1": 1099999,
+                                                "2_n_1_2_2": 1,
+                                                "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                                                "2_n_3_1_1": 1000004,
+                                                "2_n_3_1_2": 1,
+                                                "2_n_3_2_1": 1000007,
+                                                "2_n_3_2_2": 1,
+                                                "2_n_3_5_1": null,
+                                                "2_n_3_5_2": null
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "18efb694-c0ac-ae38-c305-f921386d05e0",
+                                            "3_1_2_1": 1000008,
+                                            "3_1_2_2": 1,
+                                            "3_2_1": "2020-07-01T00:00:00.000+0900",
+                                            "3_2_2": "2020-07-01T00:00:00.000+0900",
+                                            "3_5_1_1": 1000004,
+                                            "3_5_1_2": 1,
+                                            "3_5_2_1": 1000007,
+                                            "3_5_2_2": 1,
+                                            "3_5_5_1": null,
+                                            "3_5_5_2": null
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "06a43271-c6fb-1eb6-dbac-9f1464a1e795",
+                                                "4_1_2_1": 1000011,
+                                                "4_1_2_2": 1,
+                                                "4_4_1_1": 1000004,
+                                                "4_4_1_2": 1,
+                                                "4_4_2_1": 1000007,
+                                                "4_4_2_2": 1,
+                                                "4_4_5_1": null,
+                                                "4_4_5_2": null,
+                                                "rowHash": "rowHash...",
+                                                "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "update": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "6721ac59-e21f-ac8b-b68a-7029780aa6b2",
+                                                "2_n_1_2_1": 1099999,
+                                                "2_n_1_2_2": 1,
+                                                "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                                                "2_n_3_1_1": 1000004,
+                                                "2_n_3_1_2": 1,
+                                                "2_n_3_2_1": 1000007,
+                                                "2_n_3_2_2": 1,
+                                                "2_n_3_5_1": null,
+                                                "2_n_3_5_2": null
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "942d3d04-b303-dbb4-17f1-d12cc7e73c6f",
+                                            "3_1_2_1": 1000008,
+                                            "3_1_2_2": 1,
+                                            "3_2_1": "2020-07-01T00:00:00.000+0900",
+                                            "3_2_2": "2020-07-01T00:00:00.000+0900",
+                                            "3_5_1_1": 1000004,
+                                            "3_5_1_2": 1,
+                                            "3_5_2_1": 1000007,
+                                            "3_5_2_2": 1,
+                                            "3_5_5_1": null,
+                                            "3_5_5_2": null
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "ef49011a-afcb-2d86-91bc-ad242d67b612",
+                                                "4_1_2_1": 1000011,
+                                                "4_1_2_2": 1,
+                                                "4_4_1_1": 1000004,
+                                                "4_4_1_2": 1,
+                                                "4_4_2_1": 1000007,
+                                                "4_4_2_2": 1,
+                                                "4_4_5_1": null,
+                                                "4_4_5_2": null,
+                                                "rowHash": "rowHash...",
+                                                "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "delete": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "0f874dc0-9c24-704d-b616-3a434264684e"
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "70d54b9b-3a18-9181-f3d6-60b8a2e83d7c"
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "ad3002f7-0b75-90b0-4914-322f3004ac51"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "CToken登録に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "CToken登録のレスポンスボディ",
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "description": "結果"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "result": "success"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "リクエストボディが配列です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが配列であることを許容しません"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "日付指定プロパティが日付ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "日付型ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "配列指定プロパティが配列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "配列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "空不可プロパティが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は空を期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "PxR-IDが存在しません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "PxR-IDが存在しません"
+                                        }
+                                    },
+                                    "行ハッシュが存在しません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "行ハッシュが存在しません"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
+            "post": {
+                "tags": [
+                    "PxR-ID検索"
+                ],
+                "summary": "PxR-ID検索",
+                "description": "検索条件に一致するCTokenを持つ個人を特定します。",
+                "requestBody": {
+                    "description": "検索条件",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "検索条件のリクエストボディ",
+                                "properties": {
+                                    "pxrId": {
+                                        "type": "array",
+                                        "description": "検索対象PxR-ID配列",
+                                        "items": {
+                                            "type": "integer",
+                                            "description": "検索対象PxR-ID"
+                                        }
+                                    },
+                                    "condition": {
+                                        "type": "object",
+                                        "description": "検索条件",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string",
+                                                "description": "検索種別"
+                                            },
+                                            "_code": {
+                                                "$ref": "#/components/schemas/_codeVerValue"
+                                            },
+                                            "min": {
+                                                "type": "integer",
+                                                "description": "最小件数"
+                                            },
+                                            "max": {
+                                                "type": "integer",
+                                                "description": "最大件数"
+                                            }
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "pxrId": [
+                                        "pxr_test_01",
+                                        "pxr_test_02",
+                                        "pxr_test_03"
+                                    ],
+                                    "condition": [
+                                        {
+                                        "type": "and",
+                                        "_code": {
+                                            "_value": 1000011,
+                                            "_ver": 1
+                                        },
+                                        "min": 1,
+                                        "max": 100
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "取得に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "description": "該当PxR-ID配列",
+                                    "items": {
+                                        "type": "integer",
+                                        "description": "該当PxR-ID"
+                                    }
+                                },
+                                "example": [
+                                    "pxr_test_02",
+                                    "pxr_test_03"
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "空不可プロパティが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は空を期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ctokenCount": {
+                "type": "object",
+                "description": "PxR-ID毎のCToken件数",
+                "properties": {
+                    "pxrId": {
+                        "type": "string",
+                        "description": "PxR-ID"
+                    },
+                    "ctoken": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "actor": {
+                                    "$ref": "#/components/schemas/_codeOnlyValue"
+                                },
+                                "app": {
+                                    "$ref": "#/components/schemas/_codeOnlyValue"
+                                },
+                                "wf": {
+                                    "$ref": "#/components/schemas/_codeOnlyValue"
+                                },
+                                "event": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/countObject"
+                                    }
+                                },
+                                "thing": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/countObject"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "countObject": {
+                "type": "object",
+                "description": "イベント・モノ毎の件数",
+                "properties": {
+                    "_code": {
+                        "$ref": "#/components/schemas/_codeOnlyValue"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "description": "件数"
+                    }
+                }
+            },
+            "_codeOnlyValue": {
+                "type": "object",
+                "properties": {
+                    "_value": {
+                        "type": "integer",
+                        "description": "カタログコード"
+                    }
+                }
+            },
+            "_codeVerValue": {
+                "type": "object",
+                "properties": {
+                    "_value": {
+                        "type": "integer",
+                        "description": "カタログコード"
+                    },
+                    "_ver": {
+                        "type": "integer",
+                        "description": "カタログバージョン"
+                    }
+                }
+            },
+            "_code": {
+                "type": "object",
+                "properties": {
+                    "_value": {
+                        "type": "integer",
+                        "description": "カタログコード"
+                    },
+                    "_ver": {
+                        "type": "integer",
+                        "description": "カタログバージョン"
+                    }
+                }
+            },
+            "_codeValueOnly": {
+                "type": "object",
+                "properties": {
+                    "_value": {
+                        "type": "integer",
+                        "description": "カタログコード"
+                    }
+                }
+            },
+            "ctoken": {
+                "type": "object",
+                "properties": {
+                    "actor": {
+                        "$ref": "#/components/schemas/_code"
+                    },
+                    "app": {
+                        "$ref": "#/components/schemas/_code"
+                    },
+                    "wf": {
+                        "$ref": "#/components/schemas/_code"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "description": "データ作成時刻"
+                    },
+                    "_code": {
+                        "$ref": "#/components/schemas/_code"
+                    },
+                    "identifer": {
+                        "type": "string",
+                        "description": "データ識別子"
+                    }
+                }
+            }
+        }
+    }
+}

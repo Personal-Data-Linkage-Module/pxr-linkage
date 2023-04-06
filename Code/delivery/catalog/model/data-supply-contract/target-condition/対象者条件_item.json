@@ -1,0 +1,286 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/data-supply-contract/target-condition",
+        "name": "対象者条件",
+        "description": "対象者条件の定義です。",
+        "_code": {
+            "_value": 68,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "targetGroup",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "TargetGroup",
+                    "candidate": null
+                },
+                "description": "対象者グループ"
+            },
+            {
+                "key": "ownedData",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "OwnedData",
+                    "candidate": null
+                },
+                "description": "保有データ"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "TargetGroup",
+            "description": "Book利用者管理情報で条件を指定する",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "condition",
+                        "type": {
+                            "of": "item[]",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/data-supply-contract/condition",
+                                    "catalog/built_in/data-supply-contract/condition",
+                                    "catalog/ext/<ext_name>/data-supply-contract/condition"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "対象者条件"
+                    },
+                    {
+                        "key": "min",
+                        "type": {
+                            "of": "nubmer",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "最小募集人数"
+                    },
+                    {
+                        "key": "max",
+                        "type": {
+                            "of": "nubmer",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "最大募集人数"
+                    }
+                ]
+            },
+            "inner": null
+        },
+        {
+            "name": "OwnedData",
+            "description": "保有データ",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "type",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": {
+                                "value": [
+                                    "and",
+                                    "or"
+                                ]
+                            }
+                        },
+                        "description": "検索条件"
+                    },
+                    {
+                        "key": "code",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": [
+                                    "catalog/model/thing",
+                                    "catalog/built_in/thing",
+                                    "catalog/ext/<ext_name>/thing",
+                                    "catalog/model/event",
+                                    "catalog/built_in/event",
+                                    "catalog/ext/<ext_name>/event",
+                                    "catalog/model/document",
+                                    "catalog/built_in/document",
+                                    "catalog/ext/<ext_name>/document"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "対象データ種別"
+                    },
+                    {
+                        "key": "min",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "最小保有データ量"
+                    },
+                    {
+                        "key": "max",
+                        "type": {
+                            "of": "number",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "最大保有データ量"
+                    }
+                ]
+            },
+            "inner": [
+                {
+                    "name": "OwnedData",
+                    "description": "保有データ",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "type",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "and",
+                                            "or"
+                                        ]
+                                    }
+                                },
+                                "description": "検索条件"
+                            },
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/model/thing",
+                                            "catalog/built_in/thing",
+                                            "catalog/ext/<ext_name>/thing",
+                                            "catalog/model/event",
+                                            "catalog/built_in/event",
+                                            "catalog/ext/<ext_name>/event",
+                                            "catalog/model/document",
+                                            "catalog/built_in/document",
+                                            "catalog/ext/<ext_name>/document"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "対象データ種別"
+                            },
+                            {
+                                "key": "min",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "最小保有データ量"
+                            },
+                            {
+                                "key": "max",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "最大保有データ量"
+                            }
+                        ]
+                    },
+                    "inner": null
+                },
+                {
+                    "name": "OwnedData",
+                    "description": "保有データ",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "type",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": {
+                                        "value": [
+                                            "and",
+                                            "or"
+                                        ]
+                                    }
+                                },
+                                "description": "検索条件"
+                            },
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/model/thing",
+                                            "catalog/built_in/thing",
+                                            "catalog/ext/<ext_name>/thing",
+                                            "catalog/model/event",
+                                            "catalog/built_in/event",
+                                            "catalog/ext/<ext_name>/event",
+                                            "catalog/model/document",
+                                            "catalog/built_in/document",
+                                            "catalog/ext/<ext_name>/document"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "対象データ種別"
+                            },
+                            {
+                                "key": "min",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "最小保有データ量"
+                            },
+                            {
+                                "key": "max",
+                                "type": {
+                                    "of": "number",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "最大保有データ量"
+                            }
+                        ]
+                    },
+                    "inner": null
+                }
+            ]
+        }
+    ],
+    "attribute": null
+}

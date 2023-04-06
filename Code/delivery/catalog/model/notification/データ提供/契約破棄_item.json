@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/データ提供",
+        "name": "契約破棄",
+        "description": "データ提供の契約破棄の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 176,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}
