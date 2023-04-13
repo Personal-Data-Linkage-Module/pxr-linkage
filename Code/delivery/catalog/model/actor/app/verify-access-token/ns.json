@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/actor/app/verify-access-token",
-    "description": "アプリケーションのアクセストークン検証要否を定義するための名前空間です。"
-}

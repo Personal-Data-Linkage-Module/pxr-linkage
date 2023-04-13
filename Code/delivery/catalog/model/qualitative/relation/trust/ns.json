@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/qualitative/relation/trust",
-    "description": "関係性（My-Condition-Bookの管理に関する信託関係）の候補値を定義するための名前空間です。"
-}

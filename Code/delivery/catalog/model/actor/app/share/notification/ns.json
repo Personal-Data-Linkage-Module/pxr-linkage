@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/actor/app/share/notification",
-    "description": "アプリケーションの状態共有機能に関する蓄積イベント通知を定義するための名前空間です。"
-}

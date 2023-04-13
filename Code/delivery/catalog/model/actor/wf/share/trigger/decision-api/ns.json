@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/actor/wf/share/trigger/decision-api",
-    "description": "ワークフローの状態共有機能に関する共有トリガーの判定APIを定義するための名前空間です。"
-}

@@ -1,8 +1,0 @@
-node_modules
-dist
-logs
-coverage
-coverage-unit
-test
-test-unit
-.vscode

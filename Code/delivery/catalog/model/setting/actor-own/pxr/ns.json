@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/setting/actor-own/pxr",
-    "description": "流通制御によるPXRポータルの個別設定を定義するための名前空間です。"
-}

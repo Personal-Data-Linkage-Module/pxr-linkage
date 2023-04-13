@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/category",
-    "description": "カテゴリを定義するための名前空間です。"
-}

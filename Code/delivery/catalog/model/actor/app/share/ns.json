@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/actor/app/share",
-    "description": "アプリケーションが提供する状態共有機能を定義するための名前空間です。"
-}

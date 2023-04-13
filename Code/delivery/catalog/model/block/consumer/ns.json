@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/block/consumer",
-    "description": "データコンシューマー用PXR-Blockを定義するための名前空間です。"
-}

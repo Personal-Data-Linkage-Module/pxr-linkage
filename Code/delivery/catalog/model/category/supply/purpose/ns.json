@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/category/supply/purpose",
-    "description": "提供先のアクターが提供されたデータを利用する目的のカテゴリを定義するための名前空間です。"
-}

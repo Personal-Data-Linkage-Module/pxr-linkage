@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/setting/actor/app",
-    "description": "流通制御によるアプリケーションプロバイダーのアクター個別設定を定義するための名前空間です。"
-}

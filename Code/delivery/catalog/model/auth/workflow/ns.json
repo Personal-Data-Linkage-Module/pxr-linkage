@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/auth/workflow",
-    "description": "操作権（ワークフロー管理）を定義するための名前空間です。"
-}

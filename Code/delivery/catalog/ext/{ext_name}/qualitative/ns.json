@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/qualitative",
-    "description": "定性値候補を定義するための名前空間です。"
-}

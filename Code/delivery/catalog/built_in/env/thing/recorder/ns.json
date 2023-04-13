@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/built_in/env/thing/recorder",
-    "description": "モノに関する環境情報（レコーダー）を定義するための名前空間です。"
-}

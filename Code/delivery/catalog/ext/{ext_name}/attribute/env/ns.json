@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/attribute/env",
-    "description": "カタログ属性（環境情報）を定義するための名前空間です。"
-}

@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/attribute/category/data",
-    "description": "カタログ属性（データカテゴリ）を定義するための名前空間です。"
-}

@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/actor/region-root",
-    "description": "領域運営サービスプロバイダーを定義するための名前空間です。"
-}

@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/built_in/setting/data-trader",
-    "description": "流通制御によるデータ取引サービスプロバイダーのグローバル設定を定義するための名前空間です。"
-}

@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/person/identification",
-    "description": "本人性確認事項を定義するための名前空間です。"
-}

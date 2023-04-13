@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/ext/<ext_name>/person",
-    "description": "個人属性を定義するための名前空間です。"
-}

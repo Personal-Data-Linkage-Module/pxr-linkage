@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/env/event",
-    "description": "イベントに関する環境情報を定義するための名前空間です。"
-}

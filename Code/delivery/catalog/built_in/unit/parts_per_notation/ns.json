@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/built_in/unit/parts_per_notation",
-    "description": "小さい数値で表される無次元量を定義するための名前空間です。"
-}

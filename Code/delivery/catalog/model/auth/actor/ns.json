@@ -1,4 +1,0 @@
-{
-    "ns": "catalog/model/auth/actor",
-    "description": "操作権（アクター認定）を定義するための名前空間です。"
-}
