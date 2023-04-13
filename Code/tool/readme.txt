@@ -1,7 +1,7 @@
 ######
 hashpass.js
-	TISスクリプト
+	TIS様提供スクリプト
 cp932_zip_extractor.py
-	TISスクリプト
+	TIS様提供スクリプト
 replace_param.sh
-	ふるやさん提供書き換えsh
+	パラメータ書き換え用sh
