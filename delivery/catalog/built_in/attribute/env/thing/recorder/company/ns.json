@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/attribute/env/thing/recorder/company",
+    "description": "カタログ属性（モノに関する環境情報（レコーダー）の企業）を定義するための名前空間です。"
+}

@@ -1,0 +1,29 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/auth",
+        "name": "操作権",
+        "description": "操作権のテンプレートの定義です。",
+        "_code": {
+            "_value": 76,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "auth-name",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "操作権定義名（各ネームスペース毎にユニークであること）"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

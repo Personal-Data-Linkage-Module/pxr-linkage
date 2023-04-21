@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/person/user-information/actor_<pxr_root_actor_code>",
+    "description": "流通制御サービスプロバイダーの利用者情報を定義するための名前空間です。"
+}

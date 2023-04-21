@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/actor/consumer",
+    "description": "データコンシューマーを定義するための名前空間です。"
+}

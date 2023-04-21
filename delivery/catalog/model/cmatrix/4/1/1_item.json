@@ -1,0 +1,32 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/cmatrix/4/1",
+        "name": "モノ識別子列",
+        "description": "CMatrixのモノ識別子列の定義です。",
+        "_code": {
+            "_value": 27,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "@value",
+                "type": {
+                    "of": "string",
+                    "cmatrix": {
+                        "index": "4_1_1",
+                        "reserved": true
+                    },
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                }
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

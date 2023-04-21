@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/qualitative/Yes_or_No",
+    "description": "はい・いいえの候補値を定義するための名前空間です。"
+}

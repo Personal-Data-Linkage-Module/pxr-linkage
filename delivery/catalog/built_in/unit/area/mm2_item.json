@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/area",
+        "name": "mm2",
+        "description": "面積の単位mm2の定義です。",
+        "_code": {
+            "_value": 20043,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

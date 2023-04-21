@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/velocity",
+        "name": "m/s",
+        "description": "速度の単位m/sの定義です。",
+        "_code": {
+            "_value": 20032,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

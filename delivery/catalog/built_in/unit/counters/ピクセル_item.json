@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/counters",
+        "name": "ピクセル",
+        "description": "ピクセルの単位の定義です。",
+        "_code": {
+            "_value": 20041,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

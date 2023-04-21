@@ -1,0 +1,33 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/setting/actor-own/consumer",
+        "name": "setting",
+        "description": "データコンシューマーによるアクター個別設定の定義です。",
+        "_code": {
+            "_value": 163,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "use_user_information",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "利用者管理情報使用設定"
+            },
+            {
+                "key": "use_multifactor_authentication",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "2要素認証"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

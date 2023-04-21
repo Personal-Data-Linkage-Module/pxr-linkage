@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application000001-book-delete-batch-container-config-map
+  namespace: pxross1
+data:
+  config.json: |
+    {
+      "catalogService": {
+        "getForNs": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fcatalog%3Fns%3D",
+        "getForCode": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fcatalog%2F"
+      },
+      "bookManageService": {
+        "getDeleteTarget": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fbook-manage%2Fdelete%2Ftarget%3Foffset%3D{offset}%26limit%3D10",
+        "postSearchBook": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fbook-manage%2Fsearch",
+        "deleteForce": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fbook-manage%2Fforce%2F{pxrId}%3FphysicalDelete%3D{physicalDelete}"
+      },
+      "identityVerificateService": {
+        "postCodeVerified": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=$pxr-root-block&path=%2Fidentity-verificate%2Fcode%2Fverified"
+      },
+      "bookOperateService": {
+          "postUserDelete": "http://application000001-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fbook-operate&block=1000407&path=%2Fbook-operate%2Fuser%2Fdelete%3FphysicalDelete%3D{physicalDelete}"
+      },
+      "catalog": {
+        "platformTermsOfUseNs": "catalog/ext/pxross1/terms-of-use/platform"
+      },
+      "session": {
+          "loginId": "application000001_batch",
+          "auth": {
+              "member": {
+                  "delete": true
+              },
+              "book": {
+                  "create": true
+              }
+          },
+          "block": {
+            "_value": 1000407,
+            "_ver": 1
+          },
+          "actor": {
+            "_value": 1000436,
+            "_ver": 1
+          }
+      },
+      "rootSession": {
+          "loginId": "root_batch",
+          "block": {
+              "_value": 1000401,
+              "_ver": 1
+          },
+          "actor": {
+              "_value": 1000431,
+              "_ver": 1
+          }
+      },
+      "timezone": "Asia/Tokyo"
+    }
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./efs/application000001/book-delete-batch/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }

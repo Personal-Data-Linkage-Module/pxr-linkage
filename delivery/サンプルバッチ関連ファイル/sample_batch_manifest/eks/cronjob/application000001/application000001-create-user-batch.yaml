@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: application000001-create-user-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 0
+  schedule: "10-59/15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: create-user-batch
+            image: ＜ECRのDNS名＞/pxross1:create-user-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/CreateUser.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: create-user-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: create-user-batch-config
+            configMap:
+              name: application000001-create-user-batch-container-config-map

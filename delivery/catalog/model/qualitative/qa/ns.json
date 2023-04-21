@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/qualitative/qa",
+    "description": "回答候補を定義するための名前空間です。"
+}

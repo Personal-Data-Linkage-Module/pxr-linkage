@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/wf/store",
+    "description": "ワークフローが蓄積可能なデータを定義するための名前空間です。"
+}

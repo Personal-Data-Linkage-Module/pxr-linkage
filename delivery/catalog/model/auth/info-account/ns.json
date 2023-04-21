@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/auth/info-account",
+    "description": "操作権（情報口座管理）を定義するための名前空間です。"
+}

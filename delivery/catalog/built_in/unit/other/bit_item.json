@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/other",
+        "name": "bit",
+        "description": "情報量の単位（ビット）の定義です。(bit)",
+        "_code": {
+            "_value": 20051,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

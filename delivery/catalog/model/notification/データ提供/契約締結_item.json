@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/データ提供",
+        "name": "契約締結",
+        "description": "データ提供の契約締結の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 177,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

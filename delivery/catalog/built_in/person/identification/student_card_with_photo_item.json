@@ -1,0 +1,57 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/person/identification",
+        "name": "顔写真付き学生証",
+        "description": "本人性確認で利用する顔写真付き学生証の定義です。",
+        "_code": {
+            "_value": 30041,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 107,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "item-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "氏名"
+                    },
+                    {
+                        "key": "item",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "姓名"
+                            },
+                            {
+                                "key": "type",
+                                "value": [
+                                    {
+                                        "key": "_value",
+                                        "value": 30037
+                                    },
+                                    {
+                                        "key": "_ver",
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content",
+                                "value": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

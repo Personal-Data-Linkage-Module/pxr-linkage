@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/attribute/env/thing/recorder",
+    "description": "カタログ属性（モノに関する環境情報（レコーダー））を定義するための名前空間です。"
+}

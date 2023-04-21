@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/person/identification",
+    "description": "本人性確認事項を定義するための名前空間です。"
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/category/data",
+    "description": "個人向けのデータカテゴリを定義するための名前空間です。"
+}

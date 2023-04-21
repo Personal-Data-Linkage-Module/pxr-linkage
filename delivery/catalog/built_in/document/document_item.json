@@ -1,0 +1,21 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/document",
+        "name": "サービス利用記録",
+        "description": "サービス利用記録の定義です。",
+        "_code": {
+            "_value": 30046,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 52,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,224 @@
+{
+    "catalogItem": {
+        "ns": "catalog/ext/<ext_name>/actor/pxr-root",
+        "name": "<pxr_root_name>",
+        "description": "<pxr_root_name>の定義です。",
+        "_code": {
+            "_value": <pxr_root_actor_code>,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 50,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "platform_overview",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "<pf_description_title>"
+                    },
+                    {
+                        "key": "section",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "<pf_description_subtitle>"
+                            },
+                            {
+                                "key": "content",
+                                "value": [
+                                    {
+                                        "key": "sentence",
+                                        "value": "<pf_description_sentence>"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "main-block",
+                "value": [
+                    {
+                        "key": "_value",
+                        "value": <pxr_root_block_code>
+                    },
+                    {
+                        "key": "_ver",
+                        "value": 1
+                    }
+                ]
+            },
+            {
+                "key": "status",
+                "value": [
+                    {
+                        "key": "status",
+                        "value": "certified"
+                    },
+                    {
+                        "key": "by",
+                        "value": null
+                    },
+                    {
+                        "key": "at",
+                        "value": "2020-01-01T00:00:00.000+09:00"
+                    }
+                ]
+            },
+            {
+                "key": "region-root-cert",
+                "value": [
+                    {
+                        "key": "cert",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": ""
+                            },
+                            {
+                                "key": "section",
+                                "value": [
+                                    {
+                                        "key": "title",
+                                        "value": "<region_certification_criteria_title>"
+                                    },
+                                    {
+                                        "key": "content",
+                                        "value": [
+                                            {
+                                                "key": "sentence",
+                                                "value": "<region_certification_criteria_sentence>"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "audit",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": ""
+                            },
+                            {
+                                "key": "section",
+                                "value": [
+                                    {
+                                        "key": "title",
+                                        "value": "<region_audit_procedure_title>"
+                                    },
+                                    {
+                                        "key": "content",
+                                        "value": [
+                                            {
+                                                "key": "sentence",
+                                                "value": "<region_audit_procedure_sentence>"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "app-cert",
+                "value": [
+                    {
+                        "key": "cert",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": ""
+                            },
+                            {
+                                "key": "section",
+                                "value": [
+                                    {
+                                        "key": "title",
+                                        "value": "<app_certification_criteria_title>"
+                                    },
+                                    {
+                                        "key": "content",
+                                        "value": [
+                                            {
+                                                "key": "sentence",
+                                                "value": "<app_certification_criteria_sentence>"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "key": "audit",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": ""
+                            },
+                            {
+                                "key": "section",
+                                "value": [
+                                    {
+                                        "key": "title",
+                                        "value": "<app_audit_procedure_title>"
+                                    },
+                                    {
+                                        "key": "content",
+                                        "value": [
+                                            {
+                                                "key": "sentence",
+                                                "value": "<app_audit_procedure_sentence>"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "statement",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "<organization_statement_title>"
+                    },
+                    {
+                        "key": "section",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "<organization_statement_subtitle>"
+                            },
+                            {
+                                "key": "content",
+                                "value": [
+                                    {
+                                        "key": "sentence",
+                                        "value": "<organization_statement_sentence>"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

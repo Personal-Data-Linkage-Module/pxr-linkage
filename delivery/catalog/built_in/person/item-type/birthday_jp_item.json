@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/person/item-type",
+        "name": "生年月日（和暦）",
+        "description": "個人属性の項目種別（生年月日（和暦））の定義です。",
+        "_code": {
+            "_value": 30038,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 133,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "input-pattern",
+                "value": "^(明治|大正|昭和|平成|令和)[0-9]{1,2}年(0?[1-9]|1[0-2])月(0?[1-9]|[12][0-9]|3[01])日$"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

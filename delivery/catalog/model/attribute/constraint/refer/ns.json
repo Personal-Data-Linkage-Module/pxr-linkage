@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/attribute/constraint/refer",
+    "description": "カタログ属性（参照制約）を定義するための名前空間です。"
+}

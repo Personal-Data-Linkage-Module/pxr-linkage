@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/attribute",
+    "description": "カタログ属性を定義するための名前空間です。"
+}

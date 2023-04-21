@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/auth/workflow",
+        "name": "ワークフロー作成/更新",
+        "description": "ワークフローの更新（新規作成・編集・削除）操作が可能。",
+        "_code": {
+            "_value": 154,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 76,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "auth-name",
+                "value": "create"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

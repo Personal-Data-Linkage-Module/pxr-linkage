@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/データ提供",
+        "name": "支払完了",
+        "description": "データ提供の支払完了の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 185,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/time",
+        "name": "ミリ秒",
+        "description": "ミリ秒の時刻の単位msの定義です。",
+        "_code": {
+            "_value": 20040,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

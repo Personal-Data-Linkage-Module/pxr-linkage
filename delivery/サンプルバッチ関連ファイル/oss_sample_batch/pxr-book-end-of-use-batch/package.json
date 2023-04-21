@@ -1,0 +1,13 @@
+{
+  "name": "book-end-of-use-batch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index",
+  "typings": "index",
+  "scripts": {},
+  "dependencies": {
+    "log4js": "^6.7.1",
+    "request": "2.88.2"
+  },
+  "devDependencies": {}
+}

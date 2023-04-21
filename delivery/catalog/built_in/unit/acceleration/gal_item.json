@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/acceleration",
+        "name": "gal",
+        "description": "地震の加速度galの定義です。(cm/s2)",
+        "_code": {
+            "_value": 20026,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

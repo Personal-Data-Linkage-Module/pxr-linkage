@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/format",
+        "name": ".ne0",
+        "description": "有効数字の値フォーマット（小数部1桁）の定義です。",
+        "_code": {
+            "_value": 10004,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

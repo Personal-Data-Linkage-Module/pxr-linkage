@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/velocity",
+        "name": "kine",
+        "description": "地震の速度の単位kineの定義です。(cm/s)",
+        "_code": {
+            "_value": 20025,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/setting/actor-own/region-root",
+    "description": "領域運営サービスプロバイダーによるアクター個別設定を定義するための名前空間です。"
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/category/service",
+    "description": "サービス提供組織のワークフローやアプリケーションのサービスカテゴリを定義するための名前空間です。"
+}

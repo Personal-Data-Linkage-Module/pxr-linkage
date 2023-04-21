@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/event",
+    "description": "イベントを定義するための名前空間です。"
+}

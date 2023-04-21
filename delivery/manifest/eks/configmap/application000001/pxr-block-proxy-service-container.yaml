@@ -1,0 +1,1476 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application000001-pxr-block-proxy-service-container-config-map
+  namespace: <namespace>
+data:
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3003
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000  # 同時実行数しきい値
+
+    accessControl:
+      token: http://localhost:3015/access-control/token
+      collate: http://localhost:3015/access-control/collate
+
+    catalogService:
+      get: http://root-service/pxr-block-proxy/pxr-block-proxy/?from_block={root_block}&from_path=%2Fpxr-block-proxy&block=$pxr-root-block&path=%2Fcatalog%2F
+
+    operatorService:
+      session: http://localhost:3000/operator/session
+      operator: http://localhost:3000/operator
+
+    proxyService:
+      local:
+        protocol: http
+        reverseProxyPort: 3003
+        reverseProxyPath: /pxr-block-proxy/reverse
+      protocol: https
+      proxy: http://localhost:3003/pxr-block-proxy
+      reverseProxyPort: 443
+      reverseProxyPath: /pxr-block-proxy/pxr-block-proxy/reverse
+
+    pxr-root:
+      isString: $pxr-root-block
+      blockCode: 1000401
+      domain: root-service
+      name: pxr-root
+
+    csrf:
+      csrf_check: http://localhost:3000/operator/csrf/check
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストが空です",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "IS_NOT_AUTHORIZATION_SESSION": "セッションは有効ではありません",
+      "FAILED_TAKE_SESSION": "セッション情報の取得に失敗しました",
+      "FAILED_TAKE_OPERATOR": "オペレーターの取得に失敗しました",
+      "NOT_EXISTS_OPERATOR": "リクエストされたオペレーターは存在しません",
+      "FAILED_CONNECT_TO_OPERATOR": "オペレーターサービスとの接続に失敗しました",
+      "FAILED_CONNECT_TO_DATABASE": "データベースとの接続に失敗しました",
+      "IS_NOT_BLOCK_CATALOG": "リクエストされたカタログは、ブロックのものではありません（コード: %s）",
+      "NOT_EXISTS_CATALOG": "リクエストされたカタログは存在しません（コード: %s）",
+      "FAILED_CATALOG_SERVICE": "カタログサービスの内部エラーが発生しました",
+      "FAILED_CONNECT_TO_CATALOG": "カタログサービスとの接続に失敗しました",
+      "FAILED_CALL_REVERSE_PROXY_API": "宛先ブロックのリバースプロキシーAPIの呼び出しに失敗しました",
+      "NOT_PERMISSION_THIS_REQUEST": "このリクエストは許可されませんでした",
+      "FAILED_ACCESS_CONTROL_SERVICE": "アクセス制御サービスの内部処理で失敗しました",
+      "FAILED_CONNECT_TO_ACCESS_CONTROL_SERVICE": "アクセス制御サービスとの接続に失敗しました",
+      "IS_NOT_URL_PATH": "PATHのクエリーパラメーターがHTTP URLパス形式ではありません",
+      "FAILED_SAVE_ENTITY": "レコードの登録に失敗しました",
+      "FAILED_CONNECT_TO_CALL_TARGET": "対象のサービスとの接続に失敗しました",
+      "NOT_RECOGNIZE_SERVICE": "このサービスへのアクセスを拒否します",
+      "FAILED_TO_COLLATE_TOKEN": "APIトークンの認証に失敗しました",
+      "REQUEST_OPERATION_NOT_PERMIT": "指定されたAPIは、認可がありません",
+      "NOT_OPERATION_AUTH": "この操作をするための権限がありません",
+      "NOT_EXISTS_API_TOKEN": "APIトークンが取得できませんでした",
+      "CSRF_TOKEN": "不正な CSRF トークンまたは CSRF トークンがありません",
+      "validation": {
+        "isArray": "配列ではありません",
+        "isBoolean": "真偽値ではありません",
+        "isBooleanString": "真偽値への変換に失敗しました",
+        "isDate": "日付型ではありません",
+        "isDateString": "日付型への変換に失敗しました",
+        "isEmail": "Emailアドレスではありません",
+        "isEmpty": "この値は空である必要があります",
+        "isNumber": "数値ではありません",
+        "isNumberString": "数値への変換に失敗しました",
+        "isNotEmpty": "この値は空を期待しません",
+        "isUUID": "UUIDではありません",
+        "isString": "文字列ではありません",
+        "isObject": "JSONではありません",
+        "isJson": "JSONではありません",
+        "isUrl": "このフィールドでは必ずURIではなく、ドメイン以降のパスを指定してください",
+        "isDefined": "この値は必須値です"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "pxr-block-proxy-service",
+        "version": "1.0",
+        "description": "PXR-Block-Proxyサービス"
+      },
+      "servers": [
+        {
+          "url": "/pxr-block-proxy/pxr-block-proxy"
+        }
+      ],
+      "paths": {
+        "/": {
+          "get": {
+            "tags": [
+              "プロキシ"
+            ],
+            "description": "GETメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "tags": [
+              "プロキシ"
+            ],
+            "description": "POSTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "tags": [
+              "プロキシ"
+            ],
+            "description": "PUTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "プロキシ"
+            ],
+            "description": "DELETEメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/reverse": {
+          "get": {
+            "tags": [
+              "リバースプロキシ"
+            ],
+            "description": "GETメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "from_block",
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                },
+                "description": "呼出元Blockコード"
+              },
+              {
+                "name": "from_path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "description": "呼出元API URL"
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "required": true,
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "tags": [
+              "リバースプロキシ"
+            ],
+            "description": "POSTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "from_block",
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                },
+                "description": "呼出元Blockコード"
+              },
+              {
+                "name": "from_path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "description": "呼出元API URL"
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "required": true,
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "tags": [
+              "リバースプロキシ"
+            ],
+            "description": "PUTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "from_block",
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                },
+                "description": "呼出元Blockコード"
+              },
+              {
+                "name": "from_path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "description": "呼出元API URL"
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "required": true,
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "リバースプロキシ"
+            ],
+            "description": "DELETEメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "from_block",
+                "in": "query",
+                "schema": {
+                  "type": "number"
+                },
+                "description": "呼出元Blockコード"
+              },
+              {
+                "name": "from_path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "description": "呼出元API URL"
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "required": true,
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind": {
+          "get": {
+            "tags": [
+              "個人用プロキシ"
+            ],
+            "description": "GETメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "tags": [
+              "個人用プロキシ"
+            ],
+            "description": "POSTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "tags": [
+              "個人用プロキシ"
+            ],
+            "description": "PUTメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "requestBody": {
+              "description": "透過先APIに必要なリクエストボディ",
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "通知エンティティ",
+                    "additionalProperties": true
+                  }
+                },
+                "application/octet-stream": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "代理呼出先のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "個人用プロキシ"
+            ],
+            "description": "DELETEメソッドのAPIを代理で呼び出します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "block",
+                "in": "query",
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "宛先Blockコード"
+              },
+              {
+                "name": "path",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "description": "API URL。透過先APIにQueryParamが必要であればここに含め、URLエンコーディングを行う。"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "レスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "代理呼出先のレスポンス",
+                      "additionalProperties": true
+                    }
+                  },
+                  "application/octet-stream": {
+                    "schema": {
+                      "type": "string",
+                      "format": "binary",
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_block_proxy",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": false
+    }
+  port.json: |
+    {
+      "operator": 3000,
+      "catalog": 3001,
+      "catalog-update": 3002,
+      "pxr-block-proxy": 3003,
+      "notification": 3004,
+      "book-manage": 3005,
+      "book-operate": 3006,
+      "identity-verificate": 3007,
+      "ctoken-ledger": 3008,
+      "local-ctoken": 3009,
+      "certification-authority": 3012,
+      "certificate-manage": 3013,
+      "access-control-manage": 3014,
+      "access-control": 3015,
+      "audit": 3017,
+      "binary-manage": 3018
+    }
+  permission.json: |
+    {
+      "self": {
+        "GET": {
+          "3": [
+            "^\\/operator\\/?\\?.+\\/?$",
+            "^\\/operator\\/\\d+\\/?$",
+            "^\\/operator\\/user\\/info\\/?\\?.+\\/?$",
+            "^\\/notification\\/?\\?.+\\/?$",
+            "^\\/certificate-manage\\/check\\/client\\/?$"
+          ],
+          "2": [
+            "^\\/operator\\/?\\?.+\\/?$",
+            "^\\/operator\\/\\d+\\/?$",
+            "^\\/notification\\/?\\?.+\\/?$"
+          ],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [
+            "^\\/operator\\/?$",
+            "^\\/operator\\/session\\/?$",
+            "^\\/operator\\/user\\/info\\/?$",
+            "^\\/notification\\/?$",
+            "^\\/book-operate\\/user\\/?$",
+            "^\\/book-operate\\/user\\/delete\\/?$",
+            "^\\/book-operate\\/user\\/list\\/?$"
+          ],
+          "2": [
+            "^\\/operator\\/session\\/?$",
+            "^\\/notification\\/?$",
+            "^\\/book-operate\\/user\\/list\\/?$",
+            "^\\/book-operate\\/document\\/.+\\/?$",
+            "^\\/book-operate\\/event\\/.+\\/?$",
+            "^\\/book-operate\\/thing\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/thing\\/bulk\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/share\\/?$",
+            "^\\/book-operate\\/share\\/temp\\/?$",
+            "^\\/binary-manage\\/upload\\/.+\\/\\d+\\/?$",
+            "^\\/binary-manage\\/upload\\/start\\/?$",
+            "^\\/binary-manage\\/upload\\/end\\/.+\\/?$",
+            "^\\/binary-manage\\/upload\\/cancel\\/.+\\/?$",
+            "^\\/binary-manage\\/download\\/.+\\/\\d+\\/?$",
+            "^\\/binary-manage\\/download\\/start\\/.+\\/?$",
+            "^\\/binary-manage\\/download\\/end\\/.+\\/?$",
+            "^\\/binary-manage\\/download\\/cancel\\/.+\\/?$"
+          ],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [
+            "^\\/operator\\/\\d+\\/?$",
+            "^\\/operator\\/password\\/\\d+\\/?$",
+            "^\\/notification\\/?$",
+            "^\\/notification\\/approval\\/?$"
+          ],
+          "2": [
+            "^\\/notification\\/?$",
+            "^\\/notification\\/approval\\/?$",
+            "^\\/book-operate\\/document\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/document\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/event\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/event\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/thing\\/.+\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/thing\\/.+\\/.+\\/.+\\/?$"
+          ],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [
+            "^\\/operator\\/\\d+\\/?$",
+            "^\\/operator\\/user\\/info\\/?$"
+          ],
+          "2": [
+            "^\\/book-operate\\/document\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/document\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/event\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/event\\/.+\\/.+\\/?$",
+            "^\\/book-operate\\/thing\\/.+\\/.+\\/?\\?.+\\/?$",
+            "^\\/book-operate\\/thing\\/.+\\/.+\\/.+\\/?$",
+            "^\\/binary-manage\\/.+\\/?$"
+          ],
+          "1": [],
+          "0": []
+        }
+      },
+      "pxr-root": {
+        "GET": {
+          "3": [
+            "^\\/catalog\\/name\\/?$",
+            "^\\/catalog\\/?\\?.+\\/?$",
+            "^\\/catalog\\/\\d+\\/?$",
+            "^\\/catalog\\/\\d+\\/\\d+\\/?$",
+            "^\\/catalog\\/inner\\/\\d+\\/.+\\/?$",
+            "^\\/catalog\\/inner\\/\\d+\\/\\d+\\/.+\\/?$",
+            "^\\/catalog\\/ns\\/?\\?.+\\/?$",
+            "^\\/catalog\\/ns\\/\\d+\\/?$",
+            "^\\/catalog\\/updateSet\\/search\\/info\\/\\d+\\/?$",
+            "^\\/catalog\\/updateSet\\/search\\/request\\/?$",
+            "^\\/catalog\\/updateSet\\/search\\/approval\\/?$",
+            "^\\/catalog-update\\/actor\\/?\\?.+\\/?$",
+            "^\\/catalog-update\\/actor\\/accreditor\\/?\\?.+\\/?$",
+            "^\\/catalog-update\\/join\\/?\\?.+\\/?$",
+            "^\\/book-manage\\/output\\/condition\\/?\\?.+\\/?$",
+            "^\\/identity-verificate\\/acquisition\\/identification\\/.+\\/?$"
+          ],
+          "2": [
+            "^\\/catalog\\/name\\/?$",
+            "^\\/catalog\\/?\\?.+\\/?$",
+            "^\\/catalog\\/\\d+\\/?$",
+            "^\\/catalog\\/\\d+\\/\\d+\\/?$",
+            "^\\/catalog\\/inner\\/\\d+\\/.+\\/?$",
+            "^\\/catalog\\/inner\\/\\d+\\/\\d+\\/.+\\/?$",
+            "^\\/catalog\\/ns\\/?\\?.+\\/?$",
+            "^\\/catalog\\/ns\\/\\d+\\/?$",
+            "^\\/book-manage\\/settings\\/store\\/.+\\/?$",
+            "^\\/book-manage\\/setting\\/share\\/?\\??.*\\/?$"
+          ],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [
+            "^\\/catalog\\/?$",
+            "^\\/catalog\\/ext\\/?$",
+            "^\\/catalog\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/ns\\/ext\\/?$",
+            "^\\/catalog\\/ns\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/updateSet\\/register\\/?$",
+            "^\\/catalog\\/updateSet\\/request\\/?$",
+            "^\\/catalog\\/updateSet\\/approval\\/\\d+\\/?$",
+            "^\\/catalog-update\\/actor\\/?$",
+            "^\\/catalog-update\\/join\\/?$",
+            "^\\/catalog-update\\/actor\\/remove\\/?$",
+            "^\\/catalog-update\\/join\\/remove\\/?$",
+            "^\\/catalog-update\\/updateSet\\/request\\/?$",
+            "^\\/catalog-update\\/updateSet\\/approval\\/\\d+\\/?$",
+            "^\\/catalog-update\\/data-operation\\/?$",
+            "^\\/catalog-update\\/store-event\\/?$",
+            "^\\/book-manage\\/share\\/temp\\/collation\\/?$",
+            "^\\/book-manage\\/output\\/?\\?.+\\/?$",
+            "^\\/identity-verificate\\/code\\/?$",
+            "^\\/identity-verificate\\/url\\/?$",
+            "^\\/identity-verificate\\/user\\/settings\\/?$",
+            "^\\/ctoken-ledger\\/count\\/?$",
+            "^\\/ctoken-ledger\\/?$"
+          ],
+          "2": [
+            "^\\/book-manage\\/share\\/temp\\/collation\\/?$",
+            "^\\/identity-verificate\\/url\\/?$",
+            "^\\/identity-verificate\\/url\\/issue\\/?$"
+          ],
+          "1": [],
+          "0": [
+            "^\\/catalog\\/?$"
+          ]
+        },
+        "PUT": {
+          "3": [
+            "^\\/catalog\\/ext\\/?$",
+            "^\\/catalog\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/ns\\/ext\\/?$",
+            "^\\/catalog\\/ns\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/updateSet\\/register\\/\\d+\\/?$",
+            "^\\/catalog-update\\/store-event\\/?$",
+            "^\\/book-manage\\/output\\/condition\\/data_mng\\/.+\\/?$",
+            "^\\/identity-verificate\\/verify\\/others\\/.+\\/?$"
+          ],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [
+            "^\\/catalog\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/ns\\/ext\\/\\d+\\/?$",
+            "^\\/catalog\\/updateSet\\/register\\/\\d+\\/?$"
+          ],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      },
+      "region-root": {
+        "GET": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      },
+      "app": {
+        "GET": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      },
+      "wf": {
+        "GET": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      },
+      "data-trader": {
+        "GET": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      },
+      "consumer": {
+        "GET": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "POST": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "PUT": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        },
+        "DELETE": {
+          "3": [],
+          "2": [],
+          "1": [],
+          "0": []
+        }
+      }
+    }

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/number_per_unit",
+        "name": "U/L",
+        "description": "U/Lの単位の定義です。",
+        "_code": {
+            "_value": 20014,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,39 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/attribute/category/data",
+        "name": "データカテゴリ",
+        "description": "データカテゴリの定義です。",
+        "_code": {
+            "_value": 159,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "paint_color",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "データカテゴリの表示色（カラーコード指定）"
+            },
+            {
+                "key": "line_color",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "データカテゴリの線の色（カラーコード指定）"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

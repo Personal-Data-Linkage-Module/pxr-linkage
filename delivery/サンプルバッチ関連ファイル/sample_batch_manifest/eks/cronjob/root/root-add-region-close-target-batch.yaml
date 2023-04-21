@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: root-add-region-close-target-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: add-region-close-target-batch
+            image: ＜ECRのDNS名＞/pxross1:add-region-close-target-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/addRegionCloseTarget.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: add-region-close-target-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: add-region-close-target-batch-config
+            configMap:
+              name: root-add-region-close-target-batch-container-config-map

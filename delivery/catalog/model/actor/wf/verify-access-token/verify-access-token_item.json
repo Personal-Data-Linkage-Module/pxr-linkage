@@ -1,0 +1,72 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/wf/verify-access-token",
+        "name": "アクセストークン検証要否定義",
+        "description": "ワークフローのアクセストークン検証要否の定義です。",
+        "_code": {
+            "_value": 219,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "verifyAccessToken",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "VerifyAccessToken"
+                },
+                "description": "アクセストークン検証要否"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "VerifyAccessToken",
+            "description": "アクセストークン検証要否",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "service",
+                        "type": {
+                            "of": "code",
+                            "_code": null,
+                            "candidate": {
+                                "ns": [
+                                    "catalog/ext/<ext_name>/actor/app/*",
+                                    "catalog/ext/<ext_name>/actor/wf/*"
+                                ],
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "対象サービス"
+                    },
+                    {
+                        "key": "verificationRequiredOnStore",
+                        "type": {
+                            "of": "boolean",
+                            "cmatrix": null
+                        },
+                        "description": "蓄積時アクセストークン検証要否",
+                        "isInherit": false
+                    },
+                    {
+                        "key": "verificationRequiredOnShare",
+                        "type": {
+                            "of": "boolean",
+                            "cmatrix": null
+                        },
+                        "description": "共有時アクセストークン検証要否",
+                        "isInherit": false
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

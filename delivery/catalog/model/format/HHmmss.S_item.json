@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/format",
+        "name": "HHmmss.S形式",
+        "description": "時刻の値フォーマット（HHmmss.S形式）の定義です。",
+        "_code": {
+            "_value":83,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

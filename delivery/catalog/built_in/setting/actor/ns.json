@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/setting/actor",
+    "description": "流通制御によるアクター個別設定を定義するための名前空間です。"
+}

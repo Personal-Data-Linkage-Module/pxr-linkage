@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/wf/workflow",
+    "description": "ワークフローを定義するための名前空間です。"
+}

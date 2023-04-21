@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/unit/counters",
+    "description": "助数詞を定義するための名前空間です。"
+}

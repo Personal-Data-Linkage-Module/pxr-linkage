@@ -1,0 +1,112 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/page",
+        "name": "文章構造",
+        "description": "文章構造の定義です。",
+        "_code": {
+            "_value": 61,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "title",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "タイトル"
+            },
+            {
+                "key": "section",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "Section"
+                },
+                "description": "セクション"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "Section",
+            "description": "セクションの定義です。",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "title",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "セクションタイトル"
+                    },
+                    {
+                        "key": "content",
+                        "type": {
+                            "of": "inner[]",
+                            "candidate": {
+                                "inner": [
+                                    "Sentence",
+                                    "List"
+                                ]
+                            }
+                        },
+                        "description": "コンテンツ"
+                    }
+                ]
+            },
+            "inner": [
+                {
+                    "name": "Sentence",
+                    "description": "文の定義です。",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "sentence",
+                                "type": {
+                                    "of": "string",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "文（改行を含む際は、\\r\\n等改行コードで指定すること）"
+                            }
+                        ]
+                    },
+                    "inner": null
+                },
+                {
+                    "name": "List",
+                    "description": "リストの定義です。",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "list",
+                                "type": {
+                                    "of": "string[]",
+                                    "format": null,
+                                    "unit": null,
+                                    "candidate": null
+                                },
+                                "description": "リストアイテム"
+                            }
+                        ]
+                    },
+                    "inner": null
+                }
+            ]
+        }
+    ],
+    "attribute": null
+}

@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/unit/illuminance",
+    "description": "照度を定義するための名前空間です。"
+}

@@ -1,0 +1,144 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config-map
+  namespace: <namespace>
+data:
+  nginx.conf: |
+    worker_processes auto;
+    pid /run/nginx.pid;
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                            '$status $body_bytes_sent "$http_referer" '
+                            '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log /var/log/nginx/out_access.log main;
+        error_log /var/log/nginx/out_error.log;
+        client_max_body_size 50m;
+        server_tokens       off;
+        sendfile            on;
+        tcp_nopush          on;
+        tcp_nodelay         on;
+        keepalive_timeout   65;
+        types_hash_max_size 2048;
+
+        default_type        application/octet-stream;
+
+        # Client certificate is multiple lines.
+        # That convert to one line instead.
+        map $ssl_client_raw_cert $a {
+            "~^(-.*-\n)(?<st>[^\n]+)\n((?<b>[^\n]+)\n)?((?<c>[^\n]+)\n)?((?<d>[^\n]+)\n)?((?<e>[^\n]+)\n)?((?<f>[^\n]+)\n)?((?<g>[^\n]+)\n)?((?<h>[^\n]+)\n)?((?<i>[^\n]+)\n)?((?<j>[^\n]+)\n)?((?<k>[^\n]+)\n)?((?<l>[^\n]+)\n)?((?<m>[^\n]+)\n)?((?<n>[^\n]+)\n)?((?<o>[^\n]+)\n)?((?<p>[^\n]+)\n)?((?<q>[^\n]+)\n)?((?<r>[^\n]+)\n)?((?<s>[^\n]+)\n)?((?<t>[^\n]+)\n)?((?<v>[^\n]+)\n)?((?<u>[^\n]+)\n)?((?<w>[^\n]+)\n)?((?<x>[^\n]+)\n)?((?<y>[^\n]+)\n)?((?<z>[^\n]+)\n)?(-.*-)$" $st;
+        }
+
+        server {
+            listen       8080 default_server;
+            listen       [::]:8080 default_server;
+            server_name  _;
+            root         /opt/app-root/src;
+            client_max_body_size 50m;
+            # Load configuration files for the default server block.
+            include /opt/app-root/etc/nginx.default.d/*.conf;
+
+            proxy_set_header    Host    $host;
+            sendfile off;
+            etag off;
+            if_modified_since off;
+            proxy_cache off;
+            proxy_set_header Accept-Encoding "";
+            add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=-1';
+            add_header 'Pragma' 'no-cache';
+            add_header X-Frame-Options SAMEORIGIN always;
+
+            location /pxr-block-proxy/ {
+                proxy_pass http://localhost:3003/;
+                client_max_body_size 50m;
+            }
+            location /operator/ {
+                proxy_pass http://localhost:3000/;
+            }
+            location /api-docs-assets/ {
+                proxy_pass http://localhost:3000;
+            }
+            
+            
+            # カタログ登録時に必要
+            location /catalog/ {
+                proxy_pass http://localhost:3001/;
+            }
+            
+            
+            
+            location /assets/ {
+                proxy_pass http://localhost:4200/portal/assets/;
+            }
+            location / {
+            }
+
+            error_page 404 /404.html;
+                location = /404.html {
+                root /usr/share/nginx/html;
+                internal;
+            }
+
+            error_page 500 502 503 504 /50x.html;
+                location = /50x.html {
+                root /usr/share/nginx/html;
+                internal;
+            }
+        }
+
+        server {
+            listen       443 ssl;
+            listen       [::]:443 ssl;
+            server_name  _;
+            root         /opt/app-root/src;
+
+            # Load configuration files for the default server block.
+            include /opt/app-root/etc/nginx.default.d/*.conf;
+
+            proxy_set_header    Host    $host;
+            sendfile off;
+            etag off;
+            if_modified_since off;
+            proxy_cache off;
+            proxy_set_header Accept-Encoding "";
+            add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=-1';
+            add_header X-Frame-Options SAMEORIGIN always;
+
+            ssl_protocols TLSv1.1 TLSv1.2;
+            ssl_certificate /etc/nginx/secret/server.crt;
+            ssl_certificate_key /etc/nginx/secret/server.key;
+            # ssl_client_certificate /etc/nginx/secret/client-ca.crt;
+            # ssl_verify_client optional;
+
+            location /pxr-block-proxy/ {
+                proxy_pass http://127.0.0.1:3003/;
+            }
+            location /access-control-manage/ {
+                # if ($ssl_client_verify != SUCCESS) {
+                #     return 403;
+                # }
+
+                # Adds header a variable of after converted from certificate.
+                proxy_set_header X-cert $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$v$u$w$x$y$z;
+                proxy_pass http://127.0.0.1:3014/;
+            }
+            location /access-control/ {
+                # if ($ssl_client_verify != SUCCESS) {
+                #     return 403;
+                # }
+
+                # Adds header a variable of after converted from certificate.
+                proxy_set_header X-cert $a$b$c$d$e$f$g$h$i$j$k$l$m$n$o$p$q$r$s$t$v$u$w$x$y$z;
+                proxy_pass http://127.0.0.1:3015/;
+            }
+         }
+    }

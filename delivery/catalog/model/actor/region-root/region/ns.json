@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/region-root/region",
+    "description": "領域運営サービスプロバイダーが管理するRegionを定義するための名前空間です。"
+}

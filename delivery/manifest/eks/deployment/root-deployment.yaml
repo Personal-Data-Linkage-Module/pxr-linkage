@@ -1,0 +1,428 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: root-api
+  namespace: <namespace>
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: root-api
+  template:
+    metadata:
+      labels:
+        app: root-api
+    spec:
+ 
+      containers:
+      - name: nginx
+        image: nginx:1.20.1
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"cp -prfL /etc/nginx/secret/server* /etc/nginx/ssl/ && cp -prfL /etc/nginx/secret/client* /etc/nginx/ssl/ && nginx -g 'daemon off;'"]
+        resources:
+          requests:
+            cpu: 30m
+            memory: 120Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+        ports:
+        - containerPort: 8080
+        - containerPort: 443
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: shared-data
+        - mountPath: /etc/nginx/secret
+          name: ssl-secret
+        - mountPath: /etc/nginx
+          readOnly: true
+          name: nginx-config
+
+      - name: operator
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 250Mi
+          limits:
+            cpu: 500m
+            memory: 1000Mi
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: operator-service-config
+        - mountPath: /usr/src/app/config
+          name: operator-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: catalog
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1000Mi
+          limits:
+            cpu: 1500m
+            memory: 3000Mi
+        ports:
+        - containerPort: 3001
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: catalog-service-config
+        - mountPath: /usr/src/app/config
+          name: catalog-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: catalog-update
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 30m
+            memory: 120Mi
+          limits:
+            cpu: 400m
+            memory: 400Mi
+        ports:
+        - containerPort: 3002
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: catalog-update-service-config
+        - mountPath: /usr/src/app/config
+          name: catalog-update-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: pxr-block-proxy
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 500Mi
+          limits:
+            cpu: 400m
+            memory: 2000Mi
+        ports:
+        - containerPort: 3003
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: pxr-block-proxy-service-config
+        - mountPath: /usr/src/app/ssl
+          name: shared-data
+        - mountPath: /usr/src/app/config
+          name: pxr-block-proxy-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: notification
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 30m
+            memory: 120Mi
+          limits:
+            cpu: 300m
+            memory: 500Mi
+        ports:
+        - containerPort: 3004
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: notification-service-config
+        - mountPath: /usr/src/app/config
+          name: notification-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+
+      - name: book-manage
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 200Mi
+          limits:
+            cpu: 500m
+            memory: 800Mi
+        ports:
+        - containerPort: 3005
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: book-manage-service-config
+        - mountPath: /usr/src/app/config
+          name: book-manage-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: identity-verificate
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 30m
+            memory: 150Mi
+          limits:
+            cpu: 300m
+            memory: 400Mi
+        ports:
+        - containerPort: 3007
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: identity-verificate-service-config
+        - mountPath: /usr/src/app/config
+          name: identity-verificate-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json
+
+      - name: ctoken-ledger
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 30m
+            memory: 120Mi
+          limits:
+            cpu: 400m
+            memory: 500Mi
+        ports:
+        - containerPort: 3008
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: ctoken-ledger-service-config
+        - mountPath: /usr/src/app/config
+          name: ctoken-ledger-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json       
+
+      - name: certificate-authority
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp -a tmp/. config && chmod +x *.sh && sh starting.sh"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 120Mi
+          limits:
+            cpu: 300m
+            memory: 400Mi
+        ports:
+        - containerPort: 3012
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: certificate-authority-service-config
+        - mountPath: /usr/src/app/ssl
+          name: shared-data
+        - mountPath: /usr/src/app/config
+          name: certificate-authority-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json  
+
+      - name: certificate-manage
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp -a tmp/. config && chmod +x *.sh && sh starting.sh"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 120Mi
+          limits:
+            cpu: 300m
+            memory: 400Mi
+        ports:
+        - containerPort: 3013
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: certificate-manage-service-config
+        - mountPath: /usr/src/app/ssl
+          name: shared-data
+        - mountPath: /usr/src/app/secret
+          name: ssl-secret
+        - mountPath: /usr/src/app/config
+          name: certificate-manage-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json 
+
+      - name: access-control-manage
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 120Mi
+          limits:
+            cpu: 300m
+            memory: 400Mi
+        ports:
+        - containerPort: 3014
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: access-control-manage-service-config
+        - mountPath: /usr/src/app/ssl
+          name: shared-data
+        - mountPath: /usr/src/app/config
+          name: access-control-manage-config-dir
+        - mountPath: /usr/src/app/config/common-conf.json
+          name: common-config
+          subPath: common-conf.json
+        - mountPath: /usr/src/app/config/block-common-conf.json
+          name: block-config
+          subPath: block-common-conf.json 
+
+      - name: access-control
+        image: <ECRイメージURL:タグ>
+        imagePullPolicy: IfNotPresent
+        command: ["sh","-c" ,"ls -l && cp tmp/* config && npm start"]
+        resources:
+          requests:
+            cpu: 250m
+            memory: 200Mi
+          limits:
+            cpu: 1500m
+            memory: 800Mi
+        ports:
+        - containerPort: 3015
+        volumeMounts:
+        - mountPath: /usr/src/app/tmp
+          name: access-control-service-config
+        - mountPath: /usr/src/app/ssl
+          name: shared-data
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config-map
+      - name: operator-service-config
+        configMap:
+          name: root-operator-service-container-config-map
+      - name: catalog-service-config
+        configMap:
+          name: root-catalog-service-container-config-map
+      - name: catalog-update-service-config
+        configMap:
+          name: root-catalog-update-service-container-config-map
+      - name: pxr-block-proxy-service-config
+        configMap:
+          name: root-pxr-block-proxy-service-container-config-map
+      - name: notification-service-config
+        configMap:
+          name: root-notification-service-container-config-map
+      - name: book-manage-service-config
+        configMap:
+          name: root-book-manage-service-container-config-map
+      - name: identity-verificate-service-config
+        configMap:
+          name: root-identity-verificate-service-container-config-map
+      - name: ctoken-ledger-service-config
+        configMap:
+          name: root-ctoken-ledger-service-container-config-map
+      - name: certificate-authority-service-config
+        configMap:
+          name: root-certificate-authority-service-container-config-map
+      - name: certificate-manage-service-config
+        configMap:
+          name: root-certificate-manage-service-container-config-map
+      - name: access-control-manage-service-config
+        configMap:
+          name: root-access-control-manage-service-container-config-map
+      - name: access-control-service-config
+        configMap:
+          name: root-access-control-service-container-config-map
+      - name: shared-data
+        emptyDir: {}
+      - name: ssl-secret
+        secret:
+          secretName: nginx-secret
+      # commonf config
+      - name: common-config
+        configMap:
+          name: common-config-map
+      - name: block-config
+        configMap:
+          name: root-common-config-map
+      - name: operator-config-dir
+        emptyDir: {}
+      - name: catalog-config-dir
+        emptyDir: {}
+      - name: catalog-update-config-dir
+        emptyDir: {}
+      - name: pxr-block-proxy-config-dir
+        emptyDir: {}
+      - name: notification-config-dir
+        emptyDir: {}
+      - name: book-manage-config-dir
+        emptyDir: {}
+      - name: identity-verificate-config-dir
+        emptyDir: {}
+      - name: ctoken-ledger-config-dir
+        emptyDir: {}
+      - name: pxr-wallet-config-dir
+        emptyDir: {}
+      - name: certificate-authority-config-dir
+        emptyDir: {}
+      - name: certificate-manage-config-dir
+        emptyDir: {}
+      - name: access-control-manage-config-dir
+        emptyDir: {}
+      - name: access-control-config-dir
+        emptyDir: {}
+      - name: book-open-config-dir          
+        emptyDir: {}

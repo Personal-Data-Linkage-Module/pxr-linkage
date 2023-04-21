@@ -1,0 +1,174 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor",
+        "name": "アクター",
+        "description": "PXRエコシステム上で活動するアクターの定義です。（個人を除く）",
+        "_code": {
+            "_value": 36,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "main-block",
+                "type": {
+                    "of": "code",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 29,
+                            "_ver": null
+                        }
+                    }
+                },
+                "description": "アクター参加時に割り当てられたPXR-Block"
+            },
+            {
+                "key": "other-block",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 29,
+                            "_ver": null
+                        }
+                    }
+                },
+                "description": "他アクターから引き継いだPXR-Blockの配列"
+            },
+            {
+                "key": "statement",
+                "type": {
+                    "of": "item[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "組織ステートメント"
+            },
+            {
+                "key": "status",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "CertStatus"
+                },
+                "description": "認定の履歴"
+            },
+            {
+                "key": "category",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/category/share/actor",
+                            "catalog/built_in/category/share/actor",
+                            "catalog/ext/<ext_name>/category/share/actor",
+                            "catalog/model/category/supply/actor",
+                            "catalog/built_in/category/supply/actor",
+                            "catalog/ext/<ext_name>/category/supply/actor"
+                        ],
+                        "_code": null,
+                        "base": null
+                    },
+                    "description": "アクターカテゴリー"
+                }
+            },
+            {
+                "key": "breakaway-flg",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "離脱フラグ"
+            },
+            {
+                "key": "information-site",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "情報サイト"
+            }
+        ],
+        "value": [
+            {
+                "key": "breakaway-flg",
+                "value": false
+            }
+        ]
+    },
+    "inner": [
+        {
+            "name": "CertStatus",
+            "description": "認定状態",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "status",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": {
+                                "value": [
+                                    "certified",
+                                    "rejected",
+                                    "recalled"
+                                ]
+                            }
+                        },
+                        "description": "認定状態"
+                    },
+                    {
+                        "key": "by",
+                        "type": {
+                            "of": "code",
+                            "_code": null,
+                            "candidate": {
+                                "ns": null,
+                                "_code": null,
+                                "base": {
+                                    "_value": 36,
+                                    "_ver": 1
+                                }
+                            }
+                        },
+                        "description": "認定した組織"
+                    },
+                    {
+                        "key": "at",
+                        "type": {
+                            "of": "string",
+                            "format": {
+                                "_value": 6,
+                                "_ver": 1
+                            },
+                            "unit": null
+                        },
+                        "description": "認定した時刻"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

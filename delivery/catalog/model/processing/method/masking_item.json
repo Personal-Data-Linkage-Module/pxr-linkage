@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/processing/method",
+        "name": "masking",
+        "description": "データ加工処理（マスキング）の定義です。第一引数はマスク桁数指定で、第二引数はマスク文字指定です。",
+        "_code": {
+            "_value": 75,
+            "_ver": 1
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

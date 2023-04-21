@@ -1,0 +1,55 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/data-supply-contract/condition",
+        "name": "対象者の範囲条件",
+        "description": "データ提供対象者の範囲条件の定義です。値が範囲内に含まれる個人属性情報を持つ個人を対象者とします。",
+        "_code": {
+            "_value": 79,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "item-type",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": [
+                            "catalog/model/person/item-type",
+                            "catalog/built_in/person/item-type",
+                            "catalog/ext/<ext_name>/person/item-type"
+                        ],
+                        "_code": null,
+                        "base": null
+                    }
+                },
+                "description": "条件となる個人属性情報カタログコード"
+            },
+            {
+                "key": "min",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "最小値"
+            },
+            {
+                "key": "max",
+                "type": {
+                    "of": "number",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "最大値"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

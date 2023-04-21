@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/ext/<ext_name>/attribute/category",
+    "description": "カタログ属性（カテゴリ）を定義するための名前空間です。"
+}

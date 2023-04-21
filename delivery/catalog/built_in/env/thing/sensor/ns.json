@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/env/thing/sensor",
+    "description": "モノに関する環境情報（センサー）を定義するための名前空間です。"
+}

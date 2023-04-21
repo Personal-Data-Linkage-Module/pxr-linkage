@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/ctoken",
+    "description": "CTokenを定義するための名前空間です。"
+}

@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/auth/alliance",
+        "name": "提携申請",
+        "description": "提携の申請操作が可能。",
+        "_code": {
+            "_value": 152,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 76,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "auth-name",
+                "value": "application"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

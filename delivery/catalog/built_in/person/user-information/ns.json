@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/person/user-information",
+    "description": "利用者情報を定義するための名前空間です。"
+}

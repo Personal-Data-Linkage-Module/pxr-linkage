@@ -1,0 +1,64 @@
+{
+	"catalogItem": {
+		"ns": "catalog/ext//block/region-root",
+		"name": "健康見守りサービス運営事業者",
+		"_code": {
+			"_value": "",
+			"_ver": ""
+		},
+		"inherit": {
+			"_value": "",
+			"_ver": ""
+		},
+		"description": {
+			"title": null,
+			"section": [
+				{
+					"title": "健康見守りサービス運営事業者",
+					"content": [
+						{
+							"sentence": "A市データ連携基盤サービス運営事業者"
+						}
+					]
+				}
+			]
+		}
+	},
+	"template": {
+		"value": [
+			{
+				"key": "actor-type",
+				"value": "region-root"
+			},
+			{
+				"key": "assigned-organization",
+				"value": "健康見守りサービス運営事業者"
+			},
+			{
+				"key": "assignment-status",
+				"value": "assigned"
+			},
+			{
+				"key": "base-url",
+				"value": "https://region000001.pxross1.<DNS名>/portal/login"
+			},
+			{
+				"key": "first-login-url",
+				"value": "https://region000001.pxross1.<DNS名>/personal-portal/"
+			},
+			{
+				"key": "id",
+				"value": "region000001"
+			},
+			{
+				"key": "pxr-portal-first-login-url",
+				"value": null
+			},
+			{
+				"key": "service-name",
+				"value": "region000001-service"
+			}
+		]
+	},
+	"attribute": null
+}

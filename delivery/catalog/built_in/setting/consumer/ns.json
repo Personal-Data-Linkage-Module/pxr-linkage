@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/setting/consumer",
+    "description": "流通制御によるデータコンシューマーのグローバル設定を定義するための名前空間です。"
+}

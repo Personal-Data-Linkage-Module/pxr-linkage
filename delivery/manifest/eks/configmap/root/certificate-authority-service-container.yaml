@@ -1,0 +1,1248 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: root-certificate-authority-service-container-config-map
+  namespace: <namespace>
+data:
+  config.json: |
+    {
+      "sessionUrl": "http://localhost:3000/operator/session",
+      "opensslPath": "/usr/bin/openssl",
+      "root": {
+        "privateKeyPath": "./temp/root/private.key",
+        "certPath": "./temp/root/cert.pem",
+        "periodDay": 36500,
+        "subject": {
+          "C": "JP",
+          "ST": "<prefectures>",
+          "L": "<municipalities>",
+          "O": "<organization>",
+          "OU": "PXR",
+          "CN": "*-service"
+        }
+      },
+      "server": {
+        "privateKeyPath": "./temp/server/private.key",
+        "certPath": "./temp/server/cert.pem",
+        "periodDay": 36500,
+        "subject": {
+          "C": "JP",
+          "ST": "<prefectures>",
+          "L": "<municipalities>",
+          "O": "<organization>",
+          "OU": "<unit>",
+          "CN": "*-service"
+        }
+      },
+      "client": {
+        "privateKeyPath": "./temp/client/private.key",
+        "certPath": "./temp/client/cert.pem",
+        "periodDay": 36500,
+        "subject": {
+          "C": "JP",
+          "ST": "<prefectures>",
+          "L": "<municipalities>",
+          "O": "<organization>",
+          "OU": "<unit>",
+          "CN": "*-service"
+        }
+      },
+      "timezone": "Asia/Tokyo"
+    }
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3012
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000  # 同時実行数しきい値
+
+    certificate-chain: ./ssl/chained-client.pem
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストが空です",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "FAILED_TAKE_SESSION": "セッション情報の取得に失敗しました",
+      "FAILED_TAKE_OPERATOR": "オペレーターの取得に失敗しました",
+      "FAILED_CONNECT_TO_OPERATOR": "オペレーターサービスとの接続に失敗しました",
+      "TARGET_NO_DATA": "対象データが見つかりません。",
+      "RESPONSE_FAIL": "%sに失敗しました。",
+      "FAILED_CERTIFICATE_EXPIRED": "証明書の有効期限が切れています",
+      "FAILED_OPENSSL_PRIVATE_KEY": "秘密鍵の生成に失敗しました",
+      "FAILED_OPENSSL_CERTIFICATE": "証明書の生成に失敗しました",
+      "FAILED_OPENSSL_CONVERT": "証明書の値の変換に失敗しました",
+      "FAILED_OPENSSL_CERTIFICATE_REVOKE": "証明書の失効に失敗しました",
+      "IS_STRING_EXPECT": "使用できない制御文字が含まれています",
+      "validation": {
+        "isArray": "配列ではありません %s",
+        "isBoolean": "真偽値ではありません %s",
+        "isBooleanString": "真偽値への変換に失敗しました %s",
+        "isDate": "日付型ではありません %s",
+        "isDateString": "日付型への変換に失敗しました %s",
+        "isEmail": "Emailアドレスではありません %s",
+        "isEmpty": "この値は空である必要があります %s",
+        "isNumber": "数値ではありません %s",
+        "isNumberString": "数値への変換に失敗しました %s",
+        "isNotEmpty": "この値は空を期待しません %s",
+        "isUUID": "UUIDではありません %s",
+        "isString": "文字列ではありません %s",
+        "isObject": "JSONではありません %s",
+        "isJson": "JSONではありません %s",
+        "isUrl": "このフィールドでは必ずURIではなく、ドメイン以降のパスを指定してください %s",
+        "isDefined": "この値は必須値です %s"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "certification-authority",
+        "version": "1.0",
+        "description": "認証局サービス"
+      },
+      "servers": [
+        {
+          "url": "/certification-authority/certification-authority"
+        }
+      ],
+      "paths": {
+        "/root": {
+          "get": {
+            "tags": [
+              "ルート証明書取得"
+            ],
+            "description": "ルート証明書を取得します。",
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "aaa Corporation"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "PXR"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "tags": [
+              "ルート証明書生成"
+            ],
+            "description": "ルート証明書を生成します。",
+            "requestBody": {
+              "content": {
+                "application/json": {}
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "root"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "aaa Corporation"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "PXR"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/server/{serialNo}/{fingerPrint}": {
+          "get": {
+            "tags": [
+              "サーバ証明書取得"
+            ],
+            "description": "サーバ証明書を取得します。",
+            "parameters": [
+              {
+                "name": "serialNo",
+                "description": "シリアル番号",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "70F3C323BDEFDC1BFC9EBAA3CCE7EB257837BB61"
+              },
+              {
+                "name": "fingerPrint",
+                "description": "フィンガープリント",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "85:EF:19:FE:99:97:3A:69:81:F5:28:ED:57:55:22:8A:59:AB:E5:5F"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "server"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "<ext_name>"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "test-unit"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "サーバ証明書失効"
+            ],
+            "description": "サーバ証明書を失効します。",
+            "parameters": [
+              {
+                "name": "serialNo",
+                "description": "シリアル番号",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "70F3C323BDEFDC1BFC9EBAA3CCE7EB257837BB61"
+              },
+              {
+                "name": "fingerPrint",
+                "description": "フィンガープリント",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "85:EF:19:FE:99:97:3A:69:81:F5:28:ED:57:55:22:8A:59:AB:E5:5F"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/server": {
+          "post": {
+            "tags": [
+              "サーバ証明書生成"
+            ],
+            "description": "サーバ証明書を生成します。",
+            "requestBody": {
+              "description": "サーバ証明書",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "サーバ証明書生成のリクエストボディ",
+                    "properties": {
+                      "certType": {
+                        "type": "string",
+                        "description": "証明書タイプ",
+                        "example": "server"
+                      },
+                      "actorName": {
+                        "type": "string",
+                        "description": "アクター名",
+                        "example": "<ext_name>"
+                      },
+                      "actor": {
+                        "type": "object",
+                        "description": "アクターバージョン",
+                        "nullable": true,
+                        "properties": {
+                          "value": {
+                            "type": "integer",
+                            "description": "コード",
+                            "example": 10001
+                          },
+                          "ver": {
+                            "type": "integer",
+                            "description": "バージョン",
+                            "example": 1
+                          }
+                        }
+                      },
+                      "block": {
+                        "type": "object",
+                        "description": "ブロックバージョン",
+                        "nullable": true,
+                        "properties": {
+                          "value": {
+                            "type": "integer",
+                            "description": "コード",
+                            "example": 10002
+                          },
+                          "ver": {
+                            "type": "integer",
+                            "description": "バージョン",
+                            "example": 2
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "server"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "<ext_name>"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "test-unit"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/client/{serialNo}/{fingerPrint}": {
+          "get": {
+            "tags": [
+              "クライアント証明書取得"
+            ],
+            "description": "クライアント証明書を取得します。",
+            "parameters": [
+              {
+                "name": "serialNo",
+                "description": "シリアル番号",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "70F3C323BDEFDC1BFC9EBAA3CCE7EB257837BB61"
+              },
+              {
+                "name": "fingerPrint",
+                "description": "フィンガープリント",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "85:EF:19:FE:99:97:3A:69:81:F5:28:ED:57:55:22:8A:59:AB:E5:5F"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "client"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "<ext_name>"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "test-unit"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "クライアント証明書失効"
+            ],
+            "description": "クライアント証明書を失効します。",
+            "parameters": [
+              {
+                "name": "serialNo",
+                "description": "シリアル番号",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "70F3C323BDEFDC1BFC9EBAA3CCE7EB257837BB61"
+              },
+              {
+                "name": "fingerPrint",
+                "description": "フィンガープリント",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "85:EF:19:FE:99:97:3A:69:81:F5:28:ED:57:55:22:8A:59:AB:E5:5F"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/client": {
+          "post": {
+            "tags": [
+              "クライアント証明書生成"
+            ],
+            "description": "クライアント証明書を生成します。",
+            "requestBody": {
+              "description": "クライアント証明書",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "クライアント証明書生成のリクエストボディ",
+                    "properties": {
+                      "certType": {
+                        "type": "string",
+                        "description": "証明書タイプ",
+                        "example": "client"
+                      },
+                      "actorName": {
+                        "type": "string",
+                        "description": "アクター名",
+                        "example": "<ext_name>"
+                      },
+                      "actor": {
+                        "type": "object",
+                        "description": "アクターバージョン",
+                        "nullable": true,
+                        "properties": {
+                          "value": {
+                            "type": "integer",
+                            "description": "コード",
+                            "example": 10001
+                          },
+                          "ver": {
+                            "type": "integer",
+                            "description": "バージョン",
+                            "example": 1
+                          }
+                        }
+                      },
+                      "block": {
+                        "type": "object",
+                        "description": "ブロックバージョン",
+                        "nullable": true,
+                        "properties": {
+                          "value": {
+                            "type": "integer",
+                            "description": "コード",
+                            "example": 10002
+                          },
+                          "ver": {
+                            "type": "integer",
+                            "description": "バージョン",
+                            "example": 2
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "certType": {
+                          "type": "string",
+                          "example": "client"
+                        },
+                        "subject": {
+                          "type": "object",
+                          "properties": {
+                            "C": {
+                              "type": "string",
+                              "example": "JP"
+                            },
+                            "ST": {
+                              "type": "string",
+                              "example": "Tokyo"
+                            },
+                            "L": {
+                              "type": "string",
+                              "example": "Minato-ku"
+                            },
+                            "O": {
+                              "type": "string",
+                              "example": "<ext_name>"
+                            },
+                            "OU": {
+                              "type": "string",
+                              "example": "test-unit"
+                            },
+                            "CN": {
+                              "type": "string",
+                              "example": "*.---.co.jp"
+                            }
+                          }
+                        },
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "validPeriodStart": {
+                          "type": "string",
+                          "example": "2020-03-26T21:37:02.000+0900"
+                        },
+                        "validPeriodEnd": {
+                          "type": "string",
+                          "example": "2120-03-02T21:37:02.000+0900"
+                        },
+                        "certificate": {
+                          "type": "string",
+                          "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/list": {
+          "get": {
+            "tags": [
+              "証明書一覧取得"
+            ],
+            "description": "証明書一覧を取得します。",
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "description": "証明書一覧",
+                      "items": {
+                        "$ref": "#/components/schemas/listResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/list/{actorCode}": {
+          "get": {
+            "tags": [
+              "証明書一覧取得"
+            ],
+            "description": "証明書一覧を取得します。",
+            "parameters": [
+              {
+                "name": "actorCode",
+                "description": "アクターカタログコード",
+                "in": "path",
+                "schema": {
+                  "type": "number"
+                },
+                "required": true,
+                "example": 1000401
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "description": "証明書一覧",
+                      "items": {
+                        "$ref": "#/components/schemas/listResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/actor/{serialNo}/{fingerPrint}": {
+          "get": {
+            "tags": [
+              "アクター情報取得"
+            ],
+            "description": "アクター情報を取得します。",
+            "parameters": [
+              {
+                "name": "serialNo",
+                "description": "シリアル番号",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "70F3C323BDEFDC1BFC9EBAA3CCE7EB257837BB61"
+              },
+              {
+                "name": "fingerPrint",
+                "description": "フィンガープリント",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true,
+                "example": "85:EF:19:FE:99:97:3A:69:81:F5:28:ED:57:55:22:8A:59:AB:E5:5F"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "actor": {
+                          "type": "object",
+                          "description": "アクターのバージョン管理情報",
+                          "properties": {
+                            "value": {
+                              "type": "integer",
+                              "description": "コード",
+                              "example": 10001
+                            },
+                            "ver": {
+                              "type": "integer",
+                              "description": "バージョン",
+                              "example": 1
+                            }
+                          }
+                        },
+                        "block": {
+                          "type": "object",
+                          "description": "ブロックのバージョン管理情報",
+                          "properties": {
+                            "value": {
+                              "type": "integer",
+                              "description": "コード",
+                              "example": 10002
+                            },
+                            "ver": {
+                              "type": "integer",
+                              "description": "バージョン",
+                              "example": 2
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/distributed": {
+          "post": {
+            "tags": [
+              "証明書配布状況登録"
+            ],
+            "description": "証明書配布状況を登録します。",
+            "requestBody": {
+              "description": "証明書配布状況登録",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "証明書配布状況登録のリクエストボディ",
+                    "properties": {
+                      "serialNo": {
+                        "type": "string",
+                        "description": "シリアル番号",
+                        "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                      },
+                      "fingerPrint": {
+                        "type": "string",
+                        "description": "フィンガープリント",
+                        "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "serialNo": {
+                          "type": "string",
+                          "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                        },
+                        "fingerPrint": {
+                          "type": "string",
+                          "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "distributed"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/valid": {
+          "post": {
+            "tags": [
+              "クライアント証明書有効性検証"
+            ],
+            "description": "クライアント証明書有効性を検証します。",
+            "requestBody": {
+              "description": "クライアント証明書有効性検証",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "クライアント証明書有効性検証のリクエストボディ",
+                    "properties": {
+                      "serialNo": {
+                        "type": "string",
+                        "description": "シリアル番号",
+                        "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+                      },
+                      "fingerPrint": {
+                        "type": "string",
+                        "description": "フィンガープリント",
+                        "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "レスポンス",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "listResponse": {
+            "type": "object",
+            "description": "レスポンス",
+            "properties": {
+              "certType": {
+                "type": "string",
+                "example": "client"
+              },
+              "subject": {
+                "type": "object",
+                "properties": {
+                  "C": {
+                    "type": "string",
+                    "example": "JP"
+                  },
+                  "ST": {
+                    "type": "string",
+                    "example": "Tokyo"
+                  },
+                  "L": {
+                    "type": "string",
+                    "example": "Minato-ku"
+                  },
+                  "O": {
+                    "type": "string",
+                    "example": "<ext_name>"
+                  },
+                  "OU": {
+                    "type": "string",
+                    "example": "test-unit"
+                  },
+                  "CN": {
+                    "type": "string",
+                    "example": "*.---.co.jp"
+                  }
+                }
+              },
+              "serialNo": {
+                "type": "string",
+                "example": "2CF1B929DB73BD43DB8206408D0C3073EC2B419B"
+              },
+              "fingerPrint": {
+                "type": "string",
+                "example": "09:FF:AA:8C:44:B4:90:DB:1A:E4:84:59:3E:93:42:1D:FA:5B:F8:13"
+              },
+              "validPeriodStart": {
+                "type": "string",
+                "example": "2020-03-26T21:37:02.000+0900"
+              },
+              "validPeriodEnd": {
+                "type": "string",
+                "example": "2120-03-02T21:37:02.000+0900"
+              },
+              "certificate": {
+                "type": "string",
+                "example": "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAsDwJjxkOwSWufafRvREUO3MLeyLuOj0pXh2cpw5VNS3hiflv\r\nWl8cMlh5h4pp4lAI4u+ML+7YK8gc7Blk6y6GYDVFrR4KggpOPIi78Z7VeuD6w0Wu\r\n7PS5sclj7g4Lk1PxnS4G0uIOAm+mvUcUrNZFN4it5is3smSG9Mp6YLh+5/VMHT4/\r\nH86aqd3dVgIaTz8kcnbOAGBBjjn1YsZuf7UsbPf3ObOG3+NpE/Rk1b/s3nRkNFdZ\r\nx4K4D+9dujIJfZ6nNn61RL3LqUm6eAt6qDr/1quiNiNLND1rk0X+ojJ/LaHvBMD3\r\nxxSm5IMRMhEbENchcJLAVsnjDuEjhlMa98dnFQIDAQABAoIBAQChHoJuvS3sD5Mz\r\ndhYekFq67zbz4L+Dpx8G2HO7lzL3Z3bnOZBAQuv4a0LQVA7xxNIbB35W5Dnl7RHk\r\nGGNXUDWyB4In/2sD8IAOf8Oz5s6thLo9hJukLykGDWS640RZ8UjXtpiue9TrDUCX\r\nk0Cns02cs+yonaJSCe4IJoUzn/kF/ormTd3AbMNSCS/fGCVEgDE+0Gzfw4eFhVXP\r\nhwuR8rVi8q7sGI5FViG5Gm1D+Ic5/9FEg8iwsjCUpInr8ZlX6vQNerh5jupvc8n2\r\ntjCckcaYlEajhXfxiza5VGyDvA19glDLp/gsrDmdy3EbEbYhrnLJZ/Hq7sxqOKmA\r\nB3d0R/gBAoGBAOnW6Lfq8gkX0Wux2RbYRtCWIwwTQktR8k1Xqa2z+qJZC5Pclz6o\r\ncDL3Ebqr5XsobOZTEffLmutF6PJeUMt9QKTCJy34G2Ua7HldTdwnQIdwFrmx2REQ\r\nxpJr0qs79H91MYA2KE8D7m9kxT/AvtLHs3uqn5U3twBhICVeJIfbEBSVAoGBAMDv\r\nmJdmCZ7a4vT208xcpO9jqRM5ssFwKc1QdliJ+K8A5rkhKK4EZhKectSxFWBAMZbH\r\nj/Gg3mCpdnRP8+HtjJlCj++roGJKWe7EtLwk6xND/sDvkTCFT75sDkc/TrDxeKkg\r\n+D9lY3oO56S9cq5WEwiTF/wGRbLWeeWpxpkCbuiBAoGBAIj2maRv9ogg7Ua5CsB4\r\nuTGfXrPJ7ACV5OgsOnRFgL3qjf9zKxtGKUGQuU+vM2Bpky9s5I9RMFIxxnl/iK9H\r\nk79tAOnJ8rHLjUqgveP/EarCmmz1oICAZO6KPQCSw2iMSgwgrIdrdBLG4UmwKZTn\r\n51a9327VDVkpilyYwajZRJfpAoGBAIDeCC/nybk/PqScUO+JWelDyeS7fzhRMLqg\r\nacvNrDtIANPa4A8LhRoel1iVR0/Y0MaDWRPtfVtXFXWvCZj4UBb2LKnLGv9L5jHj\r\nVUzt484kdn5sBbBA+viXuBnCoU7ymsNs8CN4Fy+p0PNqTrU/bMsnZLfDgL5pH1ZV\r\nRf9hbq8BAoGAD8gHbkY3D87fkgoTRqdNh2+AUc7Y5aBsUkxhLC3o1ltTCZJ4Ly6c\r\n593+wvLvqI1iZUQ5cPXzMOp1mLtsD+K/o2vvJqiIvU6DU4cYfthknPGZ+1bSezVf\r\nSbXO3+G0vXtbDk1RjCs98Od0Q1Nzur0OUDU9+r0faIjrl36WsAvGJEA=\r\n-----END RSA PRIVATE KEY-----\r\n-----BEGIN CERTIFICATE-----\r\nMIIDwTCCAqmgAwIBAgIULPG5KdtzvUPbggZAjQwwc+wrQZswDQYJKoZIhvcNAQEL\r\nBQAwbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlNaW5h\r\ndG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhSMRQw\r\nEgYDVQQDDAsqLnB4ci5jby5qcDAgFw0yMDAzMjYxMjM3MDJaGA8yMTIwMDMwMjEy\r\nMzcwMlowbzELMAkGA1UEBhMCSlAxDjAMBgNVBAgMBVRva3lvMRIwEAYDVQQHDAlN\r\naW5hdG8ta3UxGDAWBgNVBAoMD05FQyBDb3Jwb3JhdGlvbjEMMAoGA1UECwwDUFhS\r\nMRQwEgYDVQQDDAsqLnB4ci5jby5qcDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\nAQoCggEBALA8CY8ZDsElrn2n0b0RFDtzC3si7jo9KV4dnKcOVTUt4Yn5b1pfHDJY\r\neYeKaeJQCOLvjC/u2CvIHOwZZOsuhmA1Ra0eCoIKTjyIu/Ge1Xrg+sNFruz0ubHJ\r\nY+4OC5NT8Z0uBtLiDgJvpr1HFKzWRTeIreYrN7JkhvTKemC4fuf1TB0+Px/Omqnd\r\n3VYCGk8/JHJ2zgBgQY459WLGbn+1LGz39zmzht/jaRP0ZNW/7N50ZDRXWceCuA/v\r\nXboyCX2epzZ+tUS9y6lJungLeqg6/9arojYjSzQ9a5NF/qIyfy2h7wTA98cUpuSD\r\nETIRGxDXIXCSwFbJ4w7hI4ZTGvfHZxUCAwEAAaNTMFEwHQYDVR0OBBYEFH1wO/lR\r\nGxFwgiP20dva7YZysZVDMB8GA1UdIwQYMBaAFH1wO/lRGxFwgiP20dva7YZysZVD\r\nMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBADL0jLXKzstpXMnn\r\nUhlr9AFxaA5n3sArc081n+HfYjY4vZwj5wnLRoy5xeYmHHEQ5lBwMHrS0MbsjMR2\r\njWIKcAhkD5KA6JrGoqqqUx30uToKVkWiwRjxxcMVOAsnBXa4V4Mvyi6sY/OTwic7\r\nIW3H6+UtcEXXpy199Q2GAhBg7Fb23+D8JaiDXG5hccB2J6hP9t8C2fWxKIokp2J4\r\n773pjj9Ke+ibjZ7GeaD4HYMMd30zVHJllRdVV7gpRCoyUKoNwkS722A5ZykUGldL\r\nv0DJpYdnexHNJWm5Bi8rubmeIIETI0VC8oYzYJCj1O3AK0DVkW2HPjpTxjuQZr7p\r\nl28YZGM=\r\n-----END CERTIFICATE-----\r\n"
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_certification_authority",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": false
+    }
+  .env: |
+    DB_SCHEMA=pxr_certification_authority
+    DB_USER=<user_name>
+    DB_PASSWORD=<password>
+    DB_HOST=external-db-service
+    DB_PORT=5432

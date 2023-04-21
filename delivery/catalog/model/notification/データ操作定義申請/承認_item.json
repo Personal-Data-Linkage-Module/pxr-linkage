@@ -1,0 +1,18 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/notification/データ操作定義申請",
+        "name": "承認",
+        "description": "データ操作定義申請の承認の通知カテゴリの定義です。",
+        "_code": {
+            "_value": 200,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

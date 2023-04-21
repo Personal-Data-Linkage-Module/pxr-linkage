@@ -1,0 +1,127 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/person/identification",
+        "name": "顔写真ありの障害者手帳（身体障害者手帳、療育手帳、精神障害者保健福祉手帳）",
+        "description": "本人性確認で利用する顔写真ありの障害者手帳（身体障害者手帳、療育手帳、精神障害者保健福祉手帳）の定義です。",
+        "_code": {
+            "_value": 30008,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 107,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "item-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "氏名"
+                    },
+                    {
+                        "key": "item",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "姓名"
+                            },
+                            {
+                                "key": "type",
+                                "value": [
+                                    {
+                                        "key": "_value",
+                                        "value": 30037
+                                    },
+                                    {
+                                        "key": "_ver",
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content",
+                                "value": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "item-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "生年月日（和暦）"
+                    },
+                    {
+                        "key": "item",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "生年月日（和暦）"
+                            },
+                            {
+                                "key": "type",
+                                "value": [
+                                    {
+                                        "key": "_value",
+                                        "value": 30038
+                                    },
+                                    {
+                                        "key": "_ver",
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content",
+                                "value": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "item-group",
+                "value": [
+                    {
+                        "key": "title",
+                        "value": "住所"
+                    },
+                    {
+                        "key": "item",
+                        "value": [
+                            {
+                                "key": "title",
+                                "value": "住所"
+                            },
+                            {
+                                "key": "type",
+                                "value": [
+                                    {
+                                        "key": "_value",
+                                        "value": 30035
+                                    },
+                                    {
+                                        "key": "_ver",
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "key": "content",
+                                "value": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

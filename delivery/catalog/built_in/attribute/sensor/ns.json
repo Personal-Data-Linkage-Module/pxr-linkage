@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/attribute/sensor",
+    "description": "カタログ属性（センサー）を定義するための名前空間です。"
+}

@@ -1,0 +1,186 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/app/store",
+        "name": "アプリケーションが蓄積可能なデータ",
+        "description": "アプリケーションが蓄積可能なデータ定義です。",
+        "_code": {
+            "_value": 39,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "store",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "Store"
+                },
+                "description": "蓄積定義"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "Store",
+            "description": "蓄積定義",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "id",
+                        "type": {
+                            "of": "string",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "蓄積定義UUID"
+                    },
+                    {
+                        "key": "role",
+                        "type": {
+                            "of": "code[]",
+                            "_code": null,
+                            "candidate": {
+                                "ns": null,
+                                "_code": null,
+                                "base": {
+                                    "_value": 43,
+                                    "_ver": 1
+                                }
+                            }
+                        },
+                        "description": "対象のロール"
+                    },
+                    {
+                        "key": "document",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Document"
+                        },
+                        "description": "蓄積可能なドキュメント"
+                    },
+                    {
+                        "key": "event",
+                        "type": {
+                            "of": "inner[]",
+                            "inner": "Event"
+                        },
+                        "description": "蓄積可能なイベント"
+                    }
+                ]
+            },
+            "inner": [
+                {
+                    "name": "Document",
+                    "description": "蓄積可能なデータ種別",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/document/*",
+                                            "catalog/ext/<ext_name>/document/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "蓄積可能なデータ種別コード"
+                            },
+                            {
+                                "key": "requireConsent",
+                                "type": {
+                                    "of": "boolean"
+                                },
+                                "description": "蓄積同意要求フラグ"
+                            }
+                        ]
+                    },
+                    "inner": null
+                },
+                {
+                    "name": "Event",
+                    "description": "蓄積可能なデータ種別",
+                    "template": {
+                        "inherit": null,
+                        "prop": [
+                            {
+                                "key": "code",
+                                "type": {
+                                    "of": "code",
+                                    "candidate": {
+                                        "ns": [
+                                            "catalog/built_in/event/*",
+                                            "catalog/ext/<ext_name>/event/*"
+                                        ],
+                                        "_code": null,
+                                        "base": null
+                                    }
+                                },
+                                "description": "蓄積可能なデータ種別コード"
+                            },
+                            {
+                                "key": "requireConsent",
+                                "type": {
+                                    "of": "boolean"
+                                },
+                                "description": "蓄積同意要求フラグ"
+                            },
+                            {
+                                "key": "thing",
+                                "type": {
+                                    "of": "inner[]",
+                                    "inner": "EveThing"
+                                },
+                                "description": "蓄積可能なモノ"
+                            }
+                        ]
+                    },
+                    "inner": [
+                        {
+                            "name": "EveThing",
+                            "description": "蓄積可能なデータ種別",
+                            "template": {
+                                "inherit": null,
+                                "prop": [
+                                    {
+                                        "key": "code",
+                                        "type": {
+                                            "of": "code",
+                                            "candidate": {
+                                                "ns": [
+                                                    "catalog/built_in/thing/*",
+                                                    "catalog/ext/<ext_name>/thing/*"
+                                                ],
+                                                "_code": null,
+                                                "base": null
+                                            }
+                                        },
+                                        "description": "蓄積可能なデータ種別コード"
+                                    },
+                                    {
+                                        "key": "requireConsent",
+                                        "type": {
+                                            "of": "boolean"
+                                        },
+                                        "description": "蓄積同意要求フラグ"
+                                    }
+                                ]
+                            },
+                            "inner": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "attribute": null
+}

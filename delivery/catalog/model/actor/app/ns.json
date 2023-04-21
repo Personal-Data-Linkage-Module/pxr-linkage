@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/actor/app",
+    "description": "アプリケーションプロバイダーを定義するための名前空間です。"
+}

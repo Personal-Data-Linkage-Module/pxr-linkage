@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/number_per_unit",
+        "name": "Hz",
+        "description": "Hz（ヘルツ）の単位の定義です。",
+        "_code": {
+            "_value": 20050,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

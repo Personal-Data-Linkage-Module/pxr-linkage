@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/person/item-type",
+        "name": "連絡先電話番号",
+        "description": "個人属性の項目種別（連絡先電話番号）の定義です。",
+        "_code": {
+            "_value": 30036,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 133,
+            "_ver": 1
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "input-pattern",
+                "value": "^0[-0-9]{9,12}$"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

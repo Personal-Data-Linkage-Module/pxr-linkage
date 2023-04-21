@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: root-output-user-data-file-mng-batch-container-config-map
+  namespace: pxross1
+data:
+  config.json: |
+    {
+      "catalogService": {
+        "getCatalogName": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fcatalog%2Fname",
+        "getForNs": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fcatalog%2F%3Fns%3D",
+        "getForCode": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fcatalog%2F{code}%2F{version}",
+        "getCatalog": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fcatalog"
+      },
+      "bookManageService": {
+        "getOutputCondition": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fbook-manage%2Foutput%2Fcondition%3Foffset%3D{offset}%26limit%3D10%26approved%3D1",
+        "postGetMcdOutputCodeDataFile": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fbook-manage%2Foutput%2Fcondition%2Fdata_mng%2Fsearch",
+        "postCreateMcdOutputCodeDataFile": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fbook-manage%2Foutput%2Fcondition%2Fdata_mng%2F",
+        "postGetMcdOutput": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fbook-manage%2Foutput%3Foffset%3D0%26limit%3D10",
+        "postReserveDeletion": "http://root-service/pxr-block-proxy/pxr-block-proxy/?from_path=%2Fpxr-book-manage&block=$pxr-root-block&path=%2Fbook-manage%2Freserve_deletion%2F{id}"
+      },
+      "session": {
+        "loginId": "root_batch",
+        "block": {
+          "_value": 1000401,
+          "_ver": 1
+        },
+        "actor": {
+          "_value": 1000431,
+          "_ver": 1
+        }
+      },
+      "catalog": {
+        "globalSettingNs": "catalog/ext/{extName}/setting/global"
+      },
+      "timezone": "Asia/Tokyo"
+    }
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./efs/root/output-user-data-file-mng-batch/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }

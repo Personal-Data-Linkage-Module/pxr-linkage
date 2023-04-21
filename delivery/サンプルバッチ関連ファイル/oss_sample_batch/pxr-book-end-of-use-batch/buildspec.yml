@@ -1,0 +1,89 @@
+version: 0.2
+
+env:
+  variables:
+    #APP_NAME:            
+    APP_VERSION:          1.0.0
+    IMAGE_TAG: pxrstd
+    EKS_NAME: pxrstd-cluster
+  parameter-store:
+    BLACKDUCK_TOKEN:      "blackduck-token"
+phases:
+  install:
+    runtime-versions:
+       nodejs: 12
+       #docker: 18
+    commands:
+      # install kubectl
+      #- curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/kubectl
+      #- chmod +x ./kubectl  
+  pre_build:
+    commands:
+      ## SonarQube対応
+      # SonarQube CLIのインストール
+      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip
+      - unzip sonar-scanner-cli-4.0.0.1744-linux.zip -d /tmp/.build
+      - export PATH=$PATH:/tmp/.build/sonar-scanner-4.0.0.1744-linux/bin 
+      - keytool -import -file ca.crt -noprompt -keystore /tmp/.build/sonar-scanner-4.0.0.1744-linux/jre/lib/security/cacerts -storepass changeit
+
+      # Node.jsのヒープ領域を拡大
+      - export NODE_OPTIONS="--max-old-space-size=2048"
+      # ロケールをja_JPに設定
+      - echo set locale...
+      - yum install -y glibc-langpack-ja
+      - export LC_ALL="ja_JP.utf8"
+      - echo Start to install necessary components in pre_build phase ...
+      #- npm ci
+      
+  build:
+    commands:
+      - echo Logging in to Amazon ECR/EKS
+      - $(aws ecr get-login --no-include-email --region ${AWS_REGION})
+      - aws eks update-kubeconfig --name ${EKS_NAME}
+      
+      - export PATH=$PATH:/tmp/.build/sonar-scanner-4.0.0.1744-linux/bin 
+      ## SonarQube静的解析
+      # - |
+      #   sonar-scanner \
+      #   -Dsonar.projectKey=pxr-book-end-of-use-batch \
+      #   -Dsonar.login=ac6683f9c627b32a1f540e0a86870fce78eab6fa \
+      #   -Dsonar.host.url=https://ip-172-16-2-173.ap-northeast-1.compute.internal/ip-172-16-2-173/sonar/
+      
+      ## アプリケーションのビルドを実行
+      #- echo Build started on `date` ...
+      #- npm build
+      - BUILD_ID=${CODEBUILD_BUILD_ID} && IFS=':' && set -- ${BUILD_ID} && BUILD_ID=$2
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - echo TAG ${PJ_ID}/${CONTAINER_NAME}-release:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:${IMAGE_TAG}
+      - docker build --build-arg AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} --build-arg AWS_REGION=${AWS_REGION} --build-arg PJ_ID=${PJ_ID} --build-arg APP_VERSION=${APP_VERSION} --build-arg APP_NAME=${APP_NAME} -t ${PJ_ID}/${CONTAINER_NAME}:${BUILD_ID} .
+      - docker tag ${PJ_ID}/${CONTAINER_NAME}:${BUILD_ID} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:${IMAGE_TAG}
+      - docker tag ${PJ_ID}/${CONTAINER_NAME}:${BUILD_ID} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:${IMAGE_TAG}_${BUILD_ID}
+      - docker tag ${PJ_ID}/${CONTAINER_NAME}:${BUILD_ID} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:latest
+  post_build:
+    commands:
+      - echo Build completed on `date` ...
+      - echo Archive Artifact...
+      # 開発用モジュールを除去
+      #- npm prune --production
+      # 実行時に必要なファイルのみをアーカイブ(ソースコード、テストレポートなどを除外)
+      - echo Build completed on `date`
+      - echo Pushing the Docker image... ${CONTAINER_NAME}:${IMAGE_TAG}
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:${IMAGE_TAG}
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:${IMAGE_TAG}_${BUILD_ID}
+      - docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}:latest
+      - aws ecr start-image-scan --repository-name ${PJ_ID}/${CONTAINER_NAME} --image-id imageTag=${IMAGE_TAG}
+
+      - echo Blackduck blackduck.url=${BLACKDUCK_SERVER} blackduck.api.token=${BLACKDUCK_TOKEN} detect.project.name=${BLACKDUCK_PJ_NAME}
+      - mkdir containerimage
+      - docker save -o containerimage/${PJ_ID}_${CONTAINER_NAME}.tar ${PJ_ID}/${CONTAINER_NAME}:${BUILD_ID}
+      - curl -O https://detect.synopsys.com/detect.sh
+      #- bash detect.sh --blackduck.url="${BLACKDUCK_SERVER}" --blackduck.api.token=${BLACKDUCK_TOKEN} --blackduck.trust.cert=true --detect.project.name=${BLACKDUCK_PJ_NAME} --detect.project.version.name=${PJ_ID}_${CONTAINER_NAME}_${IMAGE_TAG} --detect.tools=SIGNATURE_SCAN --detect.source.path="containerimage" --logging.level.com.synopsys.integration=DEBUG
+      #- bash detect.sh --blackduck.url="${BLACKDUCK_SERVER}" --blackduck.api.token=${BLACKDUCK_TOKEN} --blackduck.trust.cert=true --detect.project.name=${BLACKDUCK_PJ_NAME} --detect.project.version.name=${PJ_ID}/${CONTAINER_NAME}-release:${IMAGE_TAG} --detect.tools=DOCKER --detect.docker.image=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${PJ_ID}/${CONTAINER_NAME}-release:${IMAGE_TAG}
+
+      #- mkdir -p release
+      #- tar zcf release/$APP_NAME-$APP_VERSION.tgz . --exclude "./release" --exclude "./coverage" --exclude "./logs" --exclude "./src" --exclude "./.gitignore" --exclude "./.git" --exclude "./.vscode" --exclude "./npm-debug.log*" --exclude "./sonar-project.properties" --exclude "./tsconfig.json" --exclude "./tslint.json" --exclude "./*-xunit.xml" --exclude "./buildspec.yml" --exclude "./Dockerfile" --exclude "./jest.setup.js" --exclude "./jest.unit.config.js" --exclude "./.dockerignore" --exclude "./.eslintrc.json" --exclude "./.scannerwork" --exclude "./ca.crt" --exclude "./sonar-scanner-cli-4.0.0.1744-linux.zip" --exclude "./coverage-unit"
+
+#artifacts:
+#  files:
+#    - release/**/*.tgz

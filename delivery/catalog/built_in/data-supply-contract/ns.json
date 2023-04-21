@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/data-supply-contract",
+    "description": "データ提供契約申込に関するの定義するための名前空間です。"
+}

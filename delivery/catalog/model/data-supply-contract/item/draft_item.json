@@ -1,0 +1,26 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/data-supply-contract/item",
+        "name": "データ提供契約申込下書きフラグ",
+        "description": "データ提供契約申込下書きフラグの定義です。",
+        "_code": {
+            "_value": 195,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "isDraft",
+                "type": {
+                    "of": "boolean"
+                },
+                "description": "下書きフラグ"
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/built_in/unit/counters",
+        "name": "回",
+        "description": "回数の単位の定義です。",
+        "_code": {
+            "_value": 20011,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

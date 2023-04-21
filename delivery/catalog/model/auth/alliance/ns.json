@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/auth/alliance",
+    "description": "操作権（提携）を定義するための名前空間です。"
+}

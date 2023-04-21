@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/built_in/unit/magnetic_flux_density",
+    "description": "磁束密度、磁界強度を定義するための名前空間です。"
+}

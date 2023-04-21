@@ -1,0 +1,21 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/thing/relation",
+        "name": "My-Condition-Bookの管理に関する信託関係",
+        "description": "My-Condition-Bookの管理（蓄積、共有、提供）を他人に信託するための関係性です。",
+        "_code": {
+            "_value": 60,
+            "_ver": 1
+        },
+        "inherit": {
+            "_value": 59,
+            "_ver": 1    
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

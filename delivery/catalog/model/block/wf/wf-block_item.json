@@ -1,0 +1,30 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/block/wf",
+        "name": "WF-Block",
+        "description": "ワークフロープロバイダー用PXR-Blockの定義です。",
+        "_code": {
+            "_value": 35,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 29,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "actor-type",
+                "value": "wf"
+            },
+            {
+                "key": "assignment-status",
+                "value": "unassigned"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

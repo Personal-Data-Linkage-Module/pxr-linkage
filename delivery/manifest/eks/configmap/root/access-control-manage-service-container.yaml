@@ -1,0 +1,961 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: root-access-control-manage-service-container-config-map
+  namespace: <namespace>
+data:
+  config.json: |
+    {
+      "db": {
+        "host": "external-db-service",
+        "port": 5432,
+        "database": "<database_name>",
+        "schema": "pxr_access_manage",
+        "username": "<user_name>",
+        "password": "<password>",
+        "timeout": 60000
+      },
+      "app": {
+        "request-protocol": "http://",
+        "catalog-service": "localhost:3001/catalog/",
+        "permission-path": "/access-control",
+        "permission-path-to-local": "/access-control/access-control",
+        "book-manage-service": "localhost:3005/book-manage/",
+        "permission-port": 3015,
+        "permission-port-to-local": 3015,
+        "pxr-root-block-code": 1000401,
+        "is-pxr-root": false,
+        "deadline": {
+          "value": 40,
+          "unit": "minutes"
+        },
+        "binary-manage": {
+          "upload": "/binary-manage/upload/{fileId}/{chunkNo}",
+          "upload-end": "/binary-manage/upload/end/{fileId}",
+          "upload-cancel": "/binary-manage/upload/cancel/{fileId}"
+        }
+      }
+    }
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3014
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000 # 同時実行数しきい値
+
+    bookManageService:
+      protocol: http
+      first: localhost:3005/book-manage/settings/store/
+      userSearch: http://localhost:3005/book-manage/search/user/
+      getSharingDataDefinition: http://localhost:3005/book-manage/setting/share/
+      collationTemporaryShareCode: http://localhost:3005/book-manage/share/temp/collation
+      getBookInd: http://localhost:3005/book-manage/
+
+    accessControlService:
+      local:
+        protocol: http
+        first: :3015/access-control
+      protocol: https
+      first: /access-control/access-control
+
+    catalogService:
+      get: http://localhost:3001/catalog/
+      extName: <ext_name>
+
+    cTokenLedgerService:
+      getCount: http://localhost:3008/ctoken-ledger/count/
+      getCToken: http://localhost:3008/ctoken-ledger/
+
+    binaryManageService:
+      upload: /binary-manage/upload/{fileId}/{chunkNo}
+      upload-end: /binary-manage/upload/end/{fileId}
+      upload-cancel: /binary-manage/upload/cancel/{fileId}
+
+    operatorService:
+      session: http://localhost:3000/operator/session/
+
+    pxr-root:
+      blockCode: 1000401
+
+    standardTime: 9
+
+    defaultExpire:
+      addMinutes: 40
+
+    permittedCatalogNs:
+      pxr-root:
+        - ^catalog\/ext\/.+\/actor\/pxr-root$
+        - ^catalog\/ext\/.+\/attribute\/?.*$
+        - ^catalog\/ext\/.+\/block\/?.*$
+        - ^catalog\/ext\/.+\/book\/?.*$
+        - ^catalog\/ext\/.+\/category\/?.*$
+        - ^catalog\/ext\/.+\/env\/event\/?.*$
+        - ^catalog\/ext\/.+\/env\/thing\/?.*$
+        - ^catalog\/ext\/.+\/licence\/?.*$
+        - ^catalog\/ext\/.+\/person\/?.*$
+        - ^catalog\/ext\/.+\/processing\/?.*$
+        - ^catalog\/ext\/.+\/qualitative\/qa\/?.*$
+        - ^catalog\/ext\/.+\/setting\/actor\/.+$
+        - ^catalog\/ext\/.+\/setting\/actor-own\/pxr-root\/actor_%s\/?.*$
+        - ^catalog\/ext\/.+\/setting\/global$
+        - ^catalog\/ext\/.+\/thing\/?.*$
+        - ^catalog\/ext\/.+\/event\/?.*$
+        - ^catalog\/ext\/.+\/unit\/?.*$
+        - ^catalog\/ext\/.+\/format\/?.*$
+      region-root:
+        - ^catalog\/ext\/.+\/actor\/region-root$
+        - ^catalog\/ext\/.+\/actor\/region-root\/actor_%s\/.+$
+        - ^catalog\/ext\/.+\/setting\/actor-own\/region-root\/actor_%s\/?.*$
+      app:
+        - ^catalog\/ext\/.+\/actor\/app$
+        - ^catalog\/ext\/.+\/actor\/app\/actor_%s\/.+$
+        - ^catalog\/ext\/.+\/document\/actor_%s\/?.*$
+        - ^catalog\/ext\/.+\/env\/actor_%s\/.+$
+        - ^catalog\/ext\/.+\/event\/actor_%s\/?.*$
+        - ^catalog\/ext\/.+\/qualitative\/actor_%s\/?.*$
+        - ^catalog\/ext\/.+\/setting\/actor-own\/app\/actor_%s\/?.*$
+        - ^catalog\/ext\/.+\/thing\/actor_%s\/?.*$
+
+    cert:
+      client_crt: ./ssl/client.crt
+      client_key: ./ssl/client.key
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストが空です",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "FAILED_TAKE_SESSION": "セッション情報の取得に失敗しました",
+      "FAILED_TAKE_OPERATOR": "オペレーターの取得に失敗しました",
+      "NOT_EXISTS_OPERATOR": "リクエストされたオペレーターは存在しません",
+      "FAILED_CONNECT_TO_OPERATOR": "オペレーターサービスとの接続に失敗しました",
+      "FAILED_CONNECT_TO_DATABASE": "データベースとの接続に失敗しました",
+      "FAILED_CONNECT_TO_LINKAGE_SERVICE": "連携サービスとの接続に失敗しました",
+      "FAILED_SAVE_ENTITY": "データベースへのデータ登録に失敗しました",
+      "NOT_EXISTS_TARGET": "更新対象が存在しません",
+      "NO_OPERATION_AUTHORITY": "対象を操作する権限がありません",
+      "ALREADY_READ": "既読済みです",
+      "ALREADY_APPROVAL_OPERATED": "承認操作が完了しています",
+      "TARGET_IS_EXPIRED": "対象の承認期限が切れています",
+      "TYPE_ERROR": "異常な処理が発生しました",
+      "UNEXPECTED_ARRAY_REQUEST": "配列でのリクエストは期待していません",
+      "UNEXPECTED_STATUS_NUMBER": "ステータス番号としては期待していない数値です",
+      "UNEXPECTED_UNCOMMENT_WITH_UNAPPROVED": "否認操作時にコメントがないことは期待していません",
+      "FAILED_LINKAGE": "連携に失敗しました",
+      "NOT_EXISTS_NOTIFICATION": "リクエスト条件に一致する通知はありません",
+      "UNEXPECTED_OPERATOR_TYPE": "オペレーター種別は期待する数値ではありません",
+      "UNEXPECTED_NOTICE_TYPE": "通知種別は期待する数値ではありません",
+      "UNEXPECTED_DESTINATION_ARE_NOT_EXISTS_FOR_INDIVIDUALLY_SEND": "個別送信の場合、宛先となるオペレーターIDまたは利用者IDが必要です",
+      "UNEXPECTED_IS_BOTH_DESTINATION_ARE_EXISTS": "オペレーターIDと利用者IDを同時に指定することはできません",
+      "UNEXPECTED_NOT_SET_NOTICE_URL_WHEN_APPROVAL_TYPE_REQUEST": "指定された通知URLが、URLのパス表現としては不正です",
+      "IS_NOT_BLOCK_CATALOG": "リクエストされたカタログは、ブロックのものではありません（コード: %s）",
+      "IS_NOT_CATEGORY_CATALOG": "リクエストされたカタログは、カテゴリのものではありません（コード: %s）",
+      "NOT_EXISTS_CATALOG": "リクエストされたカタログは存在しません（コード: %s）",
+      "FAILED_CATALOG_SERVICE": "カタログサービスの内部エラーが発生しました",
+      "FAILED_CONNECT_TO_CATALOG": "カタログサービスとの接続に失敗しました",
+      "METHOD_IS_NOT_ALLOWED": "このメソッドは許可されていません",
+      "OPERATOR_TYPE_IS_NOT_ALLOWED": "このオペレーター種別は許可されていません",
+      "IF_APP_REQUIRED_VALUE_IS_MISSED": "アプリケーションタイプの指定では、APPオブジェクトの指定が必要です",
+      "IF_PERSONAL_VALUE_IS_MISSED": "個人タイプの指定では、ログインIDの指定が必要です",
+      "IF_BLOCK_API_KEY_CREATION_REQUIRED_VALUE": "宛先ブロックの指定が必要です",
+      "IF_APP_REQUIRED_LOGIN_ID": "アプリケーションタイプの指定では、ログインIDの指定が必要です",
+      "IF_OTHER_API_KEY_REQUIRED_VALUE": "利用者IDの指定が必要です",
+      "IF_SHARE_TEMP_API_KEY_REQUIRED_VALUE": "一時的データ共有コードの指定が必要です",
+      "IF_SHARE_POLICY_API_KEY_REQUIRED_VALUE": "本人性確認コードの指定が必要です",
+      "FAILED_CONNECT_SERVICE": "連携サービスとの接続に失敗しました(連携サービス名: %s)",
+      "REQUEST_CODE_IS_NOT_BLOCK": "このコードは、ブロックのものではありません(コード値: %s)",
+      "REQUEST_CODE_IS_NOT_ACTOR": "このコードは、アクターのものではありません(コード値: %s)",
+      "MISSING_TARGET_DATA_TYPE": "データ種コード配列が取得できませんでした",
+      "IS_NOT_EXISTS_DATA_TYPE": "指定されたデータ種はデータ蓄積定義に設定されていません",
+      "RESPONSE_IS_NO_DATE": "指定されたデータの取得を連携サービスへリクエストしましたが、存在しません(連携サービス名: %s)",
+      "SERVICE_IS_UNABLE": "連携サービスの内部エラーにより、処理に失敗しました(連携サービス名: %s)",
+      "REQUEST_OPERATION_NOT_PERMIT": "指定されたAPIとメソッドの組み合わせは、あなたの操作権だと許可されません",
+      "NOT_EXISTS_PERMISSION_OF_PATH": "宛先として指定されたAPIの権限設定がありません",
+      "FAILED_ID_SERVICE_API": "IDサービスでエラーが発生しました",
+      "FAILED_ID_SERVICE_API_WITH_MESSAGE": "IDサービスでエラーが発生しました: ",
+      "FAILED_CONNECT_TO_ID_SERVICE": "IDサービスへの接続に失敗しました",
+      "NOT_EXIST_ACCESS_TOKEN": "アクセストークンが設定されていません",
+      "INVALID_ACCESS_TOKEN": "アクセストークンが不正です",
+      "NOT_EQUAL_ACTOR_SERVICE_CODE": "呼出元アクターコード、APPのコードとリクエストのアクターコード、APPのコードが一致していません",
+      "NOT_EQUAL_USER_ID": "パスパラメーターの利用者IDと蓄積データの個人識別子が一致していません",
+      "NOT_JOIN_REGION": "Regionに参加していないため、このアクセスを拒否します",
+      "INVALID_USER_BOOK": "指定された利用者IDのBookは有効ではありません",
+      "UNSUPPORTED_OPERATOR": "未サポートのオペレータ種別です",
+      "UNSUPPORTED_ACTOR": "未サポートのアクター種別です",
+      "IF_WF_HAS_BEEN_SPECIFIED": "WFオブジェクトが指定されています",
+      "validation": {
+        "isArray": "配列ではありません",
+        "isBoolean": "真偽値ではありません",
+        "isBooleanString": "真偽値への変換に失敗しました",
+        "isDate": "日付型ではありません",
+        "isDateString": "日付型への変換に失敗しました",
+        "isEmail": "Emailアドレスではありません",
+        "isEmpty": "この値は空である必要があります",
+        "isNumber": "数値ではありません",
+        "isNumberString": "数値への変換に失敗しました",
+        "isNotEmpty": "この値は空を期待しません",
+        "isUuid": "UUIDではありません",
+        "isString": "文字列ではありません",
+        "isObject": "JSONではありません",
+        "isDefined": "この値は必須値です",
+        "matches": "document, event, thingのいずれかの値である必要があります",
+        "nestedValidation": "オブジェクトもしくは配列である必要があります",
+        "isNotEmptyObject": "この値はJSONではない、もしくは空であることを期待しません",
+        "length": "設定できる最短・最長の値の長さが異なっています",
+        "isHash": "この値はハッシュである必要があります",
+        "isNotEmptyArray": "空の配列です",
+        "isStringEmptyInArray": "配列の中に、空文字が含まれています"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "Access-Control-Manage Service",
+        "version": "1.0",
+        "description": "アクセス制御管理サービス"
+      },
+      "servers": [
+        {
+          "url": "/access-control-manage/access-control-manage"
+        }
+      ],
+      "paths": {
+        "/block": {
+          "post": {
+            "tags": [
+              "Block間APIトークン生成指示"
+            ],
+            "description": "通信する際に必要なAPIトークンの生成を行う",
+            "requestBody": {
+              "description": "オペレーター情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "description": "リクエストの配列",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "caller": {
+                          "type": "object",
+                          "description": "呼出元",
+                          "properties": {
+                            "blockCode": {
+                              "type": "integer",
+                              "description": "呼出元Blockコード"
+                            },
+                            "apiUrl": {
+                              "type": "string",
+                              "description": "呼出元APIのURL"
+                            },
+                            "apiMethod": {
+                              "type": "string",
+                              "description": "呼出元APIの実行メソッド(GET, POST, PUT, DELETE)"
+                            },
+                            "userId": {
+                              "type": "string",
+                              "description": "呼び出した利用者ID"
+                            },
+                            "operator": {
+                              "type": "object",
+                              "description": "オペレーター情報",
+                              "properties": {
+                                "type": {
+                                  "type": "integer",
+                                  "description": "オペレーター種別"
+                                },
+                                "loginId": {
+                                  "type": "string",
+                                  "description": "ログインID"
+                                },
+                                "app": {
+                                  "type": "object",
+                                  "description": "アプリケーションカタログ情報",
+                                  "properties": {
+                                    "_value": {
+                                      "type": "integer",
+                                      "description": "アプリケーションカタログコード"
+                                    },
+                                    "_ver": {
+                                      "type": "integer",
+                                      "description": "アプリケーションカタログバージョン"
+                                    }
+                                  }
+                                },
+                                "wf": {
+                                  "type": "object",
+                                  "description": "ワークフローカタログ情報",
+                                  "properties": {
+                                    "_value": {
+                                      "type": "integer",
+                                      "description": "ワークフローカタログコード"
+                                    },
+                                    "_ver": {
+                                      "type": "integer",
+                                      "description": "ワークフローカタログバージョン"
+                                    }
+                                  }
+                                },
+                                "role": {
+                                  "type": "array",
+                                  "description": "ロール配列",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "_value": {
+                                        "type": "integer",
+                                        "description": "ロールカタログコード"
+                                      },
+                                      "_ver": {
+                                        "type": "integer",
+                                        "description": "ロールカタログバージョン"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "requestBody": {
+                              "type": "object"
+                            },
+                            "apiCode": {
+                              "type": "string",
+                              "description": "API呼出元が発行したコード値"
+                            }
+                          }
+                        },
+                        "target": {
+                          "type": "object",
+                          "description": "呼出先",
+                          "properties": {
+                            "blockCode": {
+                              "type": "integer",
+                              "description": "呼出元Blockコード"
+                            },
+                            "apiUrl": {
+                              "type": "string",
+                              "description": "呼出元APIのURL"
+                            },
+                            "apiMethod": {
+                              "type": "string",
+                              "description": "呼出元APIの実行メソッド(GET, POST, PUT, DELETE)"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "caller": {
+                        "blockCode": 1000112,
+                        "apiUrl": "/pxr-block-proxy",
+                        "apiMethod": "GET",
+                        "userId": null,
+                        "operator": {
+                          "type": 3,
+                          "loginId": "wf_pj2_2_demo01",
+                          "role": null
+                        },
+                        "requestBody": {},
+                        "apiCode": "2abeba95-faae-4d38-8582-9c89a0954637"
+                      },
+                      "target": {
+                        "blockCode": 1000401,
+                        "apiUrl": "/catalog/1000004",
+                        "apiMethod": "GET"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "アクセス制御管理サービスから取得した、APIトークン",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "description": "APIトークン配列",
+                      "items": {
+                        "type": "object",
+                        "description": "APIトークン情報",
+                        "properties": {
+                          "apiUrl": {
+                            "type": "string",
+                            "description": "宛先API URL"
+                          },
+                          "apiMethod": {
+                            "type": "string",
+                            "description": "APIメソッド名"
+                          },
+                          "apiToken": {
+                            "type": "string",
+                            "description": "発行されたAPIトークン"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "description": "利用者ID"
+                          },
+                          "expirationAt": {
+                            "type": "string",
+                            "description": "有効期限",
+                            "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                          }
+                        }
+                      }
+                    },
+                    "example": [
+                      {
+                        "apiUrl": "/catalog/1000004",
+                        "apiMethod": "GET",
+                        "apiToken": "2abeba95-faae-4d38-8582-9c89a0954637",
+                        "userId": null,
+                        "expirationAt": "2020-01-01T00:00:00.000+0900"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/share/continuous": {},
+        "/share/temp": {},
+        "/store": {
+          "post": {
+            "tags": [
+              "データ蓄積APIトークン生成指示"
+            ],
+            "description": "データ蓄積をする際に必要なAPIトークンの生成を行う",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "requestBody": {
+              "description": "リクエスト内容のオブジェクト配列",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "description": "リクエスト",
+                    "items": {
+                      "$ref": "#/components/schemas/requestTemplate"
+                    }
+                  },
+                  "example": [
+                    {
+                      "caller": {
+                        "apiCode": "XXXXXXXX-1234-5678-9012-XXXXXXXXXXXX",
+                        "blockCode": 4444444,
+                        "apiUrl": "/book-operate/event/{userId}",
+                        "apiMethod": "POST",
+                        "userId": "xxx_yyy",
+                        "operator": {
+                          "type": 2,
+                          "loginId": "app01",
+                          "app": {
+                            "_value": 1000099,
+                            "_ver": 1
+                          }
+                        }
+                      },
+                      "target": {
+                        "blockCode": 4444444,
+                        "apiUrl": "/book-operate/event/{userId}",
+                        "apiMethod": "POST",
+                        "_code": [
+                          {
+                            "_value": 1000009,
+                            "_ver": 1
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "データ蓄積APIトークン生成指示のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "description": "レスポンス",
+                      "items": {
+                        "$ref": "#/components/schemas/responseTemplate"
+                      }
+                    },
+                    "example": [
+                      {
+                        "apiUrl": "https://~~~/book-operate/store/event/{userId}",
+                        "apiMethod": "POST",
+                        "apiToken": "d0af96799512cf7e4b9ebda5234a7cc8ea49d402d29191b5e9128e15a9399171",
+                        "userId": "xxx_yyy.app",
+                        "expirationDate": "2020-01-01 23:59:59.000"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "requestTemplate": {
+            "type": "object",
+            "properties": {
+              "caller": {
+                "type": "object",
+                "description": "呼出元",
+                "properties": {
+                  "apiCode": {
+                    "type": "string",
+                    "description": "API呼出元が発行したコード値",
+                    "format": "UUID(XXXXXXXX-4444-4444-4444-XXXXXXXXXXXX)"
+                  },
+                  "blockCode": {
+                    "type": "integer",
+                    "description": "呼出元Blockコード"
+                  },
+                  "apiUrl": {
+                    "type": "string",
+                    "description": "呼出元APIのURL",
+                    "format": "URL"
+                  },
+                  "apiMethod": {
+                    "type": "string",
+                    "description": "呼出元APIの実行メソッド",
+                    "required": [
+                      "POST",
+                      "PUT",
+                      "GET",
+                      "DELETE"
+                    ]
+                  },
+                  "userId": {
+                    "type": "string",
+                    "description": "呼び出した利用者ID"
+                  },
+                  "operator": {
+                    "type": "object",
+                    "description": "オペレーター情報",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "オペレーター種別",
+                        "required": [
+                          "0",
+                          "1",
+                          "2",
+                          "3"
+                        ]
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "app": {
+                        "type": "object",
+                        "description": "アプリケーションカタログ情報",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "アプリケーションカタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "アプリケーションカタログバージョン"
+                          }
+                        }
+                      },
+                      "wf": {
+                        "type": "object",
+                        "description": "ワークフローカタログ情報",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "ワークフローカタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "ワークフローカタログバージョン"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "target": {
+                "type": "object",
+                "description": "呼出先",
+                "properties": {
+                  "blockCode": {
+                    "type": "integer",
+                    "description": "呼出先Blockコード"
+                  },
+                  "apiUrl": {
+                    "type": "string",
+                    "description": "呼出先PIのURL",
+                    "format": "URL"
+                  },
+                  "apiMethod": {
+                    "type": "string",
+                    "description": "呼出先APIの実行メソッド",
+                    "required": [
+                      "POST",
+                      "PUT",
+                      "GET",
+                      "DELETE"
+                    ]
+                  },
+                  "_code": {
+                    "type": "array",
+                    "description": "データ種カタログコード配列",
+                    "items": {
+                      "type": "object",
+                      "description": "モノカタログコード",
+                      "properties": {
+                        "_value": {
+                          "type": "integer",
+                          "description": "カタログコード"
+                        },
+                        "_ver": {
+                          "type": "integer",
+                          "description": "カタログバージョン"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responseTemplate": {
+            "type": "object",
+            "properties": {
+              "apiUrl": {
+                "type": "string",
+                "description": "呼出元APIのURL",
+                "format": "URL"
+              },
+              "apiMethod": {
+                "type": "string",
+                "description": "呼出元APIの実行メソッド",
+                "required": [
+                  "POST",
+                  "PUT",
+                  "GET",
+                  "DELETE"
+                ]
+              },
+              "apiToken": {
+                "type": "string",
+                "description": "発行されたAPIトークン"
+              },
+              "userId": {
+                "type": "string",
+                "description": "呼び出した利用者ID"
+              },
+              "expirationDate": {
+                "type": "string",
+                "description": "有効期限"
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_access_manage",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": false
+    }
+  permission.json: |
+    {
+      "GET": {
+        "^\\/identity-verificate\\/acquisition\\/identification\\/.+\\/?$": [
+          "create"
+        ]
+      },
+      "POST": {
+        "^\\/operator\\/?$": [
+          "add"
+        ],
+        "^\\/book-manage\\/?$": [
+          "create"
+        ],
+        "^\\/book-manage\\/login-code\\/?$": [
+          "create"
+        ],
+        "^\\/book-manage\\/search\\/?$": [
+          "create"
+        ],
+        "^\\/book-manage\\/sms\\/open\\/?$": [
+          "create"
+        ],
+        "^\\/identity-verificate\\/user\\/settings\\/?$": [
+          "create"
+        ],
+        "^\\/book-operate\\/user\\/?$": [
+          "create"
+        ],
+        "^\\/book-operate\\/user\\/delete\\/?$": [
+          "create"
+        ],
+        "^\\/catalog-update\\/actor\\/?$": [
+          "application"
+        ],
+        "^\\/catalog-update\\/actor\\/approval\\/?.+\\/?$": [
+          "approval"
+        ],
+        "^\\/catalog-update\\/join\\/?$": [
+          "application"
+        ],
+        "^\\/catalog-update\\/join\\/approval\\/.+\\/?$": [
+          "approval"
+        ],
+        "^\\/catalog\\/(model|built_in|ext)\\/?$": [
+          "create",
+          "update"
+        ],
+        "^\\/catalog\\/updateSet\\/register\\/?$": [
+          "create",
+          "update"
+        ]
+      },
+      "PUT": {
+        "^\\/operator\\/\\d+\\/?$": [
+          "update"
+        ],
+        "^\\/operator\\/password\\/\\d+\\/?$": [
+          "add"
+        ],
+        "^\\/catalog\\/(model|built_in|ext)\\/\\d+\\/?$": [
+          "create"
+        ],
+        "^\\/catalog\\/updateSet\\/register\\/\\d+\\/?$": [
+          "create",
+          "update"
+        ],
+        "^\\/book-manage\\/force-deletion\\/?$": [
+          "create"
+        ],
+        "^\\/book-manage\\/force-enable\\/?$": [
+          "create"
+        ],
+        "^\\/identity-verificate\\/verify\\/others\\/.+\\/?$": [
+          "create"
+        ]
+      },
+      "DELETE": {
+        "^\\/operator\\/\\d+\\/?$": [
+          "delete"
+        ],
+        "^\\/catalog\\/(model|built_in|ext)\\/\\d+\\/?$": [
+          "create"
+        ]
+      }
+    }
+  allow-access.json: |
+    {
+      "self": {
+          "GET": {
+              "3": [
+                  "^\\/operator\\/?\\?.+\\/?$",
+                  "^\\/operator\\/\\d+\\/?$",
+                  "^\\/operator\\/user\\/info\\/?\\?.+\\/?$",
+                  "^\\/notification\\/?\\?.+\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "POST": {
+              "3": [
+                  "^\\/operator\\/?$",
+                  "^\\/operator\\/session\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "PUT": {
+              "3": [
+                  "^\\/operator\\/\\d+\\/?$",
+                  "^\\/operator\\/password\\/\\d+\\/?$",
+                  "^\\/notification\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "DELETE": {
+              "3": [
+                  "^\\/operator\\/\\d+\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          }
+      },
+      "pxr-root": {
+          "GET": {
+              "3": [
+                  "^\\/catalog\\/name\\/?$",
+                  "^\\/catalog\\/?\\?.+\\/?$",
+                  "^\\/catalog\\/\\d+\\/?$",
+                  "^\\/catalog\\/\\d+\\/\\d+\\/?$",
+                  "^\\/catalog\\/inner\\/\\d+\\/.+\\/?$",
+                  "^\\/catalog\\/inner\\/\\d+\\/\\d+\\/.+\\/?$",
+                  "^\\/catalog\\/ns\\/?\\?.+\\/?$",
+                  "^\\/catalog\\/ns\\/\\d+\\/?$",
+                  "^\\/catalog-update\\/actor\\/?\\?.+\\/?$",
+                  "^\\/catalog-update\\/actor\\/accreditor\\/?\\?.+\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "POST": {
+              "3": [
+                  "^\\/catalog-update\\/actor\\/?$"
+              ],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "PUT": {
+              "3": [],
+              "2": [],
+              "1": [],
+              "0": []
+          },
+          "DELETE": {
+              "3": [],
+              "2": [],
+              "1": [],
+              "0": []
+          }
+      }
+    }
+  default-raw.crt: |
+    <your_crt_file_without_header_and_footer>

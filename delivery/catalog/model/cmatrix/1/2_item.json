@@ -1,0 +1,35 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/cmatrix/2",
+        "name": "生年月日列",
+        "description": "CMatrixの生年月日列の定義です。",
+        "_code": {
+            "_value": 12,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "@value",
+                "type": {
+                    "of": "string",
+                    "cmatrix": {
+                        "index": "1_2",
+                        "reserved": true
+                    },
+                    "format": {
+                        "_value": 5,
+                        "_ver": 1
+                    },
+                    "unit": null,
+                    "candidate": null
+                }
+            }
+        ],
+        "value": null
+    },
+    "inner": null,
+    "attribute": null
+}

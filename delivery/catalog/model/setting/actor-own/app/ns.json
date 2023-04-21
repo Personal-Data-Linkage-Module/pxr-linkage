@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/setting/actor-own/app",
+    "description": "アプリケーションプロバイダーによるアクター個別設定を定義するための名前空間です。"
+}

@@ -1,0 +1,146 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/region-root/region",
+        "name": "Region",
+        "description": "Regionの定義です。",
+        "_code": {
+            "_value": 48,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "statement",
+                "type": {
+                    "of": "item[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": [
+                            {
+                                "_value": 61,
+                                "_ver": 1
+                            }
+                        ],
+                        "base": null
+                    }
+                },
+                "description": "Regionステートメント"
+            },
+            {
+                "key": "app-alliance",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 41,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "Regionメンバー(アプリケーション)のコード配列"
+            },
+            {
+                "key": "wf-alliance",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 46,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "Regionメンバー(ワークフロー)のコード配列"
+            },
+            {
+                "key": "required_app",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 41,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "必須アプリケーションのコード配列"
+            },
+            {
+                "key": "required_wf",
+                "type": {
+                    "of": "code[]",
+                    "_code": null,
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 46,
+                            "_ver": 1
+                        }
+                    }
+                },
+                "description": "必須ワークフローのコード配列"
+            },
+            {
+                "key": "information-site",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "Regionの情報サイト"
+            },
+            {
+                "key": "terms-of-use",
+                "type": {
+                    "of": "code",
+                    "candidate": {
+                        "ns": null,
+                        "_code": null,
+                        "base": {
+                            "_value": 204,
+                            "_ver": null
+                        }
+                    }
+                },
+                "description": "Region利用規約のカタログコード"
+            },
+            {
+                "key": "status",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": {
+                        "value": [
+                            "open",
+                            "close"
+                        ]
+                    }
+                },
+                "description": "サービス運用ステータス"
+            }
+        ],
+        "value": [
+            {
+                "key": "status",
+                "value": "close"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,30 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/block/region-root",
+        "name": "Region-Root-Block",
+        "description": "領域運営サービスプロバイダー用PXR-Blockの定義です。",
+        "_code": {
+            "_value": 34,
+            "_ver": null
+        },
+        "inherit": {
+            "_value": 29,
+            "_ver": null
+        }
+    },
+    "template": {
+        "prop": null,
+        "value": [
+            {
+                "key": "actor-type",
+                "value": "region-root"
+            },
+            {
+                "key": "assignment-status",
+                "value": "unassigned"
+            }
+        ]
+    },
+    "inner": null,
+    "attribute": null
+}

@@ -1,0 +1,60 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/app/share/notification",
+        "name": "蓄積イベント通知",
+        "description": "アプリケーションの状態共有機能に関する蓄積イベント通知の定義です。",
+        "_code": {
+            "_value": 211,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "notification",
+                "type": {
+                    "of": "inner[]",
+                    "inner": "Notification"
+                },
+                "description": "蓄積イベント通知"
+            }
+        ],
+        "value": null
+    },
+    "inner": [
+        {
+            "name": "Notification",
+            "description": "蓄積イベント通知",
+            "template": {
+                "inherit": null,
+                "prop": [
+                    {
+                        "key": "share",
+                        "type": {
+                            "of": "code",
+                            "candidate": {
+                                "ns": null,
+                                "_code": null,
+                                "base": null
+                            }
+                        },
+                        "description": "状態共有機能コード"
+                    },
+                    {
+                        "key": "id",
+                        "type": {
+                            "of": "string[]",
+                            "format": null,
+                            "unit": null,
+                            "candidate": null
+                        },
+                        "description": "状態共有機能UUID配列"
+                    }
+                ]
+            },
+            "inner": null
+        }
+    ],
+    "attribute": null
+}

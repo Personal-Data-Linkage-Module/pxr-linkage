@@ -1,0 +1,15 @@
+{
+    "catalogItem": {
+        "ns": "catalog/ext/<ext_name>/person/item-type",
+        "name": "住所（行政区）",
+        "description": "個人属性の項目種別（住所（行政区））の定義です。",
+        "_code": {
+            "_value": <person_item_type_address_code>,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": null,
+    "inner": null,
+    "attribute": null
+}

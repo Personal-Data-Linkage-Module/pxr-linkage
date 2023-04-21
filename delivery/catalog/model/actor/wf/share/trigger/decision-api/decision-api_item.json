@@ -1,0 +1,43 @@
+{
+    "catalogItem": {
+        "ns": "catalog/model/actor/wf/share/trigger/decision-api",
+        "name": "共有トリガー判定API定義",
+        "description": "ワークフローの状態共有機能に関する共有トリガーの判定APIの定義です。",
+        "_code": {
+            "_value": 217,
+            "_ver": null
+        },
+        "inherit": null
+    },
+    "template": {
+        "prop": [
+            {
+                "key": "type",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": {
+                        "value": [
+                            "start",
+                            "end"
+                        ]
+                    }
+                },
+                "description": "判定API種別"
+            },
+            {
+                "key": "url",
+                "type": {
+                    "of": "string",
+                    "format": null,
+                    "unit": null,
+                    "candidate": null
+                },
+                "description": "判定APIのLambdaのURL"
+            }
+        ],
+        "value": null
+    },
+    "inner": null
+}

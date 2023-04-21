@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: region000001-region-end-of-use-batch
+  namespace: pxross1
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 2
+  schedule: "5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: region-end-of-use-batch
+            image: ＜ECRのDNS名＞/pxross1:region-end-of-use-batch-container
+            imagePullPolicy: IfNotPresent
+            command: ["node", "/usr/src/app/regionEndOfUse.js"]
+            volumeMounts:
+            - mountPath: /usr/src/app/config
+              readOnly: true
+              name: region-end-of-use-batch-config
+          restartPolicy: OnFailure
+          volumes:
+          - name: region-end-of-use-batch-config
+            configMap:
+              name: region000001-region-end-of-use-batch-container-config-map
