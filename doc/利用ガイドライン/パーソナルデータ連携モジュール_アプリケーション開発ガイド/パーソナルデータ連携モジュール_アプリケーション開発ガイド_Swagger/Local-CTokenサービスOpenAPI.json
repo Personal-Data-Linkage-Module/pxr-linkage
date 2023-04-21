@@ -1,0 +1,856 @@
+# Copyright(c) NEC Corporation 2022. All rights reserved.
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Local-CTokenサービス",
+        "version": "1.0",
+        "description": "Local CTokenをCToken台帳へ連携します。"
+    },
+    "servers": [
+        {
+            "url": "/local-ctoken"
+        }
+    ],
+    "paths": {
+        "/": {
+            "post": {
+                "tags": [
+                    "CToken登録"
+                ],
+                "summary": "CToken登録",
+                "description": "ローカルで生成されたCTokenを登録します。",
+                "requestBody": {
+                    "description": "登録するCToken",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "description": "CToken追加のリクエストボディ",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "add": {
+                                            "type": "object",
+                                            "properties": {
+                                                "1_1": {
+                                                    "type": "string",
+                                                    "description": "利用者ID"
+                                                },
+                                                "document": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "_1_1": {
+                                                                "type": "string",
+                                                                "description": "ドキュメント識別子"
+                                                            },
+                                                            "_1_2_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメントカタログコード"
+                                                            },
+                                                            "_1_2_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメントカタログバージョン"
+                                                            },
+                                                            "_2_1": {
+                                                                "type": "string",
+                                                                "description": "ドキュメント作成時間"
+                                                            },
+                                                            "_3_1_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アクターカタログバージョン"
+                                                            },
+                                                            "_3_1_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アクターカタログバージョン"
+                                                            },
+                                                            "_3_2_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                            },
+                                                            "_3_2_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                            },
+                                                            "_3_5_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "_3_5_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "event": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "3_1_1": {
+                                                            "type": "string",
+                                                            "description": "イベント識別子"
+                                                        },
+                                                        "3_1_2_1": {
+                                                            "type": "number",
+                                                            "description": "イベントカタログコード"
+                                                        },
+                                                        "3_1_2_2": {
+                                                            "type": "number",
+                                                            "description": "イベントカタログバージョン"
+                                                        },
+                                                        "3_2_1": {
+                                                            "type": "string",
+                                                            "description": "イベント開始時間"
+                                                        },
+                                                        "3_2_2": {
+                                                            "type": "string",
+                                                            "description": "イベント終了時間"
+                                                        },
+                                                        "3_5_1_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アクターカタログバージョン"
+                                                        },
+                                                        "3_5_1_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アクターカタログバージョン"
+                                                        },
+                                                        "3_5_2_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録ワークフローカタログバージョン"
+                                                        },
+                                                        "3_5_2_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録ワークフローカタログバージョン"
+                                                        },
+                                                        "3_5_5_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アプリケーションカタログバージョン"
+                                                        },
+                                                        "3_5_5_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アプリケーションカタログバージョン"
+                                                        }
+                                                    }
+                                                },
+                                                "thing": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "4_1_1": {
+                                                                "type": "string",
+                                                                "description": "モノ識別子"
+                                                            },
+                                                            "4_1_2_1": {
+                                                                "type": "number",
+                                                                "description": "モノカタログコード"
+                                                            },
+                                                            "4_1_2_2": {
+                                                                "type": "number",
+                                                                "description": "モノカタログバージョン"
+                                                            },
+                                                            "4_4_1_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アクターカタログバージョン"
+                                                            },
+                                                            "4_4_1_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アクターカタログバージョン"
+                                                            },
+                                                            "4_4_2_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録ワークフローカタログバージョン"
+                                                            },
+                                                            "4_4_2_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録ワークフローカタログバージョン"
+                                                            },
+                                                            "4_4_5_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "4_4_5_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "rowHash": {
+                                                                "type": "string",
+                                                                "description": "行ハッシュ"
+                                                            },
+                                                            "rowHashCreateAt": {
+                                                                "type": "string",
+                                                                "description": "行ハッシュ作成時間"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "update": {
+                                            "type": "object",
+                                            "properties": {
+                                                "1_1": {
+                                                    "type": "string",
+                                                    "description": "利用者ID"
+                                                },
+                                                "document": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "_1_1": {
+                                                                "type": "string",
+                                                                "description": "ドキュメント識別子"
+                                                            },
+                                                            "_1_2_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメントカタログコード"
+                                                            },
+                                                            "_1_2_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメントカタログバージョン"
+                                                            },
+                                                            "_2_1": {
+                                                                "type": "string",
+                                                                "description": "ドキュメント作成時間"
+                                                            },
+                                                            "_3_1_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アクターカタログバージョン"
+                                                            },
+                                                            "_3_1_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アクターカタログバージョン"
+                                                            },
+                                                            "_3_2_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                            },
+                                                            "_3_2_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録ワークフローカタログバージョン"
+                                                            },
+                                                            "_3_5_1": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "_3_5_2": {
+                                                                "type": "number",
+                                                                "description": "ドキュメント登録アプリケーションカタログバージョン"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "event": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "3_1_1": {
+                                                            "type": "string",
+                                                            "description": "イベント識別子"
+                                                        },
+                                                        "3_1_2_1": {
+                                                            "type": "number",
+                                                            "description": "イベントカタログコード"
+                                                        },
+                                                        "3_1_2_2": {
+                                                            "type": "number",
+                                                            "description": "イベントカタログバージョン"
+                                                        },
+                                                        "3_2_1": {
+                                                            "type": "string",
+                                                            "description": "イベント開始時間"
+                                                        },
+                                                        "3_2_2": {
+                                                            "type": "string",
+                                                            "description": "イベント終了時間"
+                                                        },
+                                                        "3_5_1_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アクターカタログバージョン"
+                                                        },
+                                                        "3_5_1_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アクターカタログバージョン"
+                                                        },
+                                                        "3_5_2_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録ワークフローカタログバージョン"
+                                                        },
+                                                        "3_5_2_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録ワークフローカタログバージョン"
+                                                        },
+                                                        "3_5_5_1": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アプリケーションカタログバージョン"
+                                                        },
+                                                        "3_5_5_2": {
+                                                            "type": "number",
+                                                            "description": "イベント登録アプリケーションカタログバージョン"
+                                                        }
+                                                    }
+                                                },
+                                                "thing": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "4_1_1": {
+                                                                "type": "string",
+                                                                "description": "モノ識別子"
+                                                            },
+                                                            "4_1_2_1": {
+                                                                "type": "number",
+                                                                "description": "モノカタログコード"
+                                                            },
+                                                            "4_1_2_2": {
+                                                                "type": "number",
+                                                                "description": "モノカタログバージョン"
+                                                            },
+                                                            "4_4_1_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アクターカタログバージョン"
+                                                            },
+                                                            "4_4_1_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アクターカタログバージョン"
+                                                            },
+                                                            "4_4_2_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録ワークフローカタログバージョン"
+                                                            },
+                                                            "4_4_2_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録ワークフローカタログバージョン"
+                                                            },
+                                                            "4_4_5_1": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "4_4_5_2": {
+                                                                "type": "number",
+                                                                "description": "モノ登録アプリケーションカタログバージョン"
+                                                            },
+                                                            "rowHash": {
+                                                                "type": "string",
+                                                                "description": "行ハッシュ"
+                                                            },
+                                                            "rowHashCreateAt": {
+                                                                "type": "string",
+                                                                "description": "行ハッシュ作成時間"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "delete": {
+                                            "type": "object",
+                                            "properties": {
+                                                "1_1": {
+                                                    "type": "string",
+                                                    "description": "利用者ID"
+                                                },
+                                                "document": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "2_n_1_1": {
+                                                                "type": "string",
+                                                                "description": "ドキュメント識別子"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "event": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "3_1_1": {
+                                                            "type": "string",
+                                                            "description": "イベント識別子"
+                                                        }
+                                                    }
+                                                },
+                                                "thing": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "4_1_1": {
+                                                                "type": "string",
+                                                                "description": "モノ識別子"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "add": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                                "2_n_1_2_1": 1099999,
+                                                "2_n_1_2_2": 1,
+                                                "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                                                "2_n_3_1_1": 1000004,
+                                                "2_n_3_1_2": 1,
+                                                "2_n_3_2_1": 1000007,
+                                                "2_n_3_2_2": 1,
+                                                "2_n_3_5_1": null,
+                                                "2_n_3_5_2": null
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                            "3_1_2_1": 1000008,
+                                            "3_1_2_2": 1,
+                                            "3_2_1": "2020-07-01T00:00:00.000+0900",
+                                            "3_2_2": "2020-07-01T00:00:00.000+0900",
+                                            "3_5_1_1": 1000004,
+                                            "3_5_1_2": 1,
+                                            "3_5_2_1": 1000007,
+                                            "3_5_2_2": 1,
+                                            "3_5_5_1": null,
+                                            "3_5_5_2": null
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                                "4_1_2_1": 1000011,
+                                                "4_1_2_2": 1,
+                                                "4_4_1_1": 1000004,
+                                                "4_4_1_2": 1,
+                                                "4_4_2_1": 1000007,
+                                                "4_4_2_2": 1,
+                                                "4_4_5_1": null,
+                                                "4_4_5_2": null,
+                                                "rowHash": "rowHash...",
+                                                "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "update": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                                "2_n_1_2_1": 1099999,
+                                                "2_n_1_2_2": 1,
+                                                "2_n_2_1": "2020-07-01T00:00:00.000+0900",
+                                                "2_n_3_1_1": 1000004,
+                                                "2_n_3_1_2": 1,
+                                                "2_n_3_2_1": 1000007,
+                                                "2_n_3_2_2": 1,
+                                                "2_n_3_5_1": null,
+                                                "2_n_3_5_2": null
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                            "3_1_2_1": 1000008,
+                                            "3_1_2_2": 1,
+                                            "3_2_1": "2020-07-01T00:00:00.000+0900",
+                                            "3_2_2": "2020-07-01T00:00:00.000+0900",
+                                            "3_5_1_1": 1000004,
+                                            "3_5_1_2": 1,
+                                            "3_5_2_1": 1000007,
+                                            "3_5_2_2": 1,
+                                            "3_5_5_1": null,
+                                            "3_5_5_2": null
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu",
+                                                "4_1_2_1": 1000011,
+                                                "4_1_2_2": 1,
+                                                "4_4_1_1": 1000004,
+                                                "4_4_1_2": 1,
+                                                "4_4_2_1": 1000007,
+                                                "4_4_2_2": 1,
+                                                "4_4_5_1": null,
+                                                "4_4_5_2": null,
+                                                "rowHash": "rowHash...",
+                                                "rowHashCreateAt": "2020-07-01T00:00:00.000+0900"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "delete": [
+                                    {
+                                        "1_1": "test.user.id",
+                                        "document": [
+                                            {
+                                                "2_n_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                                            }
+                                        ],
+                                        "event": {
+                                            "3_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                                        },
+                                        "thing": [
+                                            {
+                                                "4_1_1": "uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "CToken登録に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "CToken登録のレスポンスボディ",
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "description": "結果"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "result": "success"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "リクエストボディが配列です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが配列であることを許容しません"
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "空不可プロパティが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は空を期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ledger": {
+            "post": {
+                "tags": [
+                    "CToken台帳連携"
+                ],
+                "summary": "CToken台帳連携",
+                "description": "Local-CMatrix差分を取得してLocal-CToken-Storeを更新し、CToken台帳へLocal-CToken差分を連携します。",
+                "requestBody": {
+                    "description": "登録するCToken",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "CToken追加のリクエストボディ",
+                                "properties": {
+                                    "offset": {
+                                        "type": "integer",
+                                        "description": "開始位置"
+                                    },
+                                    "count": {
+                                        "type": "integer",
+                                        "description": "対象件数"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "offset": 0,
+                                "count": 1000
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "取得に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "CToken登録のレスポンスボディ",
+                                    "properties": {
+                                        "result": {
+                                            "type": "string",
+                                            "description": "結果"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "result": "success"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストボディが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "リクエストボディが配列です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストボディが配列であることを許容しません"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "sha256ハッシュ指定プロパティがsha256ハッシュではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "この値はハッシュである必要があります"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "ObjectプロパティがObjectではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "この値はJSONではない、もしくは空であることを期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "配列指定プロパティが配列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "配列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "空不可プロパティが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は空を期待しません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ledger/count": {
+            "get": {
+                "tags": [
+                    "CToken台帳連携"
+                ],
+                "summary": "CToken台帳連携対象件数",
+                "description": "Local-CMatrix差分を取得してLocal-CToken-Storeを更新し、CToken台帳へLocal-CToken差分を連携します。",
+                "responses": {
+                    "200": {
+                        "description": "取得に成功した際のレスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "CToken登録のレスポンスボディ",
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer",
+                                            "description": "対象件数"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "count": 1000
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

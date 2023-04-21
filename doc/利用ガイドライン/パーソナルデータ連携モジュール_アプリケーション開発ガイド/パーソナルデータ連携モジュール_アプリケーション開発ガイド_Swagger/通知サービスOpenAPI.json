@@ -1,0 +1,1402 @@
+# Copyright(c) NEC Corporation 2022. All rights reserved.
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "通知サービス",
+        "version": "1.0",
+        "description": "オペレーターへ通知や承認欲求を行います。"
+    },
+    "servers": [
+        {
+            "url": "/notification"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": [
+                    "通知取得"
+                ],
+                "summary": "通知取得",
+                "description": "オペレーター自身宛の通知、承認要求を取得します。",
+                "parameters": [
+                    {
+                        "name": "is_send",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "required": true,
+                        "description": "送信履歴(True: 自分が送信した通知・承認, False: 自分宛に送られた通知・承認)"
+                    },
+                    {
+                        "name": "is_unread",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "required": true,
+                        "description": "未読フラグ(True: 未読のみ, False: すべて)"
+                    },
+                    {
+                        "name": "is_approval",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "required": true,
+                        "description": "承認フラグ(True: 承認または非承認ステータスのみ, False: すべて)"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        },
+                        "required": true,
+                        "description": "通知種別（0: 通知、1: 承認要求）"
+                    },
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "対象期間(自)(format: yyyy/MM/dd hh:mm:ss)"
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": false,
+                        "description": "対象期間(至)(format: yyyy/MM/dd hh:mm:ss)"
+                    },
+                    {
+                        "name": "num",
+                        "in": "query",
+                        "schema": {
+                            "type": "number"
+                        },
+                        "required": true,
+                        "description": "最大件数(<= 0: 全件, > 0: 指定件数分)"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "承認要求リスト",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "取得対象なし時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                },
+                                "examples": {
+                                    "status": 204,
+                                    "message": "リクエスト条件に一致する通知はありません"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "真偽値指定プロパティが真偽値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "真偽値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "日付指定プロパティが日付ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "日付型ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "通知種別が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "通知種別は期待する数値ではありません"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "通知・承認要求登録"
+                ],
+                "summary": "通知・承認要求登録",
+                "description": "通知や承認要求を登録します。",
+                "requestBody": {
+                    "description": "通知",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "通知エンティティ",
+                                "properties": {
+                                    "type": {
+                                        "type": "integer",
+                                        "description": "通知種別（0: 通知、1: 承認要求）"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "通知タイトル"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "description": "通知内容"
+                                    },
+                                    "attribute": {
+                                        "type": "object",
+                                        "description": "属性（使用者が自由な情報を設定できます）"
+                                    },
+                                    "destination": {
+                                        "type": "object",
+                                        "description": "宛先情報",
+                                        "properties": {
+                                            "blockCode": {
+                                                "type": "integer",
+                                                "description": "宛先Blockコード"
+                                            },
+                                            "operatorType": {
+                                                "type": "integer",
+                                                "description": "通知先オペレーター種別（0: 個人、1: アプリケーション、2: ワークフロー職員、3: 運営メンバー）"
+                                            },
+                                            "isSendAll": {
+                                                "type": "boolean",
+                                                "description": "全体送信フラグ（false: 個別送信、true: 全体送信）"
+                                            },
+                                            "operatorId": {
+                                                "type": "array",
+                                                "description": "宛先オペレーターID",
+                                                "items": {
+                                                    "type": "integer",
+                                                    "description": "オペレーターID"
+                                                }
+                                            },
+                                            "userId": {
+                                                "type": "array",
+                                                "description": "宛先ユーザーID",
+                                                "items": {
+                                                    "type": "string",
+                                                    "description": "ユーザーID"
+                                                }
+                                            },
+                                            "pxrId": {
+                                                "type": "array",
+                                                "description": "PXR-ID",
+                                                "items": {
+                                                    "type": "string",
+                                                    "description": "PXR-ID"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "approval": {
+                                        "type": "object",
+                                        "description": "承認情報",
+                                        "properties": {
+                                            "noticeUrl": {
+                                                "type": "string",
+                                                "description": "通知先URL"
+                                            },
+                                            "expirationAt": {
+                                                "type": "string",
+                                                "description": "有効期限",
+                                                "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "type": 1,
+                                "title": "承認リクエスト",
+                                "content": "テスト: 承認をリクエストします。",
+                                "attribute": {
+                                    "testKey": "testValue"
+                                },
+                                "destination": {
+                                    "blockCode": 30303030,
+                                    "operatorType": 2,
+                                    "isSendAll": true,
+                                    "operatorId": null,
+                                    "userId": null
+                                },
+                                "approval": {
+                                    "noticeUrl": "http://service/catalog-update/actor/approval",
+                                    "expirationAt": "2020-04-01 00:00:00.000"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登録された通知",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "通知エンティティ + 登録結果ステータス",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "description": "通知ID"
+                                        },
+                                        "type": {
+                                            "type": "integer",
+                                            "description": "通知種別（0: 通知、1: 承認要求）"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "description": "通知タイトル"
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "description": "通知内容"
+                                        },
+                                        "attribute": {
+                                            "type": "object",
+                                            "description": "属性"
+                                        },
+                                        "destination": {
+                                            "type": "object",
+                                            "description": "宛先情報",
+                                            "properties": {
+                                                "blockCode": {
+                                                    "type": "integer",
+                                                    "description": "宛先Blockコード"
+                                                },
+                                                "operatorType": {
+                                                    "type": "integer",
+                                                    "description": "通知先オペレーター種別（0: 個人、1: アプリケーション、2: ワークフロー職員、3: 運営メンバー）"
+                                                },
+                                                "isSendAll": {
+                                                    "type": "boolean",
+                                                    "description": "全体送信フラグ（false: 個別送信、true: 全体送信）"
+                                                },
+                                                "operatorId": {
+                                                    "type": "array",
+                                                    "description": "宛先オペレーターID",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "description": "オペレーターID"
+                                                    }
+                                                },
+                                                "userId": {
+                                                    "type": "array",
+                                                    "description": "宛先ユーザーID",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "description": "ユーザーID"
+                                                    }
+                                                },
+                                                "pxrId": {
+                                                    "type": "array",
+                                                    "description": "PXR-ID",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "description": "PXR-Id"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "approval": {
+                                            "type": "object",
+                                            "description": "承認情報",
+                                            "properties": {
+                                                "expirationAt": {
+                                                    "type": "string",
+                                                    "description": "有効期限",
+                                                    "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                                }
+                                            }
+                                        },
+                                        "sendAt": {
+                                            "type": "string",
+                                            "description": "送信日時",
+                                            "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                        },
+                                        "is_transfer": {
+                                            "type": "boolean",
+                                            "description": "転送フラグ（false: 自Block内宛、true: 他Blockへ転送）"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "id": "1",
+                                    "type": 1,
+                                    "title": "承認リクエスト",
+                                    "content": "テスト: 承認をリクエストします。",
+                                    "attribute": {
+                                        "testKey": "testValue"
+                                    },
+                                    "destination": {
+                                        "blockCode": 30303030,
+                                        "operatorType": 2,
+                                        "isSendAll": true,
+                                        "operatorId": [],
+                                        "userId": [],
+                                        "pxrId": []
+                                    },
+                                    "approval": {
+                                        "expirationAt": "2020-04-01 24:00:00.000"
+                                    },
+                                    "sendAt": "2019-11-29 09:36:54.521",
+                                    "is_transfer": false
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "オペレーター種別が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "オペレーター種別は期待する数値ではありません"
+                                        }
+                                    },
+                                    "通知種別が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "通知種別は期待する数値ではありません"
+                                        }
+                                    },
+                                    "PxR-IDによる個別送信は個人オペレーター宛のみ可能です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "個人オペレーター以外を宛先とした場合、PxR-IDによる個別宛先の指定はできません"
+                                        }
+                                    },
+                                    "個別送信はオペレーターID、PxR-ID、利用者IDいずれかによる指定が必要です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "個別送信の場合、宛先となるオペレーターIDまたは利用者IDが必要です"
+                                        }
+                                    },
+                                    "オペレーターID、PxR-ID、利用者IDは1つのみ指定できます": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "オペレーターIDと利用者IDを同時に指定することはできません"
+                                        }
+                                    },
+                                    "通知URLのURL表現が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "指定された通知URLが、URLのパス表現としては不正です"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "宛先の指定がブロックのカタログコードではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストされたカタログは、ブロックのものではありません（コード: <対象カタログコード>）"
+                                        }
+                                    },
+                                    "カテゴリの指定が通知カテゴリのカタログコードではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストされたカタログは、カテゴリのものではありません（コード: <対象カタログコード>）"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                },
+                                "examples": {
+                                    "連携に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携に失敗しました"
+                                        }
+                                    },
+                                    "連携サービスとの接続に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携サービスとの接続に失敗しました"
+                                        }
+                                    },
+                                    "カタログサービスで内部エラーが発生しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "カタログサービスの内部エラーが発生しました"
+                                        }
+                                    },
+                                    "カタログサービスとの接続に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "カタログサービスとの接続に失敗しました"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "既読処理"
+                ],
+                "summary": "既読処理",
+                "description": "通知に対して、読んだ時刻を記録します。",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "既読にする通知ID",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "通知ID"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "id": 1
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "既読処理の結果",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "既読にする通知ID",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "description": "レスポンスコード 200固定"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "処理メッセージ"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "status": 200,
+                                    "message": "操作が正常に完了しました"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "指定した通知が存在しません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "更新対象が存在しません"
+                                        }
+                                    },
+                                    "指定した通知が自分宛でありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "対象を操作する権限がありません"
+                                        }
+                                    },
+                                    "既読済です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "既読済みです"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transfer": {
+            "post": {
+                "tags": [
+                    "通知・承認要求登録"
+                ],
+                "summary": "連携受付登録",
+                "description": "登録APIで宛先が自Blockと異なる場合、宛先のBlockの本APIがコールされ、その通知を登録します。",
+                "requestBody": {
+                    "description": "通知",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "通知エンティティ",
+                                "properties": {
+                                    "type": {
+                                        "type": "integer",
+                                        "description": "通知種別（0: 通知、1: 承認要求）"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "通知タイトル"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "description": "通知内容"
+                                    },
+                                    "attribute": {
+                                        "type": "object",
+                                        "description": "属性（使用者が自由な情報を設定できます）"
+                                    },
+                                    "destination": {
+                                        "type": "object",
+                                        "description": "宛先情報",
+                                        "properties": {
+                                            "blockCode": {
+                                                "type": "integer",
+                                                "description": "宛先Blockコード"
+                                            },
+                                            "operatorType": {
+                                                "type": "integer",
+                                                "description": "通知先オペレーター種別（0: 個人、1: アプリケーション、2: ワークフロー職員、3: 運営メンバー）"
+                                            },
+                                            "isSendAll": {
+                                                "type": "boolean",
+                                                "description": "全体送信フラグ（false: 個別送信、true: 全体送信）"
+                                            },
+                                            "operatorId": {
+                                                "type": "array",
+                                                "description": "宛先オペレーターID",
+                                                "items": {
+                                                    "type": "integer",
+                                                    "description": "オペレーターID"
+                                                }
+                                            },
+                                            "userId": {
+                                                "type": "array",
+                                                "description": "宛先ユーザーID",
+                                                "items": {
+                                                    "type": "string",
+                                                    "description": "ユーザーID"
+                                                }
+                                            },
+                                            "pxrId": {
+                                                "type": "array",
+                                                "description": "PXR-ID",
+                                                "items": {
+                                                    "type": "string",
+                                                    "description": "PXR-ID"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "approval": {
+                                        "type": "object",
+                                        "description": "承認情報",
+                                        "properties": {
+                                            "noticeUrl": {
+                                                "type": "string",
+                                                "description": "通知先URL"
+                                            },
+                                            "expirationAt": {
+                                                "type": "string",
+                                                "description": "有効期限",
+                                                "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "type": 1,
+                                "title": "承認リクエスト",
+                                "content": "テスト: 承認をリクエストします。",
+                                "attribute": {
+                                    "testKey": "testValue"
+                                },
+                                "destination": {
+                                    "blockCode": 30303030,
+                                    "operatorType": 2,
+                                    "isSendAll": true,
+                                    "operatorId": null,
+                                    "userId": null,
+                                    "pxrId": null
+                                },
+                                "approval": {
+                                    "noticeUrl": "http://service/catalog-update/actor/approval",
+                                    "expirationAt": "2020-04-01 00:00:00.000"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "登録された通知",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "description": "通知エンティティ + 登録結果ステータス",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "description": "通知ID"
+                                        },
+                                        "type": {
+                                            "type": "integer",
+                                            "description": "通知種別（0: 通知、1: 承認要求）"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "description": "通知タイトル"
+                                        },
+                                        "content": {
+                                            "type": "string",
+                                            "description": "通知内容"
+                                        },
+                                        "attribute": {
+                                            "type": "object",
+                                            "description": "属性"
+                                        },
+                                        "destination": {
+                                            "type": "object",
+                                            "description": "宛先情報",
+                                            "properties": {
+                                                "blockCode": {
+                                                    "type": "integer",
+                                                    "description": "宛先Blockコード"
+                                                },
+                                                "operatorType": {
+                                                    "type": "integer",
+                                                    "description": "通知先オペレーター種別（0: 個人、1: アプリケーション、2: ワークフロー職員、3: 運営メンバー）"
+                                                },
+                                                "isSendAll": {
+                                                    "type": "boolean",
+                                                    "description": "全体送信フラグ（false: 個別送信、true: 全体送信）"
+                                                },
+                                                "operatorId": {
+                                                    "type": "array",
+                                                    "description": "宛先オペレーターID",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "description": "オペレーターID"
+                                                    }
+                                                },
+                                                "userId": {
+                                                    "type": "array",
+                                                    "description": "宛先ユーザーID",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "description": "ユーザーID"
+                                                    }
+                                                },
+                                                "pxrId": {
+                                                    "type": "array",
+                                                    "description": "PXR-ID",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "description": "PXR-ID"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "approval": {
+                                            "type": "object",
+                                            "description": "承認情報",
+                                            "properties": {
+                                                "expirationAt": {
+                                                    "type": "string",
+                                                    "description": "有効期限",
+                                                    "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                                }
+                                            }
+                                        },
+                                        "sendAt": {
+                                            "type": "string",
+                                            "description": "送信日時",
+                                            "format": "yyyy-MM-dd hh:mm:ss.SSS"
+                                        },
+                                        "is_transfer": {
+                                            "type": "boolean",
+                                            "description": "転送フラグ（false: 自Block内宛、true: 他Blockへ転送）"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "id": "1",
+                                    "type": 1,
+                                    "title": "承認リクエスト",
+                                    "content": "テスト: 承認をリクエストします。",
+                                    "attribute": {
+                                        "testKey": "testValue"
+                                    },
+                                    "destination": {
+                                        "blockCode": 30303030,
+                                        "operatorType": 2,
+                                        "isSendAll": true,
+                                        "operatorId": [],
+                                        "userId": [],
+                                        "pxrId": []
+                                    },
+                                    "approval": {
+                                        "expirationAt": "2020-04-01 24:00:00.000"
+                                    },
+                                    "sendAt": "2019-11-29 09:36:54.521",
+                                    "is_transfer": false
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "オペレーター種別が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "オペレーター種別は期待する数値ではありません"
+                                        }
+                                    },
+                                    "通知種別が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "通知種別は期待する数値ではありません"
+                                        }
+                                    },
+                                    "PxR-IDによる個別送信は個人オペレーター宛のみ可能です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "個人オペレーター以外を宛先とした場合、PxR-IDによる個別宛先の指定はできません"
+                                        }
+                                    },
+                                    "個別送信はオペレーターID、PxR-ID、利用者IDいずれかによる指定が必要です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "個別送信の場合、宛先となるオペレーターIDまたは利用者IDが必要です"
+                                        }
+                                    },
+                                    "オペレーターID、PxR-ID、利用者IDは1つのみ指定できます": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "オペレーターIDと利用者IDを同時に指定することはできません"
+                                        }
+                                    },
+                                    "通知URLのURL表現が不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "指定された通知URLが、URLのパス表現としては不正です"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "宛先の指定がブロックのカタログコードではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストされたカタログは、ブロックのものではありません（コード: <対象カタログコード>）"
+                                        }
+                                    },
+                                    "カテゴリの指定が通知カテゴリのカタログコードではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストされたカタログは、カテゴリのものではありません（コード: <対象カタログコード>）"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                },
+                                "examples": {
+                                    "連携に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携に失敗しました"
+                                        }
+                                    },
+                                    "連携サービスとの接続に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携サービスとの接続に失敗しました"
+                                        }
+                                    },
+                                    "カタログサービスで内部エラーが発生しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "カタログサービスの内部エラーが発生しました"
+                                        }
+                                    },
+                                    "カタログサービスとの接続に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "カタログサービスとの接続に失敗しました"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/approval": {
+            "put": {
+                "tags": [
+                    "承認"
+                ],
+                "summary": "承認",
+                "description": "承認要求に対して承認し、登録されたURLへ承認結果を送信します。",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "承認内容",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "通知ID"
+                                    },
+                                    "status": {
+                                        "type": "integer",
+                                        "description": "承認ステータス（1: 承認、2: 否認）"
+                                    },
+                                    "commet": {
+                                        "type": "string",
+                                        "description": "コメント"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "id": 1,
+                                "status": 2,
+                                "comment": "承認に必要な情報が存在しない為、非承認とします。"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "各種承認APIの呼出結果",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "呼出先のAPIのレスポンスボディ": null
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        },
+                                        "reasons": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "property": {
+                                                        "type": "string",
+                                                        "description": "プロパティ名"
+                                                    },
+                                                    "value": {
+                                                        "description": "入力値"
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": "メッセージ"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                },
+                                "examples": {
+                                    "リクエストが空です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "リクエストが空です"
+                                        }
+                                    },
+                                    "承認ステータスが不正です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "ステータス番号としては期待していない数値です"
+                                        }
+                                    },
+                                    "文字列指定プロパティが文字列ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "文字列ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "数値指定プロパティが数値ではありません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": "<入力値>",
+                                                    "message": "数値ではありません"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "必須プロパティが存在していません": {
+                                        "value": {
+                                            "status": 400,
+                                            "reasons": [
+                                                {
+                                                    "property": "<プロパティ名>",
+                                                    "value": null,
+                                                    "message": "この値は必須値です"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "既に承認済です": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "承認操作が完了しています"
+                                        }
+                                    },
+                                    "有効期限切れです": {
+                                        "value": {
+                                            "status": 400,
+                                            "message": "対象の承認期限が切れています"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "エラー時レスポンスコード",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "description": "ステータスコード"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "メッセージ"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                },
+                                "examples": {
+                                    "連携に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携に失敗しました"
+                                        }
+                                    },
+                                    "連携サービスとの接続に失敗しました": {
+                                        "value": {
+                                            "status": 500,
+                                            "message": "連携サービスとの接続に失敗しました"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
