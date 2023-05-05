@@ -37,7 +37,7 @@ spec:
   - host: application000001.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
         pathType: Prefix
         backend:
           service:
@@ -47,7 +47,7 @@ spec:
   - host: region000001.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
         pathType: Prefix
         backend:
           service:
@@ -57,7 +57,7 @@ spec:
   - host: root.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
         pathType: Prefix
         backend:
           service:
