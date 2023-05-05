@@ -1241,7 +1241,7 @@ data:
       "logging": false
     }
   .env: |
-    DB_SCHEMA=pxr_certification_authority
+    DB_SCHEMA=<database_name>
     DB_USER=<user_name>
     DB_PASSWORD=<password>
     DB_HOST=external-db-service
