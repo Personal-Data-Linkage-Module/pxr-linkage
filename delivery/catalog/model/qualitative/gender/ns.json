@@ -1,0 +1,4 @@
+{
+    "ns": "catalog/model/qualitative/gender",
+    "description": "性別の候補値を定義するための名前空間です。"
+}
