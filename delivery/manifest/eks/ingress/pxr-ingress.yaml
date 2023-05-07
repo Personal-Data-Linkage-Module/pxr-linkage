@@ -17,7 +17,7 @@
 #
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -37,22 +37,31 @@ spec:
   - host: application000001.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
+        pathType: Prefix
         backend:
-          serviceName: application000001-service
-          servicePort: 80
+          service:
+            name: application000001-service
+            port:
+              number: 80
   - host: region000001.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
+        pathType: Prefix
         backend:
-          serviceName: region000001-service
-          servicePort: 80
+          service:
+            name: region000001-service
+            port:
+              number: 80
   - host: root.domain.com
     http:
       paths:
-      - path: /*
+      - path: /
+        pathType: Prefix
         backend:
-          serviceName: root-service
-          servicePort: 80
+          service:
+            name: root-service
+            port:
+              number: 80
  
