@@ -17,7 +17,6 @@ spec:
       labels:
         app: region000001-api
     spec:
-      serviceAccountName: region-root-block
       containers:
       - name: nginx
         image: nginx:1.20.1
