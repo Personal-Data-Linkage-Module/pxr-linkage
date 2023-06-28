@@ -1,0 +1,107 @@
+{
+	"name": "電力使用量(新規作成)",
+	"description": null,
+	"type": 0,
+	"ns": [],
+	"catalog": [
+		{
+			"type": 1,
+			"catalogCode": null,
+			"template": {
+				"catalogItem": {
+					"ns": "catalog/ext/pxross1/event/actor_1000801",
+					"name": "電力使用量",
+					"_code": {
+						"_value": null,
+						"_ver": null
+					},
+					"inherit": {
+						"_value": 53,
+						"_ver": 1
+					},
+					"description": {
+						"title": null,
+						"section": [
+							{
+								"title": "電力使用量のイベントの定義",
+								"content": [
+									{
+										"sentence": "電力使用量のイベントの定義です。"
+									}
+								]
+							}
+						]
+					}
+				},
+				"template": {
+					"prop": [
+						{
+							"key": "thing",
+							"type": {
+								"candidate": {
+									"ns": [
+										"catalog/model/thing/*",
+										"catalog/built_in/thing/*",
+										"catalog/ext/pxross1/thing/*"
+									],
+									"_code": [
+										{
+											"_value": 1000803,
+											"_ver": 1
+										}
+									],
+									"base": null
+								},
+								"cmatrix": null,
+								"_code": null,
+								"of": "item[]"
+							},
+							"description": "モノの配列",
+							"isInherit": false
+						}
+					],
+					"value": [
+						{
+							"key": "code",
+							"value": [
+								{
+									"key": "_value",
+									"value": 53
+								},
+								{
+									"key": "_ver",
+									"value": 1
+								}
+							]
+						}
+					]
+				},
+				"attribute": {
+					"objects": [],
+					"tags": []
+				},
+				"inner": [
+					{
+						"template": {
+							"prop": []
+						},
+						"inner": []
+					}
+				]
+			}
+		}
+	],
+	"attribute": [],
+	"appendix": [
+		{
+			"name": "電力使用量",
+			"ver": null,
+			"template": {
+				"code": {
+					"_value": 53,
+					"_ver": 1
+				}
+			}
+		}
+	]
+}

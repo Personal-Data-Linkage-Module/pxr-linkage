@@ -1,0 +1,133 @@
+{
+	"name": "ストアカタログ",
+	"description": null,
+	"type": 1,
+	"ns": [],
+	"catalog": [
+		{
+			"type": 1,
+			"catalogCode": null,
+			"template": {
+				"catalogItem": {
+					"ns": "catalog/ext/pxross1/actor/app/actor_1000788/store",
+					"name": "運動アプリ",
+					"_code": null,
+					"inherit": {
+						"_value": 39,
+						"_ver": 1
+					},
+					"description": "運動アプリが蓄積可能なデータ定義です。"
+				},
+				"attribute": null,
+				"inner": null,
+				"template": {
+					"prop": null,
+					"value": [
+						{
+							"key": "_code",
+							"value": null
+						},
+						{
+							"key": "store",
+							"value": [
+								{
+									"key": "id",
+									"value": "e2df3af4-9d8e-42e5-918f-15a00717a681"
+								},
+								{
+									"key": "event",
+									"value": [
+										{
+											"key": "code",
+											"value": [
+												{
+													"key": "_value",
+													"value": 1000797
+												},
+												{
+													"key": "_ver",
+													"value": 1
+												}
+											]
+										},
+										{
+											"key": "requireConsent",
+											"value": false
+										},
+										{
+											"key": "thing",
+											"value": [
+												{
+													"key": "code",
+													"value": [
+														{
+															"key": "_value",
+															"value": 1000795
+														},
+														{
+															"key": "_ver",
+															"value": 1
+														}
+													]
+												},
+												{
+													"key": "requireConsent",
+													"value": true
+												}
+											]
+										}
+									]
+								},
+								{
+									"key": "event",
+									"value": [
+										{
+											"key": "code",
+											"value": [
+												{
+													"key": "_value",
+													"value": 1000798
+												},
+												{
+													"key": "_ver",
+													"value": 1
+												}
+											]
+										},
+										{
+											"key": "requireConsent",
+											"value": false
+										},
+										{
+											"key": "thing",
+											"value": [
+												{
+													"key": "code",
+													"value": [
+														{
+															"key": "_value",
+															"value": 1000796
+														},
+														{
+															"key": "_ver",
+															"value": 1
+														}
+													]
+												},
+												{
+													"key": "requireConsent",
+													"value": true
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		}
+	],
+	"appendix": []
+}

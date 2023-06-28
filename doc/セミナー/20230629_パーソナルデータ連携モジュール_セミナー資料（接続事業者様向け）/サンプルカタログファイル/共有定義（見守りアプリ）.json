@@ -1,0 +1,89 @@
+{
+	"name": "共有定義カタログ",
+	"description": null,
+	"type": 1,
+	"ns": [],
+	"catalog": [
+		{
+			"type": 1,
+			"catalogCode": null,
+			"template": {
+				"catalogItem": {
+					"ns": "catalog/ext/pxross1/actor/app/actor_1000801/share",
+					"name": "見守りアプリ",
+					"_code": null,
+					"inherit": {
+						"_value": 40,
+						"_ver": 1
+					},
+					"description": "見守りアプリが提供する状態共有機能の定義です。"
+				},
+				"attribute": null,
+				"inner": null,
+				"template": {
+					"prop": null,
+					"value": [
+						{
+							"key": "share",
+							"value": [
+								{
+									"key": "id",
+									"value": "5a8c9ee9-8b3e-4084-ac0b-cb5df2438999"
+								},
+								{
+									"key": "role",
+									"value": null
+								},
+								{
+									"key": "event",
+									"value": [
+										{
+											"key": "code",
+											"value": [
+												{
+													"key": "_value",
+													"value": 1000798
+												},
+												{
+													"key": "_ver",
+													"value": 1
+												}
+											]
+										},
+										{
+											"key": "requireConsent",
+											"value": false
+										},
+										{
+											"key": "thing",
+											"value": [
+												{
+													"key": "code",
+													"value": [
+														{
+															"key": "_value",
+															"value": 1000796
+														},
+														{
+															"key": "_ver",
+															"value": 1
+														}
+													]
+												},
+												{
+													"key": "requireConsent",
+													"value": true
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		}
+	],
+	"appendix": []
+}

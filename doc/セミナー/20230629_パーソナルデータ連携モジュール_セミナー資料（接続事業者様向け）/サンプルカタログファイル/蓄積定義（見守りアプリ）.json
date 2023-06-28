@@ -1,0 +1,133 @@
+{
+	"name": "ストアカタログ",
+	"description": null,
+	"type": 1,
+	"ns": [],
+	"catalog": [
+		{
+			"type": 1,
+			"catalogCode": null,
+			"template": {
+				"catalogItem": {
+					"ns": "catalog/ext/pxross1/actor/app/actor_1000801/store",
+					"name": "見守りアプリ",
+					"_code": null,
+					"inherit": {
+						"_value": 39,
+						"_ver": 1
+					},
+					"description": "見守りアプリが蓄積可能なデータ定義です。"
+				},
+				"attribute": null,
+				"inner": null,
+				"template": {
+					"prop": null,
+					"value": [
+						{
+							"key": "_code",
+							"value": null
+						},
+						{
+							"key": "store",
+							"value": [
+								{
+									"key": "id",
+									"value": "e7086a19-73cb-4519-8b6c-c248fcdb9f50"
+								},
+								{
+									"key": "event",
+									"value": [
+										{
+											"key": "code",
+											"value": [
+												{
+													"key": "_value",
+													"value": 1000805
+												},
+												{
+													"key": "_ver",
+													"value": 1
+												}
+											]
+										},
+										{
+											"key": "requireConsent",
+											"value": false
+										},
+										{
+											"key": "thing",
+											"value": [
+												{
+													"key": "code",
+													"value": [
+														{
+															"key": "_value",
+															"value": 1000803
+														},
+														{
+															"key": "_ver",
+															"value": 1
+														}
+													]
+												},
+												{
+													"key": "requireConsent",
+													"value": true
+												}
+											]
+										}
+									]
+								},
+								{
+									"key": "event",
+									"value": [
+										{
+											"key": "code",
+											"value": [
+												{
+													"key": "_value",
+													"value": 1000806
+												},
+												{
+													"key": "_ver",
+													"value": 1
+												}
+											]
+										},
+										{
+											"key": "requireConsent",
+											"value": false
+										},
+										{
+											"key": "thing",
+											"value": [
+												{
+													"key": "code",
+													"value": [
+														{
+															"key": "_value",
+															"value": 1000804
+														},
+														{
+															"key": "_ver",
+															"value": 1
+														}
+													]
+												},
+												{
+													"key": "requireConsent",
+													"value": true
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			}
+		}
+	],
+	"appendix": []
+}

@@ -1,0 +1,63 @@
+{
+	"name": "会話内容(新規作成)",
+	"description": null,
+	"type": 0,
+	"ns": [],
+	"catalog": [
+		{
+			"type": 1,
+			"catalogCode": null,
+			"template": {
+				"catalogItem": {
+					"ns": "catalog/ext/pxross1/thing/actor_1000801",
+					"name": "会話内容",
+					"_code": {
+						"_value": null,
+						"_ver": null
+					},
+					"inherit": {
+						"_value": 55,
+						"_ver": 1
+					},
+					"description": {
+						"title": null,
+						"section": [
+							{
+								"title": "会話内容のモノの定義",
+								"content": [
+									{
+										"sentence": "会話内容のモノの定義です。"
+									}
+								]
+							}
+						]
+					}
+				},
+				"template": {
+					"prop": null,
+					"value": null
+				},
+				"attribute": {
+					"objects": [],
+					"tags": []
+				},
+				"inner": [
+					{
+						"template": {
+							"prop": []
+						},
+						"inner": []
+					}
+				]
+			}
+		}
+	],
+	"attribute": [],
+	"appendix": [
+		{
+			"name": "会話内容",
+			"ver": null,
+			"template": {}
+		}
+	]
+}
