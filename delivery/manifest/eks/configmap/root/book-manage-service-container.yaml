@@ -286,6 +286,7 @@ data:
       "UNSUPPORTED_OPERATOR": "未サポートのオペレータ種別です",
       "UNSUPPORTED_ACTOR": "未サポートのアクター種別です",
       "INVALID_TYPE": "type は, 2, 3, 4, 5 のいずれかの値である必要があります",
+      "COULD_NOT_SPECIFY_USER_BOOK": "ユーザーのBookを特定できませんでした",
       "validation": {
         "isArray": "配列ではありません",
         "isBoolean": "真偽値ではありません",

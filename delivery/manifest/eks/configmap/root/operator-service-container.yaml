@@ -1,0 +1,2422 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: root-operator-service-container-config-map
+  namespace: <namespace>
+data:
+  config.json: |
+    {
+      "session_expire": 168,
+      "login_code_expire": 10,
+      "initial_password_expire": 7,
+      "cookie_base_name":"operator_type%s_session",
+      "catalog_url": "http://localhost:3001/catalog",
+      "catalog_ext_name": "<ext_name>",
+      "ca_url": "http://localhost:3012/certification-authority",
+      "corePerThread": 1,
+      "sms": {
+        "countryCode": "+81-"
+      },
+      "smsVerification": {
+        "expiration": {
+          "type": "minute",
+          "value": 3
+        },
+        "message": "Your code is %s"
+      },
+      "session": {
+        "expiration": {
+          "type": "hour",
+          "value": 3
+        },
+        "timeLeft": {
+          "type": "minute",
+          "value": 30
+        }
+      },
+      "userInfoCatalogCode": 1000373,
+      "timezone": "Asia/Tokyo",
+      "csrf_check_url": "http://localhost:3000/operator/csrf/check",
+      "csrf_get_url": "http://localhost:3000/operator/csrf/token",
+      "headersPattern": {
+        "external": [
+          {
+            "key": "host",
+            "value": ".+\\.pxrsrc\\.me\\.uk$"
+          },
+          {
+            "key": "x-amzn-trace-id",
+            "value": "^[a-zA-Z]+=[0-9]-[a-f0-9]{8}-[a-f0-9]{24}$"
+          }
+        ],
+        "betweenBlocks": [
+          {
+            "key": "host",
+            "value": "^(root|external|application[0-9]{6}|consumer[0-9]{6}|region[0-9]{6}|trader[0-9]{6})-service$"
+          }
+        ],
+        "withinBlock": [
+          {
+            "key": "host",
+            "value": "^(localhost|127\\.0\\.0\\.1)(|:[0-9]{4,5})$"
+          }
+        ]
+      }
+    }
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3000
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000  # 同時実行数しきい値
+
+    catalog:
+      pxr-setting: catalog/ext/<ext_name>/setting/global
+
+    sms:
+      region: ap-northeast-1
+      message_template: Your code is %s
+      expire:
+        value: 7
+        type: days
+      mode: production
+      country-code: +81-
+
+    phoneNumberCode: 30036
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "daysToKeep": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストが空です",
+      "FAILED_TAKE_SESSION": "セッション取得処理に失敗しました",
+      "NO_SESSION": "未ログインです",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "OPERATOR_NOT_EXISTS": "対象のオペレーターが存在しません",
+      "OPERATOR_NOT_LOGIN": "対象のオペレーターはログインが許可されていません",
+      "MEMBER_NOT_EXISTS": "運営メンバーが存在しません",
+      "SESSION_INVALID": "セッションが有効ではありません",
+      "IND_ONLY": "ログイン不可フラグは個人のみ変更可能です",
+      "PASSWORD_CANT_SET": "ログイン不可のオペレーターにパスワードは設定できません",
+      "NOW_PASSWORD_INVALID": "現在のパスワードが不正です",
+      "NOT_OPERATION_AUTH": "この操作をするための権限がありません",
+      "AUTH_CANT_UPDATED": "authを更新するための権限がありません",
+      "NOT_ANOTHER_ALL_AUTH_MEMBER": "他に全権を持った運営メンバーが存在しなくなるため、実行できません",
+      "MISSING_REQUIRED_ELEMENT": "attributesに必要な要素が見つかりませんでした",
+      "PHONE_NUMBER_NOT_EXISTS": "SMS認証で使用する携帯電話番号が登録されていません",
+      "NOT_ALL_AUTH": "全ての操作権限が有効に設定されていません",
+      "LOGIN_ID_ALREADY": "対象ログインIDが既に存在します",
+      "USER_ID_ALREADY": "対象利用者IDが既に存在します",
+      "NOT_ROLE_CATALOG": "ロールのカタログコードではありません",
+      "FAILD_GET_CATALOG": "カタログの取得に失敗しました",
+      "NOT_FOUND_CATALOG": "リクエストされたコードのカタログは存在しません(コード値: %s, バージョン: %s)",
+      "NOT_FOUND_CATALOG_WITH_NS": "次のネームスペースのカタログは存在しません(ネームスペース: %s)",
+      "INIT_PASSWORD_EXPIRED": "初期パスワードの有効期限が切れています",
+      "SMS_SEND_CONNECTION_ERR": "SMS送信APIへの接続に失敗しました",
+      "AUTH_INFO_INVALID": "ログインIDまたはパスワードが不正です",
+      "APP_NAME_INVALID": "アプリケーション名が正しくありません",
+      "NOT_EXIST_AUTH_CATALOG": "カタログに存在しない権限が設定されています",
+      "NON_CONFIGURABLE_AUTHORITY": "アクターで許可されていない権限が設定されています",
+      "PXR_LOGIN_CODE_EXPIRED": "PXRログインコードの有効期限が切れています",
+      "SMS_RESPONSE_STATUS": "SMS送信APIからのステータスコード: %s",
+      "SMS_RESPONSE": "SMS送信APIからのレスポンス: %s",
+      "CATALOG_RESPONSE_STATUS": "カタログサービスからのステータスコード: %s",
+      "CATALOG_RESPONSE": "カタログサービスからのレスポンス: %s",
+      "REQUEST_UNSUPPORT_MEDIA_TYPE": "サポートされていないContent-Typeが指定されています",
+      "REQUEST_PARAMETER_INVALID": "リクエストパラメータが不正です",
+      "RESPONSE_SUCCESS": "%sに成功しました",
+      "RESPONSE_FAIL": "%sに失敗しました",
+      "FAILED_SMS_SEND": "smsの送信に失敗しました",
+      "SMS_SEND_CONNECTION_ERROR": "smsの接続に失敗しました",
+      "LOGIN_CODE_INVALID": "ワンタイムログインコードが不正です",
+      "SESSION_NOT_EXISTS": "対象のセッションIDが存在しません",
+      "FAILED_CONNECT_TO_CATALOG": "カタログサービスへの接続に失敗しました",
+      "FAILED_CATALOG_GET": "カタログ情報の取得に失敗しました。statusCode: ",
+      "OUT_OF_SCOPE": "値が範囲外です",
+      "UNAUTHORIZED": "未ログインです",
+      "IS_EXPIRED": "有効期限切れです",
+      "LOCK_START": "アカウントロックされました",
+      "LOCKED_ACCOUNT_LOGIN": "アカウントはロックされています",
+      "ALREADY_USED_PASSWORD": "過去に使用されたパスワードです",
+      "isDefined": "%sは必須値です",
+      "isNumber": "%sが数値ではありません",
+      "REQUEST_IS_ARRAY": "リクエストが配列です",
+      "TARGET_DATA_IS_SET_AS_DO_NOT_UPDATABLE": "対象のデータは更新不可として設定されています",
+      "CAN_NOT_UPDATE_TYPE_MISMATCH": "対象データとのタイプ不一致により、更新できません",
+      "FAILED_UPDATE_USER_INFORMATION": "利用者情報の更新に失敗しました",
+      "NO_DATA_USER_INFORMATION": "更新対象の利用者情報が未登録の為、操作できません",
+      "MISSING_ID": "利用者ID、もしくはPXR-IDはどちらかを含めてリクエストをしてください",
+      "DO_NOT_SET_BOTH_IDS": "利用者ID、PXR-IDの両方を設定することはできません",
+      "DO_NOT_SET_IDS_FOR_IND": "利用者ID、PXR-IDを設定することはできません",
+      "MISSING_ALL_QUERY_PARAMETERS": "必要なクエリパラメーターがすべて未設定です",
+      "REQUIRE_TYPE_LOGIN_ID": "ログインIDの場合は、オペレーター種別を設定する必要があります",
+      "ONE_TIME_CODE_IS_NOT_NUMBER": "ワンタイムログインコードが数値ではありません",
+      "REQUIRED_PASSWORDS_BOTH": "現在のパスワード、新しいパスワードがどちらか存在する場合には、どちらとも必要です",
+      "NOT_REQUIRED_PASSWORD_FOR_LOGIN_PROHIBITED": "ログイン禁止に更新する場合、パスワードは不要です",
+      "REQUIRED_PASSWORD_FOR_LOGIN_ALLOWED": "ログインを許可する場合、パスワードは必要です",
+      "NO_REQUIRE_NAME": "個人種別のオペレーターの場合、nameプロパティが不要です",
+      "REQUIRE_INITIAL_PASSWORD_EXPIRE": "初期パスワード期限日時が必要です。attributesプロパティに設定してください",
+      "NOT_SET_LOGIN_PROHIBITED_FLAG_IF_NOT_IND": "個人以外ではログイン禁止フラグを設定することができません",
+      "NOT_SET_PASSWORD_WHEN_LOGIN_PROHIBITED": "ログイン禁止のオペレーターにパスワードを設定できません",
+      "REQUIRE_PASSWORD": "パスワードを設定してください",
+      "REQUIRE_PXR_ID": "PXR-IDが必須です",
+      "NO_REQUIRE_PXR_ID": "PXR-IDを設定することはできません",
+      "REQUIRE_ATTRIBUTE": "リクエストにattributesプロパティを設定してください",
+      "REQUIRE_CODE_OBJECT_IN_ATTRIBUTES": "リクエストにコードオブジェクトをattributesプロパティに含めてください",
+      "REQUIRE_USER_ID": "利用者IDが必要です",
+      "REQUIRE_CATALOG_CODES": "リクエストに、appCatalogCodeを含めてください",
+      "NO_REQUIRE_USER_ID": "利用者IDは不要です",
+      "NO_REQUIRE_CATALOG_CODES": "wfCatalogCode, appCatalogCodeは不要です",
+      "FAILED_ID_SERVICE_API": "IDサービスでエラーが発生しました",
+      "FAILED_ID_SERVICE_API_WITH_MESSAGE": "IDサービスでエラーが発生しました: ",
+      "FAILED_CONNECT_TO_ID_SERVICE": "IDサービスへの接続に失敗しました",
+      "NOT_EXIST_ACCESS_TOKEN": "アクセストークンが設定されていません",
+      "NOT_EXIST_SMS_VERIFICATION_CODE": "対象のSMS検証コードが存在しません",
+      "NOT_VERIFIED_SMS_VERIFICATION_CODE": "SMS検証コードが未検証です",
+      "FAILED_TO_GET_CLIENT": "対象のクライアント情報が取得できませんでした",
+      "NOT_MANAGE_MEMBER": "対象のオペレーターは運営メンバーではありません",
+      "CSRF_TOKEN": "不正な CSRF トークンまたは CSRF トークンがありません",
+      "NOT_MATCH_REGEX": "%sが正しく設定されていません",
+      "UNSUPPORTED_OPERATOR": "未サポートのオペレータ種別です",
+      "UNSUPPORTED_ACTOR": "未サポートのアクター種別です",
+      "NO_WF_APP_REGION": "利用者IDでの取得の場合、APP/REGIONコードのいずれかの指定が必要です。",
+      "SET_WF_APP_REGION": "APP、REGIONコードの内2つ以上が設定されています",
+      "REQUIRE_SESSION_ACTOR": "セッションにアクターコード情報が必要です。",
+      "NOT_FOUND_ACTOR_CATALOG": "アクターカタログの取得に失敗しました",
+      "MISMATCH_OPERATOR_BLOCK_TYPE_AND_SERVICE_CODE": "オペレータの所属ブロックと設定されたサービスのコードが不整合です",
+      "INVALID_OPERATOR_BLOCK_TYPE": "オペレータの所属ブロックが適切ではありません",
+      "COULD_NOT_SPECIFY_OPERATOR": "対象のオペレータを特定できませんでした",
+      "validation": {
+        "isArray": "配列ではありません",
+        "isBoolean": "真偽値ではありません",
+        "isBooleanString": "真偽値への変換に失敗しました",
+        "isDate": "日付型ではありません",
+        "isDateString": "日付型への変換に失敗しました",
+        "isEmail": "Emailアドレスではありません",
+        "isEmpty": "この値は空である必要があります",
+        "isNumber": "数値ではありません",
+        "isNumberString": "数値への変換に失敗しました",
+        "isNotEmpty": "この値は空を期待しません",
+        "isUuid": "UUIDではありません",
+        "isString": "文字列ではありません",
+        "isObject": "JSONではありません",
+        "isDefined": "この値は必須値です",
+        "nestedValidation": "期待する形式のJSONではありません",
+        "isNotEmptyObject": "この値はJSONではない、もしくは空であることを期待しません",
+        "length": "設定できる最短・最長の値の長さが異なっています",
+        "isHash": "この値はハッシュである必要があります"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "operator",
+        "version": "1.0",
+        "description": "オペレーターサービス"
+      },
+      "servers": [
+        {
+          "url": "/operator/operator"
+        }
+      ],
+      "paths": {
+        "/": {
+          "post": {
+            "tags": [
+              "追加"
+            ],
+            "description": "オペレーターを追加します。",
+            "requestBody": {
+              "description": "オペレーター情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "オペレーター追加のリクエストボディ",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "種別"
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "hpassword": {
+                        "type": "string",
+                        "description": "ハッシュパスワード"
+                      },
+                      "pxrId": {
+                        "type": "string",
+                        "description": "PXR-ID"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "表示名"
+                      },
+                      "mobilePhone": {
+                        "type": "string",
+                        "description": "携帯電話番号"
+                      },
+                      "auth": {
+                        "$ref": "#/components/schemas/auth"
+                      },
+                      "loginProhibitedFlg": {
+                        "type": "boolean",
+                        "description": "ログイン不可フラグ"
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "description": "属性"
+                      },
+                      "roles": {
+                        "type": "array",
+                        "description": "ロール設定",
+                        "items": {
+                          "$ref": "#/components/schemas/_code"
+                        }
+                      }
+                    },
+                    "example": {
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "hpassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+                      "name": "流通制御運営メンバー01",
+                      "auth": {
+                        "member": {
+                          "add": true,
+                          "update": true,
+                          "delete": true
+                        }
+                      },
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "オペレーターの追加に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "オペレーター追加のレスポンスボディ",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "オペレーターID"
+                        },
+                        "type": {
+                          "type": "integer",
+                          "description": "種別"
+                        },
+                        "loginId": {
+                          "type": "string",
+                          "description": "ログインID"
+                        },
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "表示名"
+                        },
+                        "mobilePhone": {
+                          "type": "string",
+                          "description": "携帯電話番号"
+                        },
+                        "auth": {
+                          "$ref": "#/components/schemas/auth"
+                        },
+                        "passwordChangedFlg": {
+                          "type": "boolean",
+                          "description": "パスワード変更フラグ"
+                        },
+                        "loginProhibitedFlg": {
+                          "type": "boolean",
+                          "description": "ログイン不可フラグ"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "description": "属性"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "description": "ロール設定",
+                          "items": {
+                            "$ref": "#/components/schemas/_code"
+                          }
+                        }
+                      },
+                      "example": {
+                        "id": 1,
+                        "type": 3,
+                        "loginId": "root_member01",
+                        "name": "流通制御運営メンバー01",
+                        "auth": {
+                          "member": {
+                            "add": true,
+                            "update": true,
+                            "delete": true
+                          }
+                        },
+                        "passwordChangedFlg": false,
+                        "attributes": {},
+                        "roles": [
+                          {
+                            "_value": 1,
+                            "_ver": 1
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "get": {
+            "tags": [
+              "取得"
+            ],
+            "description": "オペレーター情報を取得します。",
+            "parameters": [
+              {
+                "name": "type",
+                "description": "オペレーター種別",
+                "in": "query",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": true
+              },
+              {
+                "name": "loginId",
+                "description": "ログインID",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false
+              },
+              {
+                "name": "pxrId",
+                "description": "PXR-ID",
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                },
+                "required": false
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "オペレーター情報取得に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/operatorInfoOneOf"
+                    },
+                    "example": {
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "name": "運営メンバー01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "member": {
+                          "add": true,
+                          "update": true,
+                          "delete": true
+                        }
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43.111",
+                      "passwordChangedFlg": true,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/{operatorId}": {
+          "get": {
+            "tags": [
+              "取得"
+            ],
+            "description": "オペレーター情報を取得します。",
+            "parameters": [
+              {
+                "name": "operatorId",
+                "description": "オペレーターID",
+                "in": "path",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "オペレーター情報取得に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/operatorInfo"
+                    },
+                    "example": {
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "name": "運営メンバー01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "member": {
+                          "add": true,
+                          "update": true,
+                          "delete": true
+                        }
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43.111",
+                      "passwordChangedFlg": true,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "put": {
+            "tags": [
+              "更新"
+            ],
+            "description": "オペレーターを更新します。",
+            "parameters": [
+              {
+                "name": "operatorId",
+                "description": "オペレーターID",
+                "in": "path",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": true
+              }
+            ],
+            "requestBody": {
+              "description": "オペレーター情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "オペレーター更新のリクエストボディ",
+                    "properties": {
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "hpassword": {
+                        "type": "string",
+                        "description": "今のハッシュパスワード"
+                      },
+                      "newHpassword": {
+                        "type": "string",
+                        "description": "新しいハッシュパスワード"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "表示名"
+                      },
+                      "mobilePhone": {
+                        "type": "string",
+                        "description": "携帯電話番号"
+                      },
+                      "auth": {
+                        "$ref": "#/components/schemas/auth"
+                      },
+                      "loginProhibitedFlg": {
+                        "type": "boolean",
+                        "description": "ログイン不可フラグ"
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "description": "属性"
+                      },
+                      "roles": {
+                        "type": "array",
+                        "description": "ロール設定",
+                        "items": {
+                          "$ref": "#/components/schemas/_code"
+                        }
+                      }
+                    },
+                    "example": {
+                      "loginId": "root_menber01_change",
+                      "hpassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+                      "newHpassword": "cd08374a2f7d9827ac1e592e497bf0268b0d2af4a84e1d55c690348012202948",
+                      "name": "流通制御運営メンバー01",
+                      "mobilePhone": "09022223333",
+                      "auth": {
+                        "member": {
+                          "add": true,
+                          "update": true,
+                          "delete": true
+                        }
+                      },
+                      "attributes": {
+                        "key": "すべて上書き"
+                      },
+                      "roles": [
+                        {
+                          "_value": 0,
+                          "_ver": 0
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "オペレーターの更新に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "オペレーター更新のレスポンスボディ",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "オペレーターID"
+                        },
+                        "loginId": {
+                          "type": "string",
+                          "description": "ログインID"
+                        },
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "表示名"
+                        },
+                        "mobilePhone": {
+                          "type": "string",
+                          "description": "携帯電話番号"
+                        },
+                        "auth": {
+                          "$ref": "#/components/schemas/auth"
+                        },
+                        "passwordChangedFlg": {
+                          "type": "boolean",
+                          "description": "パスワード変更フラグ"
+                        },
+                        "loginProhibitedFlg": {
+                          "type": "boolean",
+                          "description": "ログイン不可フラグ"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "description": "属性"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "description": "ロール設定",
+                          "items": {
+                            "$ref": "#/components/schemas/_code"
+                          }
+                        }
+                      },
+                      "example": {
+                        "id": 1,
+                        "loginId": "root_menber01_change",
+                        "name": "流通制御運営メンバー01",
+                        "mobilePhone": "09022223333",
+                        "auth": {
+                          "member": {
+                            "add": true,
+                            "update": true,
+                            "delete": true
+                          }
+                        },
+                        "passwordChangedFlg": true,
+                        "attributes": {
+                          "key": "すべて上書き"
+                        },
+                        "roles": [
+                          {
+                            "_value": 0,
+                            "_ver": 0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "削除"
+            ],
+            "description": "オペレーターを削除します。",
+            "parameters": [
+              {
+                "name": "operatorId",
+                "description": "オペレーターID",
+                "in": "path",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "オペレーターの削除に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "オペレーター削除のレスポンスボディ",
+                      "properties": {
+                        "operatorId": {
+                          "type": "integer",
+                          "description": "削除したオペレーターのID"
+                        }
+                      },
+                      "example": {
+                        "operatorId": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/login": {
+          "post": {
+            "tags": [
+              "ログイン"
+            ],
+            "description": "オペレーター認証情報を受け、オペレーターを認証させます。SMS認証を利用する場合、ワンタイムログインコードを生成しSMSでオペレーターへ送付します。それ以外の場合は、セッションIDを生成してログインさせます。",
+            "requestBody": {
+              "description": "オペレーター認証情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ログインのリクエストボディ",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "種別"
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "hpassword": {
+                        "type": "string",
+                        "description": "ハッシュパスワード"
+                      }
+                    },
+                    "example": {
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "hpassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ログインに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginOneOf"
+                    },
+                    "example": {
+                      "sessionId": "2212d4a969f24f5e341470c546006d6552d1aa3c0cf60abc3002c5b29143c1ca",
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "name": "運営メンバー01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "add": true,
+                        "update": true,
+                        "delete": true
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43",
+                      "passwordChangedFlg": false,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ],
+                      "block": {
+                        "_value": 10001,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 10002,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/login/onetime": {
+          "post": {
+            "tags": [
+              "ログイン"
+            ],
+            "description": "ワンタイムログインコードを受け照合に成功したら、セッションIDを生成してログインさせます。",
+            "requestBody": {
+              "description": "ワンタイムログインコード",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ワンタイムログインコード照合のリクエストボディ",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "種別"
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "loginCode": {
+                        "type": "string",
+                        "description": "ワンタイムログインコード"
+                      }
+                    },
+                    "example": {
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "loginCode": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ワンタイムログインコード照合に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginResponse"
+                    },
+                    "example": {
+                      "sessionId": "2212d4a969f24f5e341470c546006d6552d1aa3c0cf60abc3002c5b29143c1ca",
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "add": true,
+                        "update": true,
+                        "delete": true
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43",
+                      "passwordChangedFlg": false,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ],
+                      "block": {
+                        "_value": 10001,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 10002,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/login/sso": {
+          "post": {
+            "tags": [
+              "ログイン/ログアウト"
+            ],
+            "description": "IDサービスで発行されたトークンを利用してログインを実施します。",
+            "parameters": [
+              {
+                "in": "header",
+                "name": "access-token",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "ログインに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginOneOf"
+                    },
+                    "example": {
+                      "sessionId": "2212d4a969f24f5e341470c546006d6552d1aa3c0cf60abc3002c5b29143c1ca",
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "name": "運営メンバー01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "add": true,
+                        "update": true,
+                        "delete": true
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43",
+                      "passwordChangedFlg": false,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ],
+                      "block": {
+                        "_value": 10001,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 10002,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/logout": {
+          "post": {
+            "tags": [
+              "ログアウト"
+            ],
+            "description": "セッションIDを受け、ログイン中のオペレーターをログアウトさせます。",
+            "requestBody": {
+              "description": "セッションID",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ログアウトのリクエストボディ",
+                    "properties": {
+                      "sessionId": {
+                        "type": "string",
+                        "description": "種別"
+                      }
+                    },
+                    "example": {
+                      "sessionId": "013f51805a2611ab89400f80e75686bca965f9f6519640a99fb2d4180556968f"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ログアウトに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "ログアウトのレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "ログアウト結果"
+                        }
+                      },
+                      "example": {
+                        "result": "ok"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/session": {
+          "post": {
+            "tags": [
+              "セッション確認"
+            ],
+            "description": "セッションIDを受け、有効か確認します。",
+            "requestBody": {
+              "description": "セッションID",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "セッション確認のリクエストボディ",
+                    "properties": {
+                      "sessionId": {
+                        "type": "string",
+                        "description": "種別"
+                      },
+                      "extendFlg": {
+                        "type": "boolean",
+                        "description": "SESSION延長フラグ"
+                      }
+                    },
+                    "example": {
+                      "sessionId": "013f51805a2611ab89400f80e75686bca965f9f6519640a99fb2d4180556968f",
+                      "extendFlg": true
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "セッション確認に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginResponse"
+                    },
+                    "example": {
+                      "sessionId": "013f51805a2611ab89400f80e75686bca965f9f6519640a99fb2d4180556968f",
+                      "operatorId": 1,
+                      "type": 3,
+                      "loginId": "root_member01",
+                      "name": "運営メンバー01",
+                      "mobilePhone": "09011112222",
+                      "auth": {
+                        "member": {
+                          "add": true,
+                          "update": true,
+                          "delete": true
+                        }
+                      },
+                      "lastLoginAt": "2019-10-18 14:07:43.111",
+                      "passwordChangedFlg": true,
+                      "attributes": {},
+                      "roles": [
+                        {
+                          "_value": 1,
+                          "_ver": 1
+                        }
+                      ],
+                      "block": {
+                        "_value": 10001,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 10002,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              },
+              "204": {
+                "description": "セッション確認で無効なセッションIDだった際のレスポンスコード"
+              }
+            }
+          }
+        },
+        "/password/{operatorId}": {
+          "put": {
+            "tags": [
+              "パスワードリセット"
+            ],
+            "description": "オペレーターのパスワードをリセットします。",
+            "parameters": [
+              {
+                "name": "operatorId",
+                "description": "オペレーターID",
+                "in": "path",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": true
+              }
+            ],
+            "requestBody": {
+              "description": "新パスワード",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "パスワードリセットのリクエストボディ",
+                    "properties": {
+                      "newHpassword": {
+                        "type": "string",
+                        "description": "新しいハッシュパスワード"
+                      }
+                    },
+                    "example": {
+                      "newHpassword": "cd08374a2f7d9827ac1e592e497bf0268b0d2af4a84e1d55c690348012202948"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "パスワードリセットに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        },
+        "/user/info": {
+          "get": {
+            "tags": [
+              "利用者情報"
+            ],
+            "description": "利用者情報 取得API",
+            "parameters": [
+              {
+                "in": "query",
+                "name": "pxrId",
+                "description": "PXR-ID",
+                "required": false,
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "リクエストのオペレーターに紐づく利用者情報",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "利用者情報",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID",
+                          "example": "agent"
+                        },
+                        "userInfo": {
+                          "$ref": "#/components/schemas/userInfo"
+                        }
+                      }
+                    },
+                    "example": {
+                      "pxrId": "agent",
+                      "userInfo": {
+                        "_code": {
+                          "_value": 1000373,
+                          "_ver": 1
+                        },
+                        "'item-group'": [
+                          {
+                            "title": "氏名",
+                            "item": [
+                              {
+                                "title": "姓",
+                                "type": {
+                                  "_value": 30019,
+                                  "_ver": 1
+                                },
+                                "content": "サンプル"
+                              },
+                              {
+                                "title": "名",
+                                "type": {
+                                  "_value": 30020,
+                                  "_ver": 1
+                                },
+                                "content": "太郎"
+                              }
+                            ]
+                          },
+                          {
+                            "title": "性別",
+                            "item": [
+                              {
+                                "title": "性別",
+                                "type": {
+                                  "_value": 30021,
+                                  "_ver": 1
+                                },
+                                "content": "男"
+                              }
+                            ]
+                          },
+                          {
+                            "title": "生年",
+                            "item": [
+                              {
+                                "title": "生年",
+                                "type": {
+                                  "_value": 1000372,
+                                  "_ver": 1
+                                },
+                                "content": 2000
+                              }
+                            ]
+                          },
+                          {
+                            "title": "住所（行政区）",
+                            "item": [
+                              {
+                                "title": "住所（行政区）",
+                                "type": {
+                                  "_value": 1000371,
+                                  "_ver": 1
+                                },
+                                "content": "東京都港区"
+                              }
+                            ]
+                          },
+                          {
+                            "title": "連絡先電話番号",
+                            "item": [
+                              {
+                                "title": "連絡先電話番号",
+                                "type": {
+                                  "_value": 30036,
+                                  "_ver": 1
+                                },
+                                "content": "080-1234-5678",
+                                "'changeable-flag'": true,
+                                "require-sms-verification": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "tags": [
+              "利用者情報"
+            ],
+            "description": "利用者情報 登録API",
+            "requestBody": {
+              "description": "更新対象のオペレーター情報, 登録する利用者情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "利用者情報",
+                    "properties": {
+                      "pxrId": {
+                        "type": "string",
+                        "description": "PXR-ID",
+                        "example": "agent"
+                      },
+                      "userInfo": {
+                        "$ref": "#/components/schemas/userInfo"
+                      }
+                    }
+                  },
+                  "example": {
+                    "pxrId": "agent",
+                    "userInfo": {
+                      "_code": {
+                        "_value": 1000373,
+                        "_ver": 1
+                      },
+                      "'item-group'": [
+                        {
+                          "title": "氏名",
+                          "item": [
+                            {
+                              "title": "姓",
+                              "type": {
+                                "_value": 30019,
+                                "_ver": 1
+                              },
+                              "content": "サンプル"
+                            },
+                            {
+                              "title": "名",
+                              "type": {
+                                "_value": 30020,
+                                "_ver": 1
+                              },
+                              "content": "太郎"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "性別",
+                          "item": [
+                            {
+                              "title": "性別",
+                              "type": {
+                                "_value": 30021,
+                                "_ver": 1
+                              },
+                              "content": "男"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "生年",
+                          "item": [
+                            {
+                              "title": "生年",
+                              "type": {
+                                "_value": 1000372,
+                                "_ver": 1
+                              },
+                              "content": 2000
+                            }
+                          ]
+                        },
+                        {
+                          "title": "住所（行政区）",
+                          "item": [
+                            {
+                              "title": "住所（行政区）",
+                              "type": {
+                                "_value": 1000371,
+                                "_ver": 1
+                              },
+                              "content": "東京都港区"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "連絡先電話番号",
+                          "item": [
+                            {
+                              "title": "連絡先電話番号",
+                              "type": {
+                                "_value": 30036,
+                                "_ver": 1
+                              },
+                              "content": "080-1234-5678",
+                              "'changeable-flag'": true,
+                              "require-sms-verification": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "登録したオペレーターの情報",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID",
+                          "example": "agent"
+                        }
+                      }
+                    },
+                    "example": {
+                      "pxrId": "agent"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "delete": {
+            "tags": [
+              "利用者情報"
+            ],
+            "description": "利用者情報 削除API",
+            "parameters": [
+              {
+                "in": "query",
+                "name": "pxrId",
+                "description": "PXR-ID",
+                "required": false,
+                "schema": {
+                  "type": "number"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "削除したオペレーターの情報",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID",
+                          "example": "agent"
+                        }
+                      }
+                    },
+                    "example": {
+                      "pxrId": "agent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/user/info": {
+          "put": {
+            "tags": [
+              "利用者情報"
+            ],
+            "description": "個人による自身の利用者情報更新API",
+            "requestBody": {
+              "description": "更新対象のオペレーター情報, 更新する利用者情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "利用者情報",
+                    "properties": {
+                      "pxrId": {
+                        "type": "string",
+                        "description": "PXR-ID",
+                        "example": "agent"
+                      },
+                      "userInfo": {
+                        "$ref": "#/components/schemas/userInfo"
+                      }
+                    }
+                  },
+                  "example": {
+                    "pxrId": "agent",
+                    "userInfo": {
+                      "_code": {
+                        "_value": 1000373,
+                        "_ver": 1
+                      },
+                      "'item-group'": [
+                        {
+                          "title": "氏名",
+                          "item": [
+                            {
+                              "title": "姓",
+                              "type": {
+                                "_value": 30019,
+                                "_ver": 1
+                              },
+                              "content": "サンプル"
+                            },
+                            {
+                              "title": "名",
+                              "type": {
+                                "_value": 30020,
+                                "_ver": 1
+                              },
+                              "content": "太郎"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "性別",
+                          "item": [
+                            {
+                              "title": "性別",
+                              "type": {
+                                "_value": 30021,
+                                "_ver": 1
+                              },
+                              "content": "男"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "生年",
+                          "item": [
+                            {
+                              "title": "生年",
+                              "type": {
+                                "_value": 1000372,
+                                "_ver": 1
+                              },
+                              "content": 2000
+                            }
+                          ]
+                        },
+                        {
+                          "title": "住所（行政区）",
+                          "item": [
+                            {
+                              "title": "住所（行政区）",
+                              "type": {
+                                "_value": 1000371,
+                                "_ver": 1
+                              },
+                              "content": "東京都港区"
+                            }
+                          ]
+                        },
+                        {
+                          "title": "連絡先電話番号",
+                          "item": [
+                            {
+                              "title": "連絡先電話番号",
+                              "type": {
+                                "_value": 30036,
+                                "_ver": 1
+                              },
+                              "content": "080-1234-5678",
+                              "'changeable-flag'": true,
+                              "require-sms-verification": true
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "更新結果",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "description": "結果",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "example": {
+                      "status": "success"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/identifyCode": {
+          "post": {
+            "tags": [
+              "本人性確認コード登録"
+            ],
+            "description": "本人性確認コードを登録します",
+            "requestBody": {
+              "description": "本人性確認コード",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "本人性確認コード登録のリクエストボディ",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      },
+                      "expirationAt": {
+                        "type": "string",
+                        "description": "有効期限"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "MDcxMGJiYjUtYmM0Mi00OWFlLTk1MGItY2U2YTY1Y2QxNmYz",
+                      "expirationAt": "2021-02-01T00:00:00.000+09:00"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "本人性確認コード登録に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "本人性確認コード登録のレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "処理結果"
+                        }
+                      },
+                      "example": {
+                        "result": "success"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/login": {
+          "post": {
+            "tags": [
+              "個人用ログイン/ログアウト"
+            ],
+            "description": "オペレーター認証情報を受け、オペレーターを認証させます。SMS認証を利用する場合、ワンタイムログインコードを生成しSMSでオペレーターへ送付します。それ以外の場合は、セッションIDを生成してログインさせます。",
+            "requestBody": {
+              "description": "オペレーター認証情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ログインのリクエストボディ",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "種別"
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "hpassword": {
+                        "type": "string",
+                        "description": "ハッシュパスワード"
+                      }
+                    },
+                    "example": {
+                      "type": 0,
+                      "loginId": "ind01",
+                      "hpassword": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ログインに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginOneOf"
+                    },
+                    "example": {
+                      "sessionId": "2212d4a969f24f5e341470c546006d6552d1aa3c0cf60abc3002c5b29143c1ca",
+                      "operatorId": 1,
+                      "type": 0,
+                      "loginId": "ind01",
+                      "pxrId": "pxrId01",
+                      "mobilePhone": "09011112222",
+                      "lastLoginAt": "2019-10-18 14:07:43",
+                      "passwordChangedFlg": false,
+                      "attributes": {},
+                      "block": {
+                        "_value": 1000401,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 1000431,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/login/onetime": {
+          "post": {
+            "tags": [
+              "個人用ログイン/ログアウト"
+            ],
+            "description": "ワンタイムログインコードを受け照合に成功したら、セッションIDを生成してログインさせます。",
+            "requestBody": {
+              "description": "ワンタイムログインコード",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ワンタイムログインコード照合のリクエストボディ",
+                    "properties": {
+                      "type": {
+                        "type": "integer",
+                        "description": "種別"
+                      },
+                      "loginId": {
+                        "type": "string",
+                        "description": "ログインID"
+                      },
+                      "loginCode": {
+                        "type": "string",
+                        "description": "ワンタイムログインコード"
+                      }
+                    },
+                    "example": {
+                      "type": 0,
+                      "loginId": "ind01",
+                      "loginCode": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ワンタイムログインコード照合に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/loginResponse"
+                    },
+                    "example": {
+                      "sessionId": "2212d4a969f24f5e341470c546006d6552d1aa3c0cf60abc3002c5b29143c1ca",
+                      "operatorId": 1,
+                      "type": 0,
+                      "loginId": "ind01",
+                      "pxrId": "pxrId01",
+                      "mobilePhone": "09011112222",
+                      "lastLoginAt": "2019-10-18 14:07:43",
+                      "passwordChangedFlg": false,
+                      "attributes": {},
+                      "block": {
+                        "_value": 1000401,
+                        "_ver": 1
+                      },
+                      "actor": {
+                        "_value": 1000431,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/login/sso/preparation": {
+          "get": {
+            "tags": [
+              "個人用ログイン/ログアウト"
+            ],
+            "description": "SSOログイン前にIDサービスに認証情報をリクエストします。",
+            "responses": {
+              "200": {
+                "description": "ログインに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        },
+        "/ind/login/sso": {
+          "post": {
+            "tags": [
+              "個人用ログイン/ログアウト"
+            ],
+            "description": "IDサービスで発行されたトークンを利用してログインを実施します。",
+            "requestBody": {
+              "description": "オペレーター認証情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ログインのリクエストボディ",
+                    "properties": {
+                      "authorizationCode": {
+                        "type": "integer",
+                        "description": "authorizationCode"
+                      }
+                    },
+                    "example": {
+                      "authorizationCode": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ログインに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        },
+        "/ind/logout": {
+          "post": {
+            "tags": [
+              "個人用ログイン/ログアウト"
+            ],
+            "description": "セッションIDを受け、ログイン中のオペレーターをログアウトさせます。",
+            "requestBody": {
+              "description": "セッションID",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "ログアウトのリクエストボディ",
+                    "properties": {
+                      "sessionId": {
+                        "type": "string",
+                        "description": "セッションID"
+                      }
+                    },
+                    "example": {
+                      "sessionId": "013f51805a2611ab89400f80e75686bca965f9f6519640a99fb2d4180556968f"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "ログアウトに成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "ログアウトのレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "ログアウト結果"
+                        }
+                      },
+                      "example": {
+                        "result": "ok"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/identifyCode/confirm": {
+          "post": {
+            "tags": [
+              "本人性確認コードによるPXR-ID取得"
+            ],
+            "description": "本人性確認コードを受け、PXR-IDを取得します",
+            "requestBody": {
+              "description": "本人性確認コードによるPXR-ID取得",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "本人性確認コードのリクエストボディ",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "MDcxMGJiYjUtYmM0Mi00OWFlLTk1MGItY2U2YTY1Y2QxNmYz"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "本人性確認コードによるPXR-ID取得に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "本人性確認コードによるPXR-ID取得のレスポンスボディ",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID"
+                        }
+                      },
+                      "example": {
+                        "pxrId": "test-0203.---.jp"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/sms-verificate": {
+          "post": {
+            "tags": [
+              "SMS検証コード発行/検証"
+            ],
+            "description": "申込コードおよび電話番号を受け、SMS検証コードを発行しSMSで通知します。",
+            "requestBody": {
+              "description": "SMS検証コード発行のリクエストボディ",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "SMS検証コード発行のリクエストボディ",
+                    "properties": {
+                      "code": {
+                      "type": "string",
+                      "description": "申請コード"
+                      },
+                      "userInformation": {
+                        "type": "object",
+                        "description": "利用者管理情報"
+                      }
+                    },
+                    "example": {
+                      "userInformation": {
+                          "_code": {
+                              "_value": 1000373,
+                              "_ver": 1
+                          },
+                          "item-group": [
+                          {
+                            "title": "連絡先電話番号",
+                            "item": [
+                              {
+                                "title": "連絡先電話番号",
+                                "type": {
+                                  "_value": 30036,
+                                  "_ver": 1
+                                },
+                                "content": "080-0000-0000",
+                                "changable-flag": true,
+                              "require-sms-verification": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "SMS検証コード発行に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                      "schema": {
+                      "type": "object",
+                      "description": "SMS検証コード発行のレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "処理結果"
+                        }
+                      },
+                      "example": {
+                        "smsVerificationCodeId": "9eee39d0-8c47-1df2-f88e-932d235a0865"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/ind/sms-verificate/verifiy": {
+          "post": {
+            "tags": [
+              "SMS検証コード発行/検証"
+            ],
+            "description": "申込コードおよびSMS検証コードを受け、検証結果を返却します。",
+            "requestBody": {
+              "description": "SMS検証コード検証のリクエストボディ",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "SMS検証コード検証のリクエストボディ",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "申請コード"
+                      },
+                      "smsVerificationCode": {
+                        "type": "string",
+                        "description": "SMS検証コード"
+                      }
+                    },
+                    "example": {
+                      "smsVerificationCodeId": "9eee39d0-8c47-1df2-f88e-932d235a0865",
+                      "smsVerificationCode": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "SMS検証コード検証に成功した際のレスポンスコード",
+                "content": {
+                  "application/json": {
+                      "schema": {
+                      "type": "object",
+                      "description": "SMS検証コード検証のレスポンスボディ",
+                      "properties": {
+                        "result": {
+                          "type": "string",
+                          "description": "検証結果"
+                        }
+                      },
+                      "example": {
+                        "result": "success"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "operatorInfoOneOf": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/operatorInfo"
+              },
+              {
+                "type": "array",
+                "description": "オペレーター配列",
+                "items": {
+                  "$ref": "#/components/schemas/operatorInfo"
+                }
+              }
+            ]
+          },
+          "loginOneOf": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/loginResponse"
+              },
+              {
+                "$ref": "#/components/schemas/oneTime"
+              }
+            ]
+          },
+          "_code": {
+            "type": "object",
+            "properties": {
+              "_value": {
+                "type": "integer",
+                "description": "カタログコード"
+              },
+              "_ver": {
+                "type": "integer",
+                "description": "カタログバージョン"
+              }
+            }
+          },
+          "auth": {
+            "type": "object",
+            "description": "権限",
+            "properties": {
+              "member": {
+                "type": "object",
+                "description": "オペレーター操作権限",
+                "properties": {
+                  "add": {
+                    "type": "boolean",
+                    "description": "追加権限"
+                  },
+                  "update": {
+                    "type": "boolean",
+                    "description": "更新権限"
+                  },
+                  "delete": {
+                    "type": "boolean",
+                    "description": "削除権限"
+                  }
+                }
+              }
+            }
+          },
+          "operatorInfo": {
+            "type": "object",
+            "description": "オペレーター情報取得のレスポンスボディ",
+            "properties": {
+              "operatorId": {
+                "type": "integer",
+                "description": "オペレーターID"
+              },
+              "type": {
+                "type": "integer",
+                "description": "種別"
+              },
+              "loginId": {
+                "type": "string",
+                "description": "ログインID"
+              },
+              "pxrId": {
+                "type": "string",
+                "description": "PXR-ID"
+              },
+              "name": {
+                "type": "string",
+                "description": "表示名"
+              },
+              "mobilePhone": {
+                "type": "string",
+                "description": "携帯電話番号"
+              },
+              "auth": {
+                "$ref": "#/components/schemas/auth"
+              },
+              "lastLoginAt": {
+                "type": "string",
+                "description": "前回ログイン日時"
+              },
+              "passwordChangedFlg": {
+                "type": "boolean",
+                "description": "パスワード変更フラグ"
+              },
+              "loginProhibitedFlg": {
+                "type": "boolean",
+                "description": "ログイン不可フラグ"
+              },
+              "attributes": {
+                "type": "object",
+                "description": "属性"
+              },
+              "roles": {
+                "type": "array",
+                "description": "ロール設定",
+                "items": {
+                  "$ref": "#/components/schemas/_code"
+                }
+              }
+            }
+          },
+          "loginResponse": {
+            "type": "object",
+            "properties": {
+              "sessionId": {
+                "type": "string",
+                "description": "セッションID"
+              },
+              "operatorId": {
+                "type": "integer",
+                "description": "オペレーターID"
+              },
+              "type": {
+                "type": "integer",
+                "description": "種別"
+              },
+              "loginId": {
+                "type": "string",
+                "description": "ログインID"
+              },
+              "pxrId": {
+                "type": "string",
+                "description": "PXR-ID"
+              },
+              "name": {
+                "type": "string",
+                "description": "表示名"
+              },
+              "mobilePhone": {
+                "type": "string",
+                "description": "携帯電話番号"
+              },
+              "auth": {
+                "$ref": "#/components/schemas/auth"
+              },
+              "lastLoginAt": {
+                "type": "string",
+                "description": "前回ログイン日時"
+              },
+              "passwordChangedFlg": {
+                "type": "boolean",
+                "description": "パスワード変更フラグ"
+              },
+              "attributes": {
+                "type": "object",
+                "description": "属性"
+              },
+              "roles": {
+                "type": "array",
+                "description": "ロール設定",
+                "items": {
+                  "$ref": "#/components/schemas/_code"
+                }
+              },
+              "block": {
+                "$ref": "#/components/schemas/_code"
+              },
+              "actor": {
+                "$ref": "#/components/schemas/_code"
+              }
+            }
+          },
+          "oneTime": {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "string",
+                "description": "ログイン結果",
+                "example": "onetime"
+              }
+            }
+          },
+          "userInfo": {
+            "type": "object",
+            "properties": {
+              "_code": {
+                "type": "object",
+                "description": "利用者情報 ひな形情報カタログ",
+                "properties": {
+                  "_value": {
+                    "type": "number",
+                    "description": "カタログコード値",
+                    "example": 1000373
+                  },
+                  "_ver": {
+                    "type": "number",
+                    "description": "カタログバージョン値",
+                    "example": 1
+                  }
+                }
+              },
+              "item-group": {
+                "type": "array",
+                "description": "利用者情報 各アイテム",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "タイトル（アイテム名称）",
+                      "example": "氏名"
+                    },
+                    "item": {
+                      "type": "object",
+                      "description": "利用者 個別アイテム",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "タイトル（個別アイテム名称）",
+                          "example": "姓"
+                        },
+                        "type": {
+                          "type": "object",
+                          "description": "個別アイテム情報カタログ",
+                          "properties": {
+                            "_value": {
+                              "type": "number",
+                              "description": "個別アイテム カタログコード値",
+                              "example": 30019
+                            },
+                            "_ver": {
+                              "type": "number",
+                              "description": "個別アイテム カタログバージョン値",
+                              "example": 1
+                            }
+                          }
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "そのアイテムの値",
+                          "example": "太郎"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_operator",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": true,
+      "logger": "file",
+      "extra": {
+        "poolSize": 100
+      }
+    }
