@@ -61,7 +61,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/system.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -72,7 +72,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/http.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -83,7 +83,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/access.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -94,7 +94,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/application.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -200,7 +200,7 @@ data:
         "isNumber": "数値ではありません（%s）",
         "isNumberString": "数値への変換に失敗しました（%s）",
         "isNotEmpty": "この値は空を期待しません（%s）",
-        "isUUID": "UUIDではありません（%s）",
+        "isUuid": "UUIDではありません（%s）",
         "isString": "文字列ではありません（%s）",
         "isObject": "JSONではありません（%s）",
         "isDefined": "この値は必須値です（%s）"

@@ -70,7 +70,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/system.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -81,7 +81,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/http.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -92,7 +92,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/access.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -103,7 +103,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/application.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -304,7 +304,7 @@ data:
         "matches": "document, event, thingのいずれかの値である必要があります",
         "nestedValidation": "オブジェクトもしくは配列である必要があります",
         "isNotEmptyObject": "この値はJSONではない、もしくは空であることを期待しません",
-        "length": "設定できる最短・最長の値の長さが異なっています",
+        "isLength": "設定できる最短・最長の値の長さが異なっています",
         "isHash": "この値はハッシュである必要があります",
         "isNotEmptyArray": "空の配列です",
         "isStringEmptyInArray": "配列の中に、空文字が含まれています",
