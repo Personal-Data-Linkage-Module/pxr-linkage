@@ -1,0 +1,1208 @@
+# Copyright 2022 NEC Corporation
+# Released under the MIT license.
+# https://opensource.org/licenses/mit-license.php
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: root-identity-verificate-service-container-config-map
+  namespace: <namespace>
+data:
+  config.json: |
+    {
+      "operatorService": {
+        "postIdentifyCode": "http://localhost:3000/operator/identifyCode"
+      },
+      "catalogService": {
+        "getCatalogName": "http://localhost:3001/catalog/name"
+      },
+      "sms": {
+        "countryCode": "+81-"
+      },
+      "code": {
+        "phoneNumber": 30036
+      },
+      "redirectUrl": "https://<root-block-url>/personal-portal/enter-code/?identifyCode=%s"
+    }
+  default.yml: |
+    # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
+    ports:
+      http: 3007
+
+    # SDE-IMPL-RECOMMENDED ログレベルを次のいずれかを設定します[none/debug/info]
+    loglevel: info
+
+    # SDE-MSA-PRIN 過負荷を回避する （MSA-PRIN-ID-02）
+    # SDE-IMPL-RECOMMENDED Backpressureの設定をします
+    backPressure:
+      threshold: 10000  # 同時実行数しきい値
+
+    catalog:
+      base: http://localhost:3001/catalog
+    operator:
+      session: http://localhost:3000/operator/session/
+    notification:
+      base: http://localhost:3004/notification
+    bookManage:
+      search: http://localhost:3005/book-manage/search
+      identity: http://localhost:3005/book-manage/identity
+      cooperateRequest: http://localhost:3005/book-manage/cooperate/request
+      cooperateRequestRelease: http://localhost:3005/book-manage/cooperate/request/release
+      cooperateUser: http://localhost:3005/book-manage/cooperate/user
+
+    timezone: Asia/Tokyo
+  log4js.config.json: |
+    {
+      "appenders": {
+        "ConsoleLogAppender": {
+          "type": "console"
+        },
+        "SystemLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/system.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] %m"
+          }
+        },
+        "HttpLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/http.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "AccessLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/access.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        },
+        "ApplicationLogAppender": {
+          "type": "dateFile",
+          "filename": "./logs/application.log",
+          "pattern": ".yyyy-MM-dd",
+          "numBackups": 30,
+          "alwaysIncludePattern": false,
+          "layout": {
+            "type": "pattern",
+            "pattern": "[%d{yyyy-MM-dd hh:mm:ss.SSS}] [%p] [%x{sessionId}] [%x{requestId}] %m"
+          }
+        }
+      },
+      "replaceConsole": true,
+      "categories": {
+        "default": {
+          "appenders": [
+            "ConsoleLogAppender"
+          ],
+          "level": "all"
+        },
+        "system": {
+          "appenders": [
+            "SystemLogAppender"
+          ],
+          "level": "all"
+        },
+        "http": {
+          "appenders": [
+            "HttpLogAppender"
+          ],
+          "level": "all"
+        },
+        "access": {
+          "appenders": [
+            "AccessLogAppender"
+          ],
+          "level": "all"
+        },
+        "application": {
+          "appenders": [
+            "ApplicationLogAppender"
+          ],
+          "level": "all"
+        }
+      }
+    }
+  message.json: |
+    {
+      "RESPONSE_ERROR": "サービスからのレスポンスの制御処理に失敗しました",
+      "UNDEFINED_ERROR": "未定義のエラーが発生しました",
+      "REQUEST_IS_EMPTY": "リクエストボディが空です",
+      "REQUEST_IS_ARRAY": "リクエストが配列です",
+      "NOT_AUTHORIZED": "未ログイン状態でのリクエストはエラーです",
+      "FAILED_TAKE_SESSION": "セッション情報の取得に失敗しました",
+      "REQUEST_UNAUTORIZED": "権限が不足しています",
+      "OPERATOR_REQUEST_URL": "オペレーターサービスのリクエストURL: %s",
+      "OPERATOR_REQUEST_BODY": "オペレーターサービスのリクエストボディ: %s",
+      "OPERATOR_RESPONSE_BODY": "オペレーターサービスのレスポンス: %s",
+      "OPERATOR_RESPONSE_STATUS": "オペレーターサービスのレスポンスコード: %s",
+      "FAILED_POST_IDENTIFY_CODE": "オペレーターサービス 本人性確認コード登録に失敗しました",
+      "FAILED_CONNECT_TO_OPERATOR": "オペレーターサービスとの接続に失敗しました",
+      "FAILED_CONNECT_TO_DATABASE": "データベースとの接続に失敗しました",
+      "FAILED_SAVE_ENTITY": "データベースへのデータ登録に失敗しました",
+      "NOT_EXISTS_IDENTIFY_CODE": "指定された本人性確認コードは存在しません(コード: %s)",
+      "PERMISSION_DENIED": "操作権限がありません",
+      "EXPIRED": "指定された本人性確認コードは、有効期限切れです",
+      "IS_VERIFIED": "指定された本人性確認コードは既に、確認済みになっています",
+      "NOT_MATCH_PXR_ID": "PXR-IDが一致しません",
+      "NOT_APPLIED_ACTOR": "申請されたアクターではありません",
+      "NO_USERID": "利用者IDを設定してください",
+      "UNSUPPORTED_ACTOR_CATALOG_CODE": "アクターのカタログコードがサポート外です",
+      "USERID_ASCII_ONLY": "利用者IDは半角英数記号で設定してください",
+      "FAILED_TAKE_IDENTIFICATION": "My-Condition-Book管理サービスから本人性確認事項の取得に失敗しました",
+      "CATALOG_RESPONSE_BODY": "カタログサービスのレスポンス{%s}",
+      "CATALOG_RESPONSE_STATUS": "カタログサービスのレスポンス ステータスコード(%s)",
+      "CATALOG_IS_NOT_EXISTS": "指定したカタログは存在しません(コード: %s)",
+      "FAILED_GET_CATALOG": "カタログサービスからのカタログ取得に失敗しました",
+      "FAILED_CONNECT_TO_CATALOG": "カタログサービスへの接続に失敗しました",
+      "CATALOG_IS_NOT_EXISTS_WITH_NS": "指定したカタログは存在しません(ネームスペース: %s)",
+      "INVALID_ACTOR_CATALOG": "REGION/APPに紐づくアクターではありません",
+      "NOTICE_RESPONSE_STATUS": "通知サービスのレスポンス ステータスコード(%s)",
+      "NOTIFICATION_CREATION_ERROR": "連携する通知の登録処理に失敗しました",
+      "FAILED_ADD_NOTIFICATION_REQUEST": "通知サービスへの通知データの登録処理に失敗しました",
+      "REQUEST_MISS_REQUIRED": "リクエスト内容に必須値が存在しません",
+      "REQUEST_PARAMETER_IS_NOT_NUMBER": "数値を期待するパラメーターが数値ではありません",
+      "REQUEST_PARAMETER_IS_NOT_STRING": "文字列を期待するパラメーターが文字列ではありません",
+      "REQUEST_URL_TYPE_PARAMETER_IS_INVALID": "発行するURL種別のパラメーターが規定とする値ではありません(規定値: 0, 1)",
+      "REQUEST_INVALID_CODE_OBJECT": "リクエストされたコードオブジェクトは、不正な形式です",
+      "REQUEST_INVALID_DATE_FORMAT": "リクエストされた日付は、フォーマットエラーです",
+      "REQUEST_EXPIRE_PARAMETER_IS_PAST_DATE": "有効期限には、過去の日付を指定できません",
+      "REQUEST_STATUS_PARAMETER_IS_INVALID": "ステータスパラメーターが規定とする値ではありません(規定値: 1, 2)",
+      "IS_NOT_VERIFIED": "指定された本人性確認コードは、確認済み(成功)ではありません",
+      "FAILED_COOPERATE_REQUEST": "利用者ID連携申請に失敗しました",
+      "FAILED_COOPERATE_USER": "利用者ID設定に失敗しました",
+      "FAILED_CONNECT_TO_BOOK_MANAGE": "My-Condition-Book管理サービスへの接続に失敗しました",
+      "NOTIFICATION_COOPERATE_REQUEST": "個人から利用者ID連携の連携要求がきました",
+      "NOTIFICATION_COOPERATE_RELEASE_REQUEST": "個人から利用者ID連携の連携解除要求がきました",
+      "NOTICE_IDENTIFY_CODE": "本人確認コードは続けて送付されるSMSに記載の通り発行されました。",
+      "REGION_NOT_OPEN": "開始申請前のRegionです。",
+      "validation": {
+        "isArray": "配列ではありません（%s）",
+        "isBoolean": "真偽値ではありません（%s）",
+        "isBooleanString": "真偽値への変換に失敗しました（%s）",
+        "isDate": "日付型ではありません（%s）",
+        "isDateString": "日付型への変換に失敗しました（%s）",
+        "isEmail": "Emailアドレスではありません（%s）",
+        "isEmpty": "この値は空である必要があります（%s）",
+        "isNumber": "数値ではありません（%s）",
+        "isNumberString": "数値への変換に失敗しました（%s）",
+        "isNotEmpty": "この値は空を期待しません（%s）",
+        "isUuid": "UUIDではありません（%s）",
+        "isString": "文字列ではありません（%s）",
+        "isObject": "JSONではありません（%s）",
+        "isDefined": "この値は必須値です（%s）"
+      }
+    }
+  openapi.json: |
+    {
+      "openapi": "3.0.2",
+      "info": {
+        "title": "identity-verificate-service",
+        "version": "1.0",
+        "description": "本人性確認サービス"
+      },
+      "servers": [
+        {
+          "url": "/identity-verificate/identity-verificate"
+        }
+      ],
+      "paths": {
+        "/code": {
+          "post": {
+            "tags": [
+              "本人性確認コード発行"
+            ],
+            "description": "本人性確認コードを発行し、WF関連の発行処理の場合はWFメンバーへの通知も行います。",
+            "requestBody": {
+              "description": "本人性確認コード発行用のリクエスト",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "発行情報",
+                    "properties": {
+                      "actor": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "カタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "カタログバージョン"
+                          }
+                        },
+                        "description": "アクターカタログコードオブジェクト"
+                      },
+                      "wf": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "カタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "カタログバージョン"
+                          }
+                        },
+                        "description": "WF定義カタログコードオブジェクト"
+                      },
+                      "app": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "カタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "カタログバージョン"
+                          }
+                        },
+                        "description": "APP定義カタログコードオブジェクト"
+                      }
+                    },
+                    "example": {
+                      "actor": {
+                        "_value": 1000004,
+                        "_ver": 1
+                      },
+                      "app": null,
+                      "wf": {
+                        "_value": 1000007,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "コード発行に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "発行情報",
+                      "properties": {
+                        "identifyCode": {
+                          "type": "string",
+                          "description": "本人性確認コード"
+                        },
+                        "actor": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "アクターカタログコードオブジェクト"
+                        },
+                        "wf": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "WF定義カタログコードオブジェクト"
+                        },
+                        "app": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "APP定義カタログコードオブジェクト"
+                        },
+                        "expireAt": {
+                          "type": "string",
+                          "description": "有効期限(yyyy-MM-ddTHH:MM:SS.SSS+0900"
+                        }
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo",
+                      "actor": {
+                        "_value": 1000004,
+                        "_ver": 1
+                      },
+                      "app": null,
+                      "wf": {
+                        "_value": 1000007,
+                        "_ver": 1
+                      },
+                      "expireAt": "2020-12-01T00:00:00.000+0900"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/code/verified": {
+          "post": {
+            "tags": [
+              "確認済本人性確認コード生成"
+            ],
+            "description": "確認済の本人性確認コードを発行します。",
+            "requestBody": {
+              "description": "確認済本人性確認コード生成用のリクエスト",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "確認コード生成情報",
+                    "properties": {
+                      "pxrId": {
+                        "type": "string",
+                        "description": "連携PXR-ID"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "description": "連携利用者ID"
+                      },
+                      "actor": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "連携アクターカタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "連携アクターカタログバージョン"
+                          }
+                        },
+                        "description": "アクターカタログコードオブジェクト"
+                      },
+                      "wf": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "連携wfカタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "連携wfカタログバージョン"
+                          }
+                        },
+                        "description": "WF定義カタログコードオブジェクト"
+                      },
+                      "app": {
+                        "type": "object",
+                        "properties": {
+                          "_value": {
+                            "type": "integer",
+                            "description": "連携appカタログコード"
+                          },
+                          "_ver": {
+                            "type": "integer",
+                            "description": "連携appカタログバージョン"
+                          }
+                        },
+                        "description": "APP定義カタログコードオブジェクト"
+                      }
+                    },
+                    "example": {
+                      "pxrId": "test.org",
+                      "userId": "test.bank",
+                      "actor": {
+                        "_value": 1000004,
+                        "_ver": 1
+                      },
+                      "app": null,
+                      "wf": {
+                        "_value": 1000007,
+                        "_ver": 1
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "確認済本人性確認コード生成に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "確認コード生成情報",
+                      "properties": {
+                        "identifyCode": {
+                          "type": "string",
+                          "description": "本人性確認コード"
+                        },
+                        "pxrId": {
+                          "type": "string",
+                          "description": "連携PXR-ID"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "連携利用者ID"
+                        },
+                        "actor": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "連携アクターカタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "連携アクターカタログバージョン"
+                            }
+                          },
+                          "description": "アクターカタログコードオブジェクト"
+                        },
+                        "wf": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "連携wfカタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "連携wfカタログバージョン"
+                            }
+                          },
+                          "description": "WF定義カタログコードオブジェクト"
+                        },
+                        "app": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "連携appカタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "連携appカタログバージョン"
+                            }
+                          },
+                          "description": "APP定義カタログコードオブジェクト"
+                        },
+                        "expireAt": {
+                          "type": "string",
+                          "description": "有効期限(yyyy-MM-ddTHH:MM:SS.SSS+0900"
+                        }
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo",
+                      "pxrId": "test.org",
+                      "userId": "test.bank",
+                      "actor": {
+                        "_value": 1000004,
+                        "_ver": 1
+                      },
+                      "app": null,
+                      "wf": {
+                        "_value": 1000007,
+                        "_ver": 1
+                      },
+                      "expireAt": "2020-12-01T00:00:00.000+0900"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/url": {
+          "post": {
+            "tags": [
+              "URL発行"
+            ],
+            "description": "本人性確認を閲覧する為のURLを発行します。",
+            "requestBody": {
+              "description": "発行するURL情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "発行するURLに関するリクエスト",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      },
+                      "urlType": {
+                        "type": "number",
+                        "required": [
+                          "0",
+                          "1"
+                        ],
+                        "description": "発行URL種別(0: 本人用, 1: 第三者用)"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "description": "ユーザーID"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo",
+                      "urlType": 1,
+                      "userId": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "URLの発行に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "発行URL",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "description": "発行URL"
+                        }
+                      },
+                      "example": {
+                        "url": "https://xxxx.xxx/confirm/third-party/{本人性確認コード}/"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/verify/others/{identifyCode}": {
+          "put": {
+            "tags": [
+              "第三者による本人性確認"
+            ],
+            "description": "本人性を第三者によって確認されたとき、データを更新します。",
+            "parameters": [
+              {
+                "name": "identifyCode",
+                "description": "本人性確認コード",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true
+              }
+            ],
+            "requestBody": {
+              "description": "確認結果ステータス",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "確認結果を内包したリクエスト",
+                    "properties": {
+                      "status": {
+                        "type": "number",
+                        "description": "本人性確認のステータス(1: 成功, 2: 失敗)"
+                      }
+                    },
+                    "example": {
+                      "status": 1
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "本人性確認に成功したステータスコード",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        },
+        "/acquisition/identification/{identifyCode}": {
+          "get": {
+            "tags": [
+              "本人性確認事項 取得"
+            ],
+            "description": "本人性確認事項を取得します。",
+            "parameters": [
+              {
+                "name": "identifyCode",
+                "description": "本人性確認コード",
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                },
+                "required": true
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "パスパラメーターのコードのデータ取得に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "照合結果",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "description": "利用者ID"
+                        },
+                        "actor": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "アクターカタログコードオブジェクト"
+                        },
+                        "wf": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "WF定義カタログコードオブジェクト"
+                        },
+                        "app": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "APP定義カタログコードオブジェクト"
+                        },
+                        "identification": {
+                          "type": "array",
+                          "description": "本人性確認事項",
+                          "items": {
+                            "$ref": "#/components/schemas/identification"
+                          }
+                        }
+                      }
+                    },
+                    "example": {
+                      "userId": "123456",
+                      "actor": {
+                        "_value": 1000003,
+                        "_ver": 1
+                      },
+                      "wf": {
+                        "_value": 1000004,
+                        "_ver": 1
+                      },
+                      "identification": [
+                        {
+                          "template": {
+                            "_code": {
+                              "_value": "30001",
+                              "_ver": 1
+                            },
+                            "item-group": [
+                              {
+                                "title": "氏名",
+                                "item": [
+                                  {
+                                    "title": "姓",
+                                    "type": {
+                                      "_value": 30019,
+                                      "_ver": 1
+                                    },
+                                    "content": "サンプル"
+                                  },
+                                  {
+                                    "title": "名",
+                                    "type": {
+                                      "_value": 30020,
+                                      "_ver": 1
+                                    },
+                                    "content": "太郎"
+                                  }
+                                ]
+                              },
+                              {
+                                "title": "性別",
+                                "item": [
+                                  {
+                                    "title": "性別",
+                                    "type": {
+                                      "_value": 30021,
+                                      "_ver": 1
+                                    },
+                                    "content": "男"
+                                  }
+                                ]
+                              },
+                              {
+                                "title": "生年月日",
+                                "item": [
+                                  {
+                                    "title": "生年月日",
+                                    "type": {
+                                      "_value": 30022,
+                                      "_ver": 1
+                                    },
+                                    "content": "2000-01-01"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/collate": {
+          "post": {
+            "tags": [
+              "本人性確認コード照合"
+            ],
+            "description": "本人性確認コード照合を行い、照合結果を取得します。",
+            "requestBody": {
+              "description": "照合結果",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "照合する本人性確認コード",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "照合に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "照合結果",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "利用者ID"
+                        },
+                        "actor": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "アクターカタログコードオブジェクト"
+                        },
+                        "wf": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "WF定義カタログコードオブジェクト"
+                        },
+                        "app": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "APP定義カタログコードオブジェクト"
+                        }
+                      },
+                      "example": {
+                        "pxrId": "sample.pxrid",
+                        "userId": "123456",
+                        "actor": {
+                          "_value": 1000003,
+                          "_ver": 1
+                        },
+                        "wf": {
+                          "_value": 1000004,
+                          "_ver": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/user/settings": {
+          "post": {
+            "tags": [
+              "利用者情報設定"
+            ],
+            "description": "利用者情報を設定します。",
+            "requestBody": {
+              "description": "利用者情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "利用者情報に関するリクエスト",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "description": "利用者ID"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo",
+                      "userId": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "利用者情報設定に成功した際のレスポンス",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        },
+        "/ind/collate": {
+          "post": {
+            "tags": [
+              "個人による本人性確認コード照合"
+            ],
+            "description": "本人性確認コード照合を行い、照合結果を取得します。",
+            "requestBody": {
+              "description": "照合結果",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "照合する本人性確認コード",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "照合に成功した際のレスポンス",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "description": "照合結果",
+                      "properties": {
+                        "pxrId": {
+                          "type": "string",
+                          "description": "PXR-ID"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "利用者ID"
+                        },
+                        "actor": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "アクターカタログコードオブジェクト"
+                        },
+                        "wf": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "WF定義カタログコードオブジェクト"
+                        },
+                        "app": {
+                          "type": "object",
+                          "properties": {
+                            "_value": {
+                              "type": "integer",
+                              "description": "カタログコード"
+                            },
+                            "_ver": {
+                              "type": "integer",
+                              "description": "カタログバージョン"
+                            }
+                          },
+                          "description": "APP定義カタログコードオブジェクト"
+                        }
+                      },
+                      "example": {
+                        "pxrId": "sample.pxrid",
+                        "userId": "123456",
+                        "actor": {
+                          "_value": 1000003,
+                          "_ver": 1
+                        },
+                        "wf": {
+                          "_value": 1000004,
+                          "_ver": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/user/settings": {
+          "post": {
+            "tags": [
+              "利用者情報設定"
+            ],
+            "description": "利用者情報を設定します。",
+            "requestBody": {
+              "description": "利用者情報",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "description": "利用者情報に関するリクエスト",
+                    "properties": {
+                      "identifyCode": {
+                        "type": "string",
+                        "description": "本人性確認コード"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "description": "利用者ID"
+                      }
+                    },
+                    "example": {
+                      "identifyCode": "ukO8z+Xf8vv7yxXQj2Hpo",
+                      "userId": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "利用者情報設定に成功した際のレスポンス",
+                "content": {
+                  "application/json": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "identification": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/template"
+              }
+            ]
+          },
+          "template": {
+            "type": "object",
+            "properties": {
+              "_code": {
+                "type": "object",
+                "properties": {
+                  "_value": {
+                    "type": "integer",
+                    "description": "カタログコード"
+                  },
+                  "_ver": {
+                    "type": "integer",
+                    "description": "カタログバージョン"
+                  }
+                }
+              },
+              "item-group": {
+                "type": "array",
+                "description": "項目グループ",
+                "items": {
+                  "$ref": "#/components/schemas/item-group"
+                }
+              }
+            }
+          },
+          "item-group": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "項目名"
+              },
+              "item": {
+                "type": "array",
+                "description": "項目",
+                "items": {
+                  "$ref": "#/components/schemas/item"
+                }
+              }
+            }
+          },
+          "item": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "項目名"
+              },
+              "type": {
+                "type": "object",
+                "properties": {
+                  "_value": {
+                    "type": "integer",
+                    "description": "カタログコード"
+                  },
+                  "_ver": {
+                    "type": "integer",
+                    "description": "カタログバージョン"
+                  }
+                }
+              },
+              "content": {
+                "type": "string",
+                "description": "内容"
+              }
+            }
+          }
+        }
+      }
+    }
+  ormconfig.json: |
+    {
+      "name": "postgres",
+      "type": "postgres",
+      "host": "external-db-service",
+      "port": 5432,
+      "database": "<database_name>",
+      "schema": "pxr_identify_verify",
+      "username": "<user_name>",
+      "password": "<password>",
+      "synchronize": false,
+      "logging": false
+    }
+
