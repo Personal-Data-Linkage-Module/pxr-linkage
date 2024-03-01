@@ -1086,7 +1086,8 @@ data:
             "^\\/notification\\/?\\?.+\\/?$",
             "^\\/book-manage\\/output\\/condition\\/?\\?.*\\/?$",
             "^\\/identity-verificate\\/acquisition\\/identification\\/.+\\/?$",
-            "^\\/certificate-manage\\/check\\/client\\/?$"
+            "^\\/certificate-manage\\/check\\/client\\/?$",
+            "^\\/certification-authority\\/client\\/.+\\/.+\\/?$"
           ],
           "2": [],
           "1": [],
