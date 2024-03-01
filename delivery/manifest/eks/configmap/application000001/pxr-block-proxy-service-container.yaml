@@ -1184,7 +1184,8 @@ data:
             "^\\/notification\\/?$",
             "^\\/book-operate\\/user\\/?$",
             "^\\/book-operate\\/user\\/delete\\/?$",
-            "^\\/book-operate\\/user\\/list\\/?$"
+            "^\\/book-operate\\/user\\/list\\/?$",
+            "^\\/certificate-manage\\/?$"
           ],
           "2": [
             "^\\/operator\\/session\\/?$",
