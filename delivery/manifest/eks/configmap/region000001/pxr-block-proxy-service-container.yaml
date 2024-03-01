@@ -10,30 +10,30 @@ metadata:
 data:
   config.json: |
     {
-        "headersPattern": {
-            "external": [
-                {
-                    "key": "host",
-                    "value": ".+\\.pxrsrc\\.me\\.uk$"
-                },
-                {
-                    "key": "x-amzn-trace-id",
-                    "value": "^[a-zA-Z]+=[0-9]-[a-f0-9]{8}-[a-f0-9]{24}$"
-                }
-            ],
-            "betweenBlocks": [
-                {
-                    "key": "host",
-                    "value": "^(root|external|application[0-9]{6}|consumer[0-9]{6}|region[0-9]{6}|trader[0-9]{6})-service$"
-                }
-            ],
-            "withinBlock": [
-                {
-                    "key": "host",
-                    "value": "^localhost(|:[0-9]{4})$"
-                }
-            ]
-        }
+      "headersPattern": {
+        "external": [
+          {
+            "key": "host",
+            "value": ".+\\.pxrsrc\\.me\\.uk$"
+          },
+          {
+            "key": "x-amzn-trace-id",
+            "value": "^[a-zA-Z]+=[0-9]-[a-f0-9]{8}-[a-f0-9]{24}$"
+          }
+        ],
+        "betweenBlocks": [
+          {
+            "key": "host",
+            "value": "^(root|external|application[0-9]{6}|consumer[0-9]{6}|region[0-9]{6}|trader[0-9]{6})-service$"
+          }
+        ],
+        "withinBlock": [
+          {
+            "key": "host",
+            "value": "^localhost(|:[0-9]{4})$"
+          }
+        ]
+      }
     }
   default.yml: |
     # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
