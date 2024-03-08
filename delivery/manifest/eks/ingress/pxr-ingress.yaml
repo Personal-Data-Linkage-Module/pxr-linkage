@@ -34,21 +34,21 @@ metadata:
   namespace: <namespace>
 spec:
   rules:
-  - host: application000001.domain.com
+  - host: application000001.<domain.com>
     http:
       paths:
       - path: /*
         backend:
           serviceName: application000001-service
           servicePort: 80
-  - host: region000001.domain.com
+  - host: region000001.<domain.com>
     http:
       paths:
       - path: /*
         backend:
           serviceName: region000001-service
           servicePort: 80
-  - host: root.domain.com
+  - host: root.<domain.com>
     http:
       paths:
       - path: /*

@@ -16,9 +16,6 @@ data:
         "hashSalt": "<password_hashsalt>",
         "hashStrechCount": <password_hashStrechCount>
       },
-      "aws": {
-        "bucketName": "<bucket_name>"
-      },
       "cloud_search": {
        "post_url": "https://{endpoint}/{authcode}/documents/batch",
        "get_url": "https://{endpoint}/{authcode}/search",
