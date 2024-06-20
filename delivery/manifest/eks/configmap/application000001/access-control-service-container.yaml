@@ -49,6 +49,9 @@ data:
       session: http://localhost:3000/operator/session
 
     timezone: Asia/Tokyo
+
+    # APIトークン有効期限チェック時に使用するバッファ時間（秒）
+    bufferTime: 10
   log4js.config.json: |
     {
       "appenders": {
