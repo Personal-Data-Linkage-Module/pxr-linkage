@@ -60,6 +60,8 @@ data:
       getSharingDataDefinition: http://localhost:3005/book-manage/setting/share/
       collationTemporaryShareCode: http://localhost:3005/book-manage/share/temp/collation
       getBookInd: http://localhost:3005/book-manage/
+      postStorePermission: http://localhost:3005/book-manage/settings/store/permission
+      postSharePermission: http://localhost:3005/book-manage/setting/share/permission
 
     accessControlService:
       local:
