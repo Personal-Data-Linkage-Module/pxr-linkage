@@ -209,6 +209,7 @@ data:
       "EMPTY_REGION_AND_APP": "REGION、APPが共に設定されていません",
       "SET_WF_AND_APP": "REGION、APPが共に設定されています",
       "EMPTY_PXR_ID": "PXR-IDが取得できませんでした",
+      "MISSING_LIMIT_AND_PXR_ID": "limit、PXR-IDどちらか設定必須です",
       "ACTOR_CATALOG_INVALID": "指定されたアクターカタログコードは対象アクターのカタログコードではありません",
       "APP_CATALOG_CODE_NOT_EXIST": "指定されたアプリケーションカタログコードがアクターカタログ内にありません",
       "NOT_STORE_CATALOG_CODE": "蓄積可能なデータ定義が見つかりません",
@@ -1101,7 +1102,7 @@ data:
                 "application/json": {
                   "schema": {
                     "type": "object",
-                    "description": "一覧取得のリクエストボディ",
+                    "description": "一覧取得のリクエストボディ PXR-ID、limitはいずれか必須",
                     "properties": {
                       "pxrId": {
                         "type": "array",
@@ -1124,6 +1125,10 @@ data:
                             "description": "終了日"
                           }
                         }
+                      },
+                      "coopStartAt": {
+                        "type": "string",
+                        "description": "連携開始日時"
                       },
                       "offset": {
                         "type": "number",
@@ -1183,6 +1188,28 @@ data:
               "ユーザー取得"
             ],
             "description": "ユーザーIDからユーザー情報を取得します。",
+            "parameters": [
+              {
+                "name": "disableFlg",
+                "description": "Book削除済みを含む",
+                "in": "query",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": false,
+                "example": 1
+              },
+              {
+                "name": "includeDeleteCoop",
+                "description": "削除済み連携情報を含む",
+                "in": "query",
+                "schema": {
+                  "type": "integer"
+                },
+                "required": false,
+                "example": 1
+              }
+            ],
             "requestBody": {
               "description": "User取得リクエストボディ",
               "required": true,
