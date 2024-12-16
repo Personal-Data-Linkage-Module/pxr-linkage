@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create Cfn Role
+
+#初期構築に使用するCloudFormationとEKSを操作するためのロールを作成する
+
+# --------------------------------------------------
+# Parameters Section
+# --------------------------------------------------
+Parameters:
+  strStackPrefixName:
+    Type: String
+    Description: Please input stack prefix name
+    AllowedPattern: ^.+$
+
+# --------------------------------------------------
+# Resources Section
+# --------------------------------------------------
+Resources:
+  #
+  # IAM
+  #
+  IamRolInsPrf:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${strStackPrefixName}-RolInsPrfAdm
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: 
+                - ec2.amazonaws.com
+                - cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+        #- arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        #- arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+        #- arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        #- arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      #Policies:
+      #  - PolicyName: PlcRolInsVpcEndPntSsmAccSss
+      #    PolicyDocument:
+      #      Version: 2012-10-17
+      #      Statement:
+      #        Effect: Allow
+      #        Action: s3:GetObject
+      #        Resource:
+      #          - !Sub arn:aws:s3:::aws-ssm-${AWS::Region}/*
+      #          - !Sub arn:aws:s3:::aws-windows-downloads-${AWS::Region}/*
+      #          - !Sub arn:aws:s3:::amazon-ssm-${AWS::Region}/*
+      #          - !Sub arn:aws:s3:::amazon-ssm-packages-${AWS::Region}/*
+      #          - !Sub arn:aws:s3:::${AWS::Region}-birdwatcher-prod/*
+      #          - !Sub arn:aws:s3:::patch-baseline-snapshot-${AWS::Region}/*
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Role-InstanceProfile
+  IamInsPrf:
+    DependsOn:
+      - IamRolInsPrf
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref IamRolInsPrf
+      Path: /
+       
+Outputs:
+  IamInsPrfOutput: 
+    Value: !Ref IamInsPrf
+    Export:
+      Name: !Sub ${strStackPrefixName}-IamInsPrfOutput
