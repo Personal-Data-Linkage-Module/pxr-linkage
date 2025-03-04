@@ -1179,6 +1179,7 @@ data:
             "^\\/book-manage\\/user\\/info\\/?$",
             "^\\/book-manage\\/output\\/?\\?.*\\/?$",
             "^\\/book-manage\\/output\\/condition\\/data_mng\\/search\\/?\\?.*\\/?$",
+            "^\\/book-manage\\/output\\/condition\\/prepare\\/?$",
             "^\\/identity-verificate\\/code\\/?$",
             "^\\/identity-verificate\\/code\\/verified\\/?$",
             "^\\/identity-verificate\\/url\\/?$",
