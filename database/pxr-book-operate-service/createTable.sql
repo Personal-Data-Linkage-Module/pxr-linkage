@@ -503,7 +503,7 @@ CREATE TABLE IF NOT EXISTS pxr_book_operate.cmatrix_floating_column
     id bigserial,
     cmatrix_thing_id bigint NOT NULL,
     index_key varchar(255) NOT NULL,
-    value varchar(255),
+    value text,
     is_disabled boolean NOT NULL DEFAULT false,
     created_by varchar(255) NOT NULL,
     created_at timestamp(3) NOT NULL DEFAULT NOW(),
