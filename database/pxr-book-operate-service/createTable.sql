@@ -503,7 +503,7 @@ CREATE TABLE IF NOT EXISTS pxr_book_operate.cmatrix_floating_column
     id bigserial,
     cmatrix_thing_id bigint NOT NULL,
     index_key varchar(255) NOT NULL,
-    value varchar(255),
+    value text,
     is_disabled boolean NOT NULL DEFAULT false,
     created_by varchar(255) NOT NULL,
     created_at timestamp(3) NOT NULL DEFAULT NOW(),
@@ -670,6 +670,8 @@ CREATE TABLE IF NOT EXISTS pxr_book_operate.collection_request_consent
     status smallint NOT NULL DEFAULT 0,
     user_id varchar(255) NOT NULL,
     mask_id varchar(255) NOT NULL,
+    wf_catalog_code bigint,
+    app_catalog_code bigint,
     is_disabled boolean NOT NULL DEFAULT false,
     created_by varchar(255) NOT NULL,
     created_at timestamp(3) NOT NULL DEFAULT NOW(),
@@ -684,6 +686,8 @@ COMMENT ON COLUMN pxr_book_operate.collection_request_consent.collection_request
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.status IS 'ステータス';
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.user_id IS '利用者ID';
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.mask_id IS 'マスクID';
+COMMENT ON COLUMN pxr_book_operate.collection_request_consent.wf_catalog_code IS 'ワークフローカタログコード';
+COMMENT ON COLUMN pxr_book_operate.collection_request_consent.app_catalog_code IS 'アプリケーションカタログコード';
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.is_disabled IS '削除フラグ';
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.created_by IS '登録者';
 COMMENT ON COLUMN pxr_book_operate.collection_request_consent.created_at IS '登録日時';

@@ -41,7 +41,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/system.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -52,7 +52,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/http.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -63,7 +63,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/access.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -74,7 +74,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/application.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",

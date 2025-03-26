@@ -1,5 +1,3 @@
-/** Copyright 2022 NEC Corporation
-*/
 // 利用者データ削除
 // deleteUser.js
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
@@ -128,6 +126,8 @@ async function main () {
                 try {
                     // Book管理サービス.My-Condition-Book一覧取得 API を呼び出し、利用者ID連携情報を取得する
                     let userId;
+                    let app;
+                    let wf;
                     const postMcbSearchBody = {
                         pxrId: [
                             target['pxrId']
@@ -151,6 +151,8 @@ async function main () {
                                     ((cooperation['app'] && target['app'] && Number(target['app']['_value']) === Number(cooperation['app']['_value'])) ||
                                         (cooperation['wf'] && target['wf'] && Number(target['wf']['_value']) === Number(cooperation['wf']['_value'])))) {
                                     userId = cooperation['userId'];
+                                    app = target['app'] ? Number(target['app']['_value']) : undefined;
+                                    wf = target['wf'] ? Number(target['wf']['_value']) : undefined;
                                 }
                             }
                         }
@@ -206,6 +208,11 @@ async function main () {
                         };
                         deleteUserDataOptions.url = deleteUserDataOptions.url.replace('{userId}', userId);
                         deleteUserDataOptions.url = deleteUserDataOptions.url.replace('{physicalDelete}', deletingFlg);
+                        if (app) {
+                            deleteUserDataOptions.url = deleteUserDataOptions.url + encodeURIComponent('&app=' + app);
+                        } else {
+                            deleteUserDataOptions.url = deleteUserDataOptions.url + encodeURIComponent('&wf=' + wf);
+                        }
                         await execRequest(deleteUserDataOptions, '利用者データ削除');
 
                         // 削除ステータスを 3: 削除済 に更新する

@@ -8,6 +8,33 @@ metadata:
   name: root-pxr-block-proxy-service-container-config-map
   namespace: <namespace>
 data:
+  config.json: |
+    {
+      "headersPattern": {
+        "external": [
+          {
+            "key": "host",
+            "value": ".+\\.pxrsrc\\.me\\.uk$"
+          },
+          {
+            "key": "x-amzn-trace-id",
+            "value": "^[a-zA-Z]+=[0-9]-[a-f0-9]{8}-[a-f0-9]{24}$"
+          }
+        ],
+        "betweenBlocks": [
+          {
+            "key": "host",
+            "value": "^(root|external|application[0-9]{6}|consumer[0-9]{6}|region[0-9]{6}|trader[0-9]{6})-service$"
+          }
+        ],
+        "withinBlock": [
+          {
+            "key": "host",
+            "value": "^localhost(|:[0-9]{4})$"
+          }
+        ]
+      }
+    }
   default.yml: |
     # SDE-IMPL-RECOMMENDED REST API サーバーのポート番号を指定します
     ports:
@@ -60,7 +87,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/system.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -71,7 +98,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/http.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -82,7 +109,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/access.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -93,7 +120,7 @@ data:
           "type": "dateFile",
           "filename": "./logs/application.log",
           "pattern": ".yyyy-MM-dd",
-          "daysToKeep": 30,
+          "numBackups": 30,
           "alwaysIncludePattern": false,
           "layout": {
             "type": "pattern",
@@ -175,7 +202,7 @@ data:
         "isNumber": "数値ではありません",
         "isNumberString": "数値への変換に失敗しました",
         "isNotEmpty": "この値は空を期待しません",
-        "isUUID": "UUIDではありません",
+        "isUuid": "UUIDではありません",
         "isString": "文字列ではありません",
         "isObject": "JSONではありません",
         "isJson": "JSONではありません",
@@ -1086,7 +1113,8 @@ data:
             "^\\/notification\\/?\\?.+\\/?$",
             "^\\/book-manage\\/output\\/condition\\/?\\?.*\\/?$",
             "^\\/identity-verificate\\/acquisition\\/identification\\/.+\\/?$",
-            "^\\/certificate-manage\\/check\\/client\\/?$"
+            "^\\/certificate-manage\\/check\\/client\\/?$",
+            "^\\/certification-authority\\/client\\/.+\\/.+\\/?$"
           ],
           "2": [],
           "1": [],
@@ -1151,6 +1179,7 @@ data:
             "^\\/book-manage\\/user\\/info\\/?$",
             "^\\/book-manage\\/output\\/?\\?.*\\/?$",
             "^\\/book-manage\\/output\\/condition\\/data_mng\\/search\\/?\\?.*\\/?$",
+            "^\\/book-manage\\/output\\/condition\\/prepare\\/?$",
             "^\\/identity-verificate\\/code\\/?$",
             "^\\/identity-verificate\\/code\\/verified\\/?$",
             "^\\/identity-verificate\\/url\\/?$",

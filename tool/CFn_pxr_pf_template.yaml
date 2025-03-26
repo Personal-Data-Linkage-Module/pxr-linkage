@@ -1,0 +1,2343 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create EKS on Fargate
+# --------------------------------------------------
+# Parameters Section
+# --------------------------------------------------
+Parameters:
+  ### Required Option
+  strStackPrefixName:
+    Type: String
+    Description: Please input stack prefix name
+    AllowedPattern: ^[a-z|0-9|/-]+$
+    # ドメインとして使用できない文字は不可
+  strDomainName:
+    Type: String
+    Description: example.com
+  strSecondOcted:
+    Type: String
+    Description: Please input second octed number.(10.*.0.0/16 <- please write * section.)
+    AllowedPattern: '^([0-9]{1}|[1-9]{1}[0-9]{1}|[1]{1}[0-9]{1}[0-9]{1}|[2]{1}[0-4]{1}[0-9]{1}|[2]{1}[5]{1}[0-5]{1})$'
+  strKmsUserName:
+    Type: String
+#  strSnsMailAddress:
+#    Type: String
+#    Description: xxx@example.com
+  FirstRun:
+    Type: String
+    AllowedValues:
+      - True
+      - False
+  ProductionEnvironment:
+    Type: String
+    AllowedValues:
+      - True
+      - False
+  UseSameAccountAwsManagedDomain: 
+    Type: String 
+    Description: When the domain is registered with the same account Route 53,choose yes.
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+    Default: 'Yes'
+
+  ### RDS Option
+  strRdsMasterUserName:
+    Type: String
+    Default: postgres
+  strRdsMasterPassword:
+    Type: String
+    Default: postgres
+  RdsInstanceSize:
+    Type: String
+    Default: db.t3.medium
+  RdsPostgresVersion:
+    Type: String
+    Default: 15.3
+  strRetentionPeriod:
+    Type: String
+    Default: 7
+    Description: The amount of time, in days, to retain Performance Insights data. Valid values are 7 or 731 (2 years).
+  ### EC2 Option
+  Ec2InstanceSize:
+    Type: String
+    Default: t3.micro
+  Ec2VolumeSize:
+    Type: Number
+    Default: 8
+  ### Eks Option
+  EksVersion:
+    Type: String
+    Description: EKS Cluster Version
+    Default: '1.25'
+
+  ### Other Option
+  ExternalConn:
+    Type: String
+    Description: Choose External connection.
+    AllowedValues:
+      - 'On'
+      - 'Off'
+    ConstraintDescription: must specify On or Off.
+    Default: 'On'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          default: "Required"
+        Parameters:
+          - strStackPrefixName
+          - strDomainName
+          - strSecondOcted
+          - strKmsUserName
+          #- strSnsMailAddress
+          - FirstRun
+          - ProductionEnvironment
+          - UseSameAccountAwsManagedDomain
+      -
+        Label:
+          default: "RDS Option"
+        Parameters:
+          - strRdsMasterUserName
+          - strRdsMasterPassword
+          - RdsInstanceSize
+          - RdsPostgresVersion
+          - strRetentionPeriod
+      -
+        Label:
+          default: "EC2 Option"
+        Parameters:
+          - Ec2InstanceSize
+          - Ec2VolumeSize
+      -
+        Label:
+          default: "EKS Option"
+        Parameters:
+          - EksVersion
+# --------------------------------------------------
+# Mappings Section
+# --------------------------------------------------
+Mappings:
+  Ec2:
+    Ami:
+      Al2: ami-0a1c2ec61571737db
+Conditions:
+  ExternalConnStt: !Equals
+    - !Ref ExternalConn
+    - 'On'
+  FirstRunStt: !Equals
+    - !Ref FirstRun
+    - True
+  ProdEnvStt: !Equals
+    - !Ref ProductionEnvironment
+    - True
+  UseAwsDomain: !Equals
+    - !Ref UseSameAccountAwsManagedDomain
+    - 'Yes'
+
+# --------------------------------------------------
+# Resources Section
+# --------------------------------------------------
+Resources:
+
+  #
+  # KMS
+  #
+
+  ###  KMS Key
+  PxrKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: encryption key
+      KeyPolicy:
+        Id: pxr-key-policy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: kms:*
+            Resource: "*"
+          - Sid: Allow access for Key Administrators
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/${strKmsUserName}"
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:TagResource
+              - kms:UntagResource
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: "*"
+          - Sid: Allow use of the key
+            Effect: Allow
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/${strKmsUserName}"
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+          - Sid: Allow attachment of persistent resources
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:user/${strKmsUserName}"
+            Action:
+              - kms:CreateGrant
+              - kms:ListGrants
+              - kms:RevokeGrant
+            Resource: "*"
+            Condition:
+              Bool:
+                kms:GrantIsForAWSResource: true
+      KeyUsage: ENCRYPT_DECRYPT
+
+  ### KMS Key Alias
+  PxrKmsAlias:
+    Condition: ProdEnvStt
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${strStackPrefixName}/CloudTrail
+      TargetKeyId: !GetAtt PxrKmsKey.Arn
+
+
+  #
+  # VPC
+  #
+
+  ### VPC
+  Vpc4Pf:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Sub 10.${strSecondOcted}.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-VPC
+  ### Elastic IP
+  EipNgwSbnPubA:
+    Condition: ExternalConnStt
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  EipNgwSbnPubB:
+    Condition: ExternalConnStt
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  ### Internet Gateway
+  Igw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-InternetGateway
+  VpcIgwAtt:
+    DependsOn:
+      - Vpc4Pf
+      - Igw
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      InternetGatewayId: !Ref Igw
+  ### Subnet
+  SbnPubA:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.200.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Public-A
+        - Key: kubernetes.io/role/elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+      
+  SbnPubB:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.225.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Public-B
+        - Key: kubernetes.io/role/elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+
+  SbnPriA:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.100.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Private-A
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+  SbnPriB:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.150.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Private-B
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+
+  SbnPriC:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.120.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Private-C
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+  SbnPriD:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref AWS::Region
+      CidrBlock: !Sub 10.${strSecondOcted}.170.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Subnet-Private-D
+        - Key: kubernetes.io/role/internal-elb
+          Value: 1
+        - Key: !Sub kubernetes.io/cluster/${strStackPrefixName}-cluster
+          Value: owned
+
+  ### RouteTable
+  RtbPubCmn:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-RouteTable-Public-Cmn
+  RtbPriA:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-RouteTable-Private-A
+  RtbPriB:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-RouteTable-Private-B
+  RtbPriC:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-RouteTable-Private-C
+  RtbPriD:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-RouteTable-Private-D
+  SbnRtbAssPubACmn:
+    DependsOn:
+      - SbnPriA
+      - RtbPubCmn
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPubA
+      RouteTableId: !Ref RtbPubCmn
+  SbnRtbAssPubBCmn:
+    DependsOn:
+      - SbnPubB
+      - RtbPubCmn
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPubB
+      RouteTableId: !Ref RtbPubCmn
+  SbnRtbAssPriAPriA:
+    DependsOn:
+      - SbnPriA
+      - RtbPriA
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPriA
+      RouteTableId: !Ref RtbPriA
+  SbnRtbAssPriBPriB:
+    DependsOn:
+      - SbnPriB
+      - RtbPriB
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPriB
+      RouteTableId: !Ref RtbPriB
+  SbnRtbAssPriAPriC:
+    DependsOn:
+      - SbnPriC
+      - RtbPriC
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPriC
+      RouteTableId: !Ref RtbPriC
+  SbnRtbAssPriBPriD:
+    DependsOn:
+      - SbnPriD
+      - RtbPriD
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SbnPriD
+      RouteTableId: !Ref RtbPriD
+
+  ### NatGateway
+  NgwSbnPubA:
+    Condition: ExternalConnStt
+    DependsOn:
+      - SbnPubA
+      - EipNgwSbnPubA
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref SbnPubA
+      AllocationId: !GetAtt EipNgwSbnPubA.AllocationId
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-NatGw-A
+  NgwSbnPubB:
+    Condition: ExternalConnStt
+    DependsOn:
+      - SbnPubB
+      - EipNgwSbnPubB
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref SbnPubB
+      AllocationId: !GetAtt EipNgwSbnPubB.AllocationId
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-NatGw-B
+
+  #### NatGatway RouteTable
+  RouDefViaIgwRtbPubCmn:
+    DependsOn:
+      - Igw
+      - RtbPubCmn
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RtbPubCmn
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref Igw
+  RouDefViaNgwRtbPriA:
+    Condition: ExternalConnStt
+    DependsOn:
+      - RtbPriA
+      - NgwSbnPubA
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RtbPriA
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NgwSbnPubA
+  RouDefViaNgwRtbPriB:
+    Condition: ExternalConnStt
+    DependsOn:
+      - RtbPriB
+      - NgwSbnPubB
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RtbPriB
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NgwSbnPubB
+
+  ### SecurityGroup
+  #### SecutiryGroup VPCEndPoint ECR
+  ScgVepEcr:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-ECR
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-ECR
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-ECR
+  SgiVepEcr001:
+    DependsOn:
+      - ScgVepEcr
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgVepEcr.GroupId
+      SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiVepEcr002:
+    DependsOn:
+      - ScgVepEcr
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgVepEcr.GroupId
+      SourceSecurityGroupId: !GetAtt ScgEc2Bsn.GroupId
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+
+  #### SecutiryGroup VPCEndPoint S3
+  ScgVepS3:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-S3
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-S3
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-VpcEndPoint-S3
+  SgiVepS3001:
+    DependsOn:
+      - ScgVepS3
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgVepS3.GroupId
+      SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiVepS3002:
+    DependsOn:
+      - ScgVepS3
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgVepS3.GroupId
+      SourceSecurityGroupId: !GetAtt ScgEc2Bsn.GroupId
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+
+  #### SecurityGroup RDS DBCluster Cmn
+  ScgRdsClsCmn:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-RDS-DbCluster-Cmn
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-RDS-DbCluster-Cmn
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-RDS-DbCluster-Cmn
+  SgiRdsCls001:
+    DependsOn:
+      - ScgRdsClsCmn
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgRdsClsCmn.GroupId
+      SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      IpProtocol: tcp
+      FromPort: '5432'
+      ToPort: '5432'
+  SgiRdsCls002:
+    DependsOn:
+      - ScgRdsClsCmn
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgRdsClsCmn.GroupId
+      SourceSecurityGroupId: !GetAtt ScgEc2Bsn.GroupId
+      IpProtocol: tcp
+      FromPort: '5432'
+      ToPort: '5432'
+
+  #### SecutiryGroup ALB
+  ScgAlbBus:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-ApplicationELB-Business
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-ApplicationELB-Business
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-ApplicationELB-Business
+  
+  EipNgwSbnPubASecurityGroupIngress:
+    DependsOn:
+      - EipNgwSbnPubA
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: !Join
+          - ''
+          - - !Ref EipNgwSbnPubA
+            - '/32'
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+
+  EipNgwSbnPubBSecurityGroupIngress:
+    DependsOn:
+      - EipNgwSbnPubB
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: !Join
+          - ''
+          - - !Ref EipNgwSbnPubB
+            - '/32'
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+
+  SgiAlbBusEks:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt EksControlPlaneSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt ScgAlbBus.GroupId
+      IpProtocol: tcp
+      FromPort: '8080'
+      ToPort: '8080'
+  SgiAlbBusPrf001:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.192.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf002:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.194.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf003:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.196.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf004:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.198.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf005:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.200.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf006:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 165.225.110.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf007:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 165.225.116.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf008:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 165.225.234.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrf009:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 147.161.96.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+
+  SgiAlbBusPrf010:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 136.226.238.0/23
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+      
+  SgiAlbBusPrfEgress01:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: '443'
+      ToPort: '443'
+  SgiAlbBusPrfEgress02:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: '8080'
+      ToPort: '8080'
+  SgiAlbBusPrfEgress03:
+    DependsOn:
+      - ScgAlbBus
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt ScgAlbBus.GroupId
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: '3000'
+      ToPort: '3000'
+
+  
+  ScgEksCls:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      SourceSecurityGroupId: !GetAtt ScgAlbBus.GroupId
+      IpProtocol: tcp
+      FromPort: '8080'
+      ToPort: '8080'
+  GrafanaScgEksCls:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      SourceSecurityGroupId: !GetAtt ScgAlbBus.GroupId
+      IpProtocol: tcp
+      FromPort: '3000'
+      ToPort: '3000'
+
+  ScgEc2Bsn:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-EC2-Instance-Bastion
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-EC2-Instance-Bastion
+      VpcId: !Ref Vpc4Pf
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-EC2-Instance-Bastion
+
+  #
+  # EndPoints
+  #
+  VepEcrApi:
+    DependsOn:
+      - SbnPriA
+      - SbnPriB
+      - ScgVepEcr
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.api
+      VpcId: !Ref Vpc4Pf
+      SubnetIds:
+        - !Ref SbnPriA
+        - !Ref SbnPriB
+      SecurityGroupIds:
+        - !GetAtt ScgVepEcr.GroupId
+      PrivateDnsEnabled: true
+  VepEcrDkr:
+    DependsOn:
+      - SbnPriA
+      - SbnPriB
+      - ScgVepEcr
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ecr.dkr
+      VpcId: !Ref Vpc4Pf
+      SubnetIds:
+        - !Ref SbnPriA
+        - !Ref SbnPriB
+      SecurityGroupIds:
+        - !GetAtt ScgVepEcr.GroupId
+      PrivateDnsEnabled: true
+  VepSss:
+    DependsOn:
+      - RtbPriA
+      - RtbPriB
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Vpc4Pf
+      RouteTableIds:
+        - !Ref RtbPriA
+        - !Ref RtbPriB
+  VepSssIf:
+    DependsOn:
+      - SbnPriA
+      - SbnPriB
+      - ScgVepS3
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Vpc4Pf
+      SubnetIds:
+        - !Ref SbnPriA
+        - !Ref SbnPriB
+      SecurityGroupIds:
+        - !GetAtt ScgVepS3.GroupId
+      PrivateDnsEnabled: false
+
+  ###  Amazon Managed service for Prometheus
+  Workspace:
+    Type: AWS::APS::Workspace
+    Properties:
+      Alias: !Sub ${strStackPrefixName}-workspace
+
+  EfsGrafanaSecurityGroup:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-EFS-Grafana
+      GroupDescription: EFS Allowed Ports
+      VpcId: !Ref Vpc4Pf
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      Tags: 
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-EFS-Grafana
+
+  GrafanaEfs:
+    Type: AWS::EFS::FileSystem
+    Properties: 
+      Encrypted: true
+      FileSystemTags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-grafana-efs
+  GrafanaMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref GrafanaEfs
+      SubnetId: !Ref SbnPriA
+      SecurityGroups: 
+        - !Ref EfsGrafanaSecurityGroup
+  GrafanaMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref GrafanaEfs
+      SubnetId: !Ref SbnPriB
+      SecurityGroups: 
+        - !Ref EfsGrafanaSecurityGroup
+
+  EfsCronJobLogSecurityGroup:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-EFS-CronJobLog
+      GroupDescription: EFS Allowed Ports
+      VpcId: !Ref Vpc4Pf
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !GetAtt ScgEc2Bsn.GroupId
+      Tags: 
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-EFS-CronJobLog
+
+  CronjoblogEfs:
+    Type: AWS::EFS::FileSystem
+    Properties: 
+      Encrypted: true
+      FileSystemTags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-cronjoblog-efs
+  CronjoblogMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref CronjoblogEfs
+      SubnetId: !Ref SbnPriA
+      SecurityGroups: 
+        - !Ref EfsCronJobLogSecurityGroup
+  CronjoblogMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref CronjoblogEfs
+      SubnetId: !Ref SbnPriB
+      SecurityGroups: 
+        - !Ref EfsCronJobLogSecurityGroup
+
+  ### Elastic File System end
+
+  #
+  # EC2
+  #
+
+  Ec2InsAl2001:
+    DependsOn:
+      - EksFargateProfilePxrCore
+      - GrafanaEfs
+    Type: AWS::EC2::Instance
+    #####cwagent start
+    Metadata:
+      AWS::CloudFormation::Init:
+        configSets:
+          default:
+            - 01_setupCfnHup
+            - 02_config-amazon-cloudwatch-agent
+            - 03_restart_amazon-cloudwatch-agent
+          UpdateEnvironment:
+            - 02_config-amazon-cloudwatch-agent
+            - 03_restart_amazon-cloudwatch-agent
+        # Definition of json configuration of AmazonCloudWatchAgent, you can change the configuration below.
+        02_config-amazon-cloudwatch-agent:
+          files:
+            '/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json':
+              content: !Sub |
+                {
+                  "metrics": {
+                    "append_dimensions": {
+                      "AutoScalingGroupName": "${!aws:AutoScalingGroupName}",
+                      "ImageId": "${!aws:ImageId}",
+                      "InstanceId": "${!aws:InstanceId}",
+                      "InstanceType": "${!aws:InstanceType}"
+                    },
+                    "metrics_collected": {
+                      "mem": {
+                        "measurement": [
+                          "mem_used_percent"
+                        ]
+                      },
+                      "disk": {
+                        "measurement": [
+                          "used_percent"
+                        ]
+                      }
+                    }
+                  }
+                }
+        # Invoke amazon-cloudwatch-agent-ctl to restart the AmazonCloudWatchAgent.
+        03_restart_amazon-cloudwatch-agent:
+          commands:
+            01_stop_service:
+              command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a stop
+            02_start_service:
+              command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+        # Cfn-hup setting, it is to monitor the change of metadata.
+        # When there is change in the contents of json file in the metadata section, cfn-hup will call cfn-init to restart the AmazonCloudWatchAgent.
+        01_setupCfnHup:
+          files:
+             '/etc/cfn/cfn-hup.conf':
+               content: !Sub |
+                 [main]
+                 stack=${AWS::StackId}
+                 region=${AWS::Region}
+                 interval=1
+               mode: '000400'
+               owner: root
+               group: root
+             '/etc/cfn/hooks.d/amazon-cloudwatch-agent-auto-reloader.conf':
+               content: !Sub |
+                 [cfn-auto-reloader-hook]
+                 triggers=post.update
+                 path=Resources.Ec2InsAl2001.Metadata.AWS::CloudFormation::Init.02_config-amazon-cloudwatch-agent
+                 action=/opt/aws/bin/cfn-init -v --stack ${AWS::StackId} --resource Ec2InsAl2001 --region ${AWS::Region} --configsets UpdateEnvironment
+                 runas=root
+               mode: '000400'
+               owner: root
+               group: root
+             "/lib/systemd/system/cfn-hup.service":
+                content: !Sub |
+                  [Unit]
+                  Description=cfn-hup daemon
+                  [Service]
+                  Type=simple
+                  ExecStart=/opt/aws/bin/cfn-hup
+                  Restart=always
+                  [Install]
+                  WantedBy=multi-user.target
+          commands:
+            01enable_cfn_hup:
+              command: !Sub |
+                systemctl enable cfn-hup.service
+            02start_cfn_hup:
+              command: !Sub |
+                systemctl start cfn-hup.service
+    #####cwagent end 
+
+    Properties:
+      IamInstanceProfile: 
+        Fn::ImportValue:
+          !Sub ${strStackPrefixName}-IamInsPrfOutput
+      InstanceType: !Ref Ec2InstanceSize
+      ImageId: !FindInMap
+        - Ec2
+        - Ami
+        - Al2
+      SubnetId: !Ref SbnPriB
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: !Ref Ec2VolumeSize
+            Encrypted: true
+            DeleteOnTermination: true
+      #KeyName: !Ref KeyNam
+      SecurityGroupIds:
+        - !GetAtt ScgEc2Bsn.GroupId
+      Monitoring: true
+      InstanceInitiatedShutdownBehavior: stop
+      DisableApiTermination: false
+      UserData: !If
+        - ExternalConnStt
+        - Fn::Base64: !Sub |
+            #! /bin/bash
+            yum -y install amazon-cloudwatch-agent
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackId} --resource Ec2InsAl2001 --region ${AWS::Region} --configsets default
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackId} --resource Ec2InsAl2001 --region ${AWS::Region}
+            yum -y update https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+            rpm -qa | grep amazon-ssm-agent
+            systemctl restart amazon-ssm-agent.service
+            systemctl status amazon-ssm-agent.service
+            yum -y remove awscli
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            ./aws/install
+            aws --version
+            curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.25.13/2023-09-14/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            sudo mv ./kubectl /usr/local/bin/kubectl
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin/
+            eksctl version
+            yum -y install jq.x86_64
+            jq --version
+            wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+            rpm -Uvh --nodeps pgdg-redhat-repo-latest.noarch.rpm
+            sed --in-place -e "s/\$releasever/7/g" /etc/yum.repos.d/pgdg-redhat-all.repo
+            yum -y install postgresql15
+            psql --version
+            yum -y install git
+            curl -sL https://rpm.nodesource.com/setup_12.x | bash 
+            yum install -y --enablerepo=nodesource nodejs
+            node --version
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+            #npm --version
+            #create cloudsearch 
+            aws cloudsearch create-domain --domain-name ${strStackPrefixName}-cloudsearch
+            aws cloudsearch define-index-field --domain-name ${strStackPrefixName}-cloudsearch --name description --type text --return-enabled true --sort-enabled true  --highlight-enabled true --analysis-scheme _ja_default_ 
+            aws cloudsearch define-index-field --domain-name ${strStackPrefixName}-cloudsearch --name name --type text --return-enabled true --sort-enabled true  --highlight-enabled true --analysis-scheme _ja_default_ 
+            aws cloudsearch define-index-field --domain-name ${strStackPrefixName}-cloudsearch --name code --type int --facet-enabled true --return-enabled true --sort-enabled true 
+            aws cloudsearch define-index-field --domain-name ${strStackPrefixName}-cloudsearch --name id --type int --facet-enabled true --return-enabled true --sort-enabled true  
+            aws cloudsearch index-documents --domain-name ${strStackPrefixName}-cloudsearch
+            aws cloudsearch update-service-access-policies --domain-name ${strStackPrefixName}-cloudsearch --access-policies \
+            "{\"Version\":\"2012-10-17\",
+              \"Statement\":[{
+                \"Sid\":\"\",
+                \"Effect\":\"Allow\",
+                \"Principal\":{\"AWS\":\"*\"},
+                \"Action\":\"cloudsearch:*\",
+                \"Condition\":{
+                  \"IpAddress\":{
+                    \"aws:SourceIp\":[
+                      \"${EipNgwSbnPubA}/32\",\"${EipNgwSbnPubB}/32\"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }"
+            mkdir /root/setup
+            cat <<EOF > /root/setup/fluentd-secret.sh
+            kubectl create secret generic fluentd-region --from-literal=aws_region=ap-northeast-1 -n pxr-core
+            EOF
+            cat <<EOF > /root/setup/kube-config-update.sh
+            #! /bin/bash
+            aws eks update-kubeconfig --region ap-northeast-1 --name ${EksControlPlane}
+            EOF
+            cat <<EOF > /root/setup/kube-coredns-patch.sh
+            #! /bin/bash
+            kubectl patch deployment coredns -n kube-system --type json -p='[{"op": "replace", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type", "value": "fargate"}]'
+            kubectl rollout restart -n kube-system deploy coredns
+            ROLE="    - rolearn: arn:aws:iam::${AWS::AccountId}:role/${strStackPrefixName}-deploy-codebuild-role\n      username: codebuild\n      groups:\n        - system:masters"
+            kubectl get -n kube-system configmap/aws-auth -o yaml | awk "/mapRoles: \|/{print;print \"\$ROLE\";next}1" > /root/setup/aws-auth-patch.yml
+            kubectl patch configmap/aws-auth -n kube-system --patch "\$(cat /root/setup/aws-auth-patch.yml)"
+            EOF
+
+            cat <<EOF > /root/setup/clusterconfig.yaml
+            ---
+            apiVersion: eksctl.io/v1alpha5
+            kind: ClusterConfig
+
+            metadata:
+              name: ${EksControlPlane}
+              region: ap-northeast-1
+            cloudWatch:
+              clusterLogging:
+                enableTypes: ["*"]
+            iam:
+              withOIDC: true
+              serviceAccounts:
+              - metadata:
+                  name: application-block
+                  namespace: pxr-core
+                roleName: ${strStackPrefixName}-application-block-serviceAccount
+                attachPolicyARNs:
+                - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+              - metadata:
+                  name: region-root-block
+                  namespace: pxr-core
+                roleName: ${strStackPrefixName}-cregion-root-block-serviceAccount
+                attachPolicyARNs:
+                - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+              - metadata:
+                  name: pxr-root-block
+                  namespace: pxr-core
+                roleName: ${strStackPrefixName}-root-block-serviceAccount
+                attachPolicyARNs:
+                - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+              - metadata:
+                  name: batch-job
+                  namespace: pxr-core
+                roleName: ${strStackPrefixName}-batch-job-serviceAccount
+                attachPolicyARNs:
+                - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+              
+            vpc:
+              clusterEndpoints:
+                publicAccess:  false
+                privateAccess: true
+
+            EOF
+
+            cat <<EOF > /root/setup/eks-oidc-utils.sh
+            #! /bin/bash
+            #eksctl utils update-cluster-logging -f  /root/setup/clusterconfig.yaml --approve
+            eksctl utils associate-iam-oidc-provider -f /root/setup/clusterconfig.yaml --approve
+            EOF
+            cat <<EOF > /root/setup/eks-svcaccount-create.sh
+            #! /bin/bash
+            eksctl create iamserviceaccount -f /root/setup/clusterconfig.yaml --override-existing-serviceaccounts --approve
+            EOF
+            cat <<EOF > /root/setup/eks-endpoints-utils.sh
+            #! /bin/bash
+            eksctl utils update-cluster-endpoints -f /root/setup/clusterconfig.yaml --approve
+            EOF
+
+            cat <<EOF > /root/setup/grafana-efs-setup.yaml
+            kind: StorageClass
+            apiVersion: storage.k8s.io/v1
+            metadata:
+              name: efs-sc-grafana
+            provisioner: efs.csi.aws.com
+            reclaimPolicy: Retain
+            ---
+            apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              name: grafana
+              namespace: prometheus
+            spec:
+              capacity:
+                storage: 50Gi
+              volumeMode: Filesystem
+              accessModes:
+                - ReadWriteMany
+              persistentVolumeReclaimPolicy: Retain
+              storageClassName: efs-sc-grafana
+              csi:
+                driver: efs.csi.aws.com
+                volumeHandle: ${GrafanaEfs}
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: grafana
+              namespace: prometheus
+            spec:
+              accessModes:
+                - ReadWriteMany
+              storageClassName: efs-sc-grafana
+              resources:
+                requests:
+                  storage: 50Gi
+            EOF
+            cat <<EOF > /root/setup/setup.sh
+            #! /bin/bash
+            kubectl create namespace prometheus
+            /root/setup/eks-endpoints-utils.sh
+            kubectl apply -f /root/setup/grafana-efs-setup.yaml
+            EOF
+            
+            chmod +x /root/setup/*.sh
+            mkdir -p /root/work/build/
+
+        - !Ref "AWS::NoValue"
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Instance-Bastion
+
+  #
+  # RDS
+  #
+
+  ### DB Parameter Group
+  RdsClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: !Sub ${strStackPrefixName}-DBClusterParameterGroup-PostgreSQL
+      Family: aurora-postgresql15
+      Parameters:
+        max_connections: '262143'
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBClusterParameterGroup-PostgreSQL
+  RdsParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !Sub ${strStackPrefixName}-DBParameterGroup-PostgreSQL
+      Family: aurora-postgresql15
+      Parameters:
+        max_connections: '2500'
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBParameterGroup-PostgreSQL
+
+  ### DB Subnet Group
+  RdsSubnetGroup:
+    DependsOn:
+      - SbnPriC
+      - SbnPriD
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub "For ${strStackPrefixName}"
+      DBSubnetGroupName: !Sub ${strStackPrefixName}-dbsubnetgroup-cmn
+      SubnetIds:
+        - !Ref SbnPriC
+        - !Ref SbnPriD
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBSubnetGroup-Cmn
+
+  ### DB Cluster
+  RdsCluster:
+    DependsOn:
+      - ScgRdsClsCmn
+      - RdsSubnetGroup
+      - RdsClusterParameterGroup
+      - RdsParameterGroup
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub ${strStackPrefixName}-dbcluster-postgresql-1
+      Engine: aurora-postgresql
+      EngineVersion: !Ref RdsPostgresVersion
+      EngineMode: provisioned
+      Port: 5432
+      VpcSecurityGroupIds:
+        - !Ref ScgRdsClsCmn
+      DBSubnetGroupName: !Ref RdsSubnetGroup
+      DBClusterParameterGroupName: !Ref RdsClusterParameterGroup
+      EnableCloudwatchLogsExports:
+        - postgresql
+      StorageEncrypted: true
+      #KmsKeyId: !Ref PxrKmsKey
+      MasterUsername: !Ref strRdsMasterUserName
+      MasterUserPassword: !Ref strRdsMasterPassword
+      BackupRetentionPeriod: 7
+      DeletionProtection: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBCluster
+
+  ### DB Instance
+  RdsInstance01:
+    DependsOn:
+      - RdsCluster
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref RdsCluster
+      DBInstanceIdentifier: !Sub ${strStackPrefixName}-dbinstance-postgresql-1
+      DBInstanceClass: !Ref RdsInstanceSize
+      StorageEncrypted: true
+      Engine: aurora-postgresql
+      AvailabilityZone: !GetAtt SbnPriC.AvailabilityZone
+      DBParameterGroupName: !Ref RdsParameterGroup
+      EnablePerformanceInsights: true
+      CACertificateIdentifier: rds-ca-rsa2048-g1
+      PerformanceInsightsRetentionPeriod: !Ref strRetentionPeriod
+      PubliclyAccessible: false
+      AutoMinorVersionUpgrade: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBInstance
+  RdsInstance02:
+    DependsOn:
+      - RdsCluster
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref RdsCluster
+      DBInstanceIdentifier: !Sub ${strStackPrefixName}-dbinstance-postgresql-2
+      DBInstanceClass: !Ref RdsInstanceSize
+      StorageEncrypted: true
+      Engine: aurora-postgresql
+      AvailabilityZone: !GetAtt SbnPriD.AvailabilityZone
+      DBParameterGroupName: !Ref RdsParameterGroup
+      EnablePerformanceInsights: true
+      CACertificateIdentifier: rds-ca-rsa2048-g1
+      PerformanceInsightsRetentionPeriod: !Ref strRetentionPeriod
+      PubliclyAccessible: false
+      AutoMinorVersionUpgrade: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-DBInstance
+
+  RdsEventSubscriptionFailover:
+    Type: AWS::RDS::EventSubscription
+    Properties:
+      Enabled: true
+      EventCategories:
+        - failover
+      SnsTopicArn: !Ref SnsTopic 
+      SourceIds:
+        - !Ref RdsCluster
+      SourceType: "db-cluster"
+
+  RdsEventSubscriptionFailure:
+    Type: AWS::RDS::EventSubscription
+    Properties:
+      Enabled: true
+      EventCategories:
+        - failure
+      SnsTopicArn: !Ref SnsTopic 
+      SourceIds:
+        - !Ref RdsInstance01
+        - !Ref RdsInstance02
+      SourceType: "db-instance"
+
+
+  #
+  # Route53
+  #
+
+  ### サブドメインのホストゾーンを作成
+  R53HstZonPub:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Sub ${strStackPrefixName}.${strDomainName}
+      HostedZoneConfig:
+        Comment: !Sub ${strStackPrefixName} (Public)
+      HostedZoneTags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Route53-HostedZone-Public
+
+  ### 上記で作成したホストゾーンに委任するため該当サブドメインのレコードを登録する
+  Route53Recordset:
+    Condition: UseAwsDomain
+    DependsOn:
+      - R53HstZonPub
+    Type: AWS::Route53::RecordSet
+    Properties:
+      # AliasTarget:
+      #   AliasTarget
+      # Comment: String
+      # Failover: String
+      # GeoLocation:
+      #   GeoLocation
+      # HealthCheckId: String
+      # HostedZoneId: !Ref Route53HostZoneId
+      HostedZoneName: !Sub ${strDomainName}.
+      # MultiValueAnswer: Boolean
+      Name: !Sub ${strStackPrefixName}.${strDomainName} #required
+      # Region: String
+      ResourceRecords: !GetAtt R53HstZonPub.NameServers
+      # SetIdentifier: String
+      TTL: 300
+      Type: NS #required
+      # Weight: Integer
+
+  #
+  # ACM
+  #
+  ### 証明書の発行+ドメイン認証用レコード登録
+  AcmCertificateAlbIngress:
+    DependsOn:
+      - R53HstZonPub
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub "*.${strStackPrefixName}.${strDomainName}"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Sub "*.${strStackPrefixName}.${strDomainName}"
+          HostedZoneId: !GetAtt R53HstZonPub.Id
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-Certificate-AlbIngress
+
+
+  #
+  # EKS on Fargate
+  #
+
+  ### EKS CLuster Node SecurityGroup
+  EksClusterSharedNodeSecurityGroup:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-EksClusterSharedNode
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-EksClusterSharedNode
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-EksClusterSharedNode
+      VpcId: !Ref Vpc4Pf
+  EksIngressDefaultClusterToNodeSG:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: >-
+        Allow managed and unmanaged nodes to communicate with each other (all
+        ports)
+      FromPort: 0
+      GroupId: !Ref EksClusterSharedNodeSecurityGroup
+      IpProtocol: '-1'
+      SourceSecurityGroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      ToPort: 65535
+  EksIngressInterNodeGroupSG:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow nodes to communicate with each other (all ports)
+      FromPort: 0
+      GroupId: !Ref EksClusterSharedNodeSecurityGroup
+      IpProtocol: '-1'
+      SourceSecurityGroupId: !Ref EksClusterSharedNodeSecurityGroup
+      ToPort: 65535
+  EksIngressNodeToDefaultClusterSG:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Allow unmanaged nodes to communicate with control plane (all ports)
+      FromPort: 0
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      IpProtocol: '-1'
+      SourceSecurityGroupId: !Ref EksClusterSharedNodeSecurityGroup
+      ToPort: 65535
+
+  ### EKS Cluster Controle Plane Secutiry Group
+  EksControlPlaneSecurityGroup:
+    DependsOn:
+      - Vpc4Pf
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${strStackPrefixName}-SecurityGroup-EksControlPlane
+      GroupDescription: !Sub ${strStackPrefixName}-SecurityGroup-EksControlPlane
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SecurityGroup-EksControlPlane
+      VpcId: !Ref Vpc4Pf
+  EksControlPlaneSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Sub 10.${strSecondOcted}.150.0/24
+      GroupId: !GetAtt EksControlPlaneSecurityGroup.GroupId
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+
+  ### EKS Cluster Controle Plane
+  EksControlPlane:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Name: !Sub ${strStackPrefixName}-cluster
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - !Ref EksControlPlaneSecurityGroup
+          #- !Ref ScgAlbBus
+        SubnetIds:
+          - !Ref SbnPriA
+          - !Ref SbnPriB
+          - !Ref SbnPubA
+          - !Ref SbnPubB
+      RoleArn: !GetAtt EksServiceRole.Arn
+      Version: !Ref EksVersion
+      Logging: 
+        ClusterLogging:
+          EnabledTypes:
+            - Type: api
+            - Type: audit
+            - Type: authenticator
+            - Type: controllerManager
+            - Type: scheduler
+        
+  EksOut1:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      Description: PostgreSQL
+      CidrIp: !Sub 10.${strSecondOcted}.0.0/16
+      IpProtocol: tcp
+      FromPort: '5432'
+      ToPort: '5432'
+      
+  EksOut2:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      CidrIp: !Sub 10.${strSecondOcted}.0.0/16
+      IpProtocol: tcp
+      FromPort: '53'
+      ToPort: '53'
+  EksOut3:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      CidrIp: !Sub 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: '0'
+      ToPort: '65535'
+  EksOut4:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      CidrIp: !Sub 10.${strSecondOcted}.0.0/16
+      IpProtocol: udp
+      FromPort: '53'
+      ToPort: '53'
+  EksGrafana:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt EksControlPlane.ClusterSecurityGroupId
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: '3000'
+      ToPort: '3000'
+  ### CloudwatchMetrics IAM Policy
+  EksPolicyCloudWatchMetrics:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'cloudwatch:PutMetricData'
+            Effect: Allow
+            Resource: '*'
+        Version: 2012-10-17
+      PolicyName: !Sub '${strStackPrefixName}-EksPolicyCloudWatchMetrics'
+      Roles:
+        - !Ref EksServiceRole
+
+  ### Fargate Pod Role
+  FargatePodExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+                - eks-fargate-pods.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub >-
+          arn:${AWS::Partition}:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-FargatePodExecutionRole
+
+  ### ELB IAM Policy
+  EksPolicyELBPermissions:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - 'ec2:DescribeAccountAttributes'
+              - 'ec2:DescribeAddresses'
+              - 'ec2:DescribeInternetGateways'
+            Effect: Allow
+            Resource: '*'
+        Version: 2012-10-17
+      PolicyName: !Sub '${strStackPrefixName}-EksPolicyELBPermissions'
+      Roles:
+        - !Ref EksServiceRole
+
+  ### EKS Service Role
+  EksServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${strStackPrefixName}-EksServiceRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+                - eks-fargate-pods.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSClusterPolicy'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSVPCResourceController'
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-EKS-ServiceRole
+
+  ### Fargate Profile
+  EksFargateProfileDefault:
+    DependsOn:
+      - EksControlPlane
+    Type: AWS::EKS::FargateProfile
+    Properties:
+      ClusterName: !Ref EksControlPlane #required
+      FargateProfileName: fp-default
+      PodExecutionRoleArn: !GetAtt FargatePodExecutionRole.Arn #required
+      Selectors: #required
+        # Labels: 
+        #   - Label
+        - Namespace: fp-default
+        - Namespace: kube-system
+        # - Namespace: pxr
+      Subnets:
+        - !Ref SbnPriA
+        - !Ref SbnPriB
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-fargateprofile-default
+
+  EksFargateProfilePxrCore:
+    DependsOn:
+      - EksControlPlane
+      - EksFargateProfileDefault
+    Type: AWS::EKS::FargateProfile
+    Properties: 
+      ClusterName: !Ref EksControlPlane #required
+      FargateProfileName: pxr-core
+      PodExecutionRoleArn: !GetAtt FargatePodExecutionRole.Arn #required
+      Selectors: #required
+        # Labels: 
+        #   - Label
+        - Namespace: pxr-core
+      Subnets:
+        - !Ref SbnPriA
+        - !Ref SbnPriB
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-fargateprofile-pxr-core
+
+  #
+  # CloudTrail + S3
+  #
+  ### CloudTrail用のS3バケットを作成
+  S3CloudTrail:
+    Condition: ProdEnvStt
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${strStackPrefixName}-${AWS::AccountId}-s3-cloudtrail-log
+      AccessControl: LogDeliveryWrite
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: ObjectWriter
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      LifecycleConfiguration:
+        Rules: 
+        - Id: s3-cloudtrail-log-lifecycle-rule
+          Status: Enabled
+          ExpirationInDays: 365
+    DeletionPolicy: Retain
+
+  S3CloudTrailPolicy:
+    Condition: ProdEnvStt
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3CloudTrail
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal: 
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource: !Sub "arn:aws:s3:::${S3CloudTrail}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal: 
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub "arn:aws:s3:::${S3CloudTrail}/AWSLogs/${AWS::AccountId}/*"
+            Condition: 
+              StringEquals: 
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AllowSSLRequestsOnly
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: 
+              - !Sub "arn:aws:s3:::${S3CloudTrail}"
+              - !Sub "arn:aws:s3:::${S3CloudTrail}/*"
+            Condition: 
+              Bool: 
+                aws:SecureTransport: false
+
+  ### CloudTrail LogGroup
+  CloudTrailLogGroup:
+    Condition: ProdEnvStt
+    Type: AWS::Logs::LogGroup
+    Properties:
+      # KmsKeyId: String
+      LogGroupName: /aws/CloudTrail/
+      RetentionInDays: 365 #The number of days to retain the log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.
+  CloudTrailLogStream:
+    Condition: ProdEnvStt
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref CloudTrailLogGroup #required
+      LogStreamName: !Sub ${AWS::AccountId}_CloudTrail_ap-northeast-1
+
+
+  ### CloudTrail LogGroup Policy + Role
+  CloudTrailLogPolicy:
+    Condition: ProdEnvStt
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${strStackPrefixName}-CloudTrailLogPolicy #required
+      # Path: String
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AWSCloudTrailCreateLogStream2014110
+          Effect: Allow
+          Action:
+          - logs:CreateLogStream
+          Resource:
+          - !Sub arn:aws:logs:ap-northeast-1:${AWS::AccountId}:log-group:${CloudTrailLogGroup}:log-stream:${CloudTrailLogStream}*
+        - Sid: AWSCloudTrailPutLogEvents20141101
+          Effect: Allow
+          Action:
+          - logs:PutLogEvents
+          Resource:
+          - !Sub arn:aws:logs:ap-northeast-1:${AWS::AccountId}:log-group:${CloudTrailLogGroup}:log-stream:${CloudTrailLogStream}*
+      # Roles:
+      #   - !Ref CloudTrailServiceRole
+  CloudTrailServiceRole:
+    Condition: ProdEnvStt
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${strStackPrefixName}-CloudTrailServiceRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Ref CloudTrailLogPolicy
+
+  ### CloudTrail 証跡の作成
+  CloudTrail:
+    Condition: ProdEnvStt
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      CloudWatchLogsLogGroupArn: !GetAtt CloudTrailLogGroup.Arn
+      CloudWatchLogsRoleArn: !GetAtt CloudTrailServiceRole.Arn
+      # EnableLogFileValidation: Boolean
+      # EventSelectors:
+      #   - EventSelector
+      IncludeGlobalServiceEvents: true
+      IsLogging: true #required
+      IsMultiRegionTrail: true
+      KMSKeyId: !Ref PxrKmsKey
+      S3BucketName: !Ref S3CloudTrail #required
+      # S3KeyPrefix: String
+      # SnsTopicName: String
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-CloudTrail
+      TrailName: !Sub cloudtrail-log
+
+  #
+  # WAF
+  #
+  ### WebACL 作成 + マネージドルールの追加
+  AllowIPSet:
+    Type: AWS::WAFv2::IPSet
+    Properties: 
+      Name: !Sub  ${strStackPrefixName}-allow-ip-list
+      Addresses:
+        - 0.0.0.0/32
+      IPAddressVersion: IPV4
+      Scope: "REGIONAL"
+  BlockIPSet:
+    Type: AWS::WAFv2::IPSet
+    Properties: 
+      Name: !Sub ${strStackPrefixName}-block-ip-list
+      Addresses:
+        - 0.0.0.0/32
+      IPAddressVersion: IPV4
+      Scope: "REGIONAL"
+
+  WebAcl:
+      Type: AWS::WAFv2::WebACL
+      Properties:
+        Name: !Sub ${strStackPrefixName}-waf
+        DefaultAction: 
+          Allow: {}
+        Description: !Sub ${strStackPrefixName}-WAF-WebACl
+        Scope: REGIONAL
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          MetricName: !Sub ${strStackPrefixName}-waf
+          SampledRequestsEnabled: false
+        Rules:
+          - 
+            Name: pxr-block-ip-list
+            Priority: 0
+            Action:
+                Block: {}
+            Statement:
+              IPSetReferenceStatement:
+                Arn: !GetAtt BlockIPSet.Arn
+            VisibilityConfig:
+              CloudWatchMetricsEnabled: true
+              MetricName: "pxr-block-ip-list"
+              SampledRequestsEnabled: true
+            
+          - 
+            Name: AWS-AWSManagedRulesKnownBadInputsRuleSet
+            Priority: 1
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesKnownBadInputsRuleSet
+                ExcludedRules: []
+          - Name: AWS-AWSManagedRulesAnonymousIpList
+            Priority: 2
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesAnonymousIpListMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesAnonymousIpList
+                ExcludedRules: 
+                  - Name: HostingProviderIPList
+          - Name: AWS-AWSManagedRulesCommonRuleSet
+            Priority: 3
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesCommonRuleSetMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesCommonRuleSet
+                ExcludedRules: 
+                  - Name: NoUserAgent_HEADER
+                  - Name: EC2MetaDataSSRF_BODY
+                  - Name: EC2MetaDataSSRF_COOKIE
+                  - Name: EC2MetaDataSSRF_URIPATH
+                  - Name: EC2MetaDataSSRF_QUERYARGUMENTS
+                  - Name: SizeRestrictions_BODY
+          - Name: AWS-AWSManagedRulesLinuxRuleSet
+            Priority: 4
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesLinuxRuleSetMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesLinuxRuleSet
+                ExcludedRules: []
+          - Name: AWS-AWSManagedRulesSQLiRuleSet
+            Priority: 5
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesSQLiRuleSetMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesSQLiRuleSet
+                ExcludedRules: []
+          - Name: AWS-AWSManagedRulesAmazonIpReputationList
+            Priority: 6
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesAmazonIpReputationListMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesAmazonIpReputationList
+                ExcludedRules: []
+          - Name: AWS-AWSManagedRulesAdminProtectionRuleSet
+            Priority: 7
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: false
+              CloudWatchMetricsEnabled: true
+              MetricName: AWSManagedRulesAdminProtectionRuleSetMetric
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesAdminProtectionRuleSet
+                ExcludedRules: []
+          - Name: block-access-not-from-japan
+            Priority: 8
+            Statement:
+              AndStatement:
+                Statements:
+                - NotStatement:
+                    Statement:
+                      IPSetReferenceStatement:
+                        Arn: !GetAtt AllowIPSet.Arn
+                - NotStatement:
+                    Statement:
+                      GeoMatchStatement:
+                        CountryCodes:
+                        - JP
+            Action:
+              Block: {}
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: block-access-not-from-japan
+
+  #
+  # SNS
+  #
+
+  ### SNS Topic 作成
+  SnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub ${strStackPrefixName}-Alarm-Notification
+      FifoTopic: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${strStackPrefixName}-SNS-Topic
+      TopicName: !Sub ${strStackPrefixName}-Alarm-Notification # notification の箇所は利用用途が入る
+
+  #
+  # GuardDuty
+  #
+
+  ### GuradDuty 有効化
+  GuardDuty:
+    Condition: FirstRunStt
+    Type: AWS::GuardDuty::Detector
+    Properties:
+      Enable: true
+
+  #
+  # Create IAM User Group
+  #
+  ###  AdministratorGroup
+  AdministratorGroup: 
+    Condition: FirstRunStt
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName : pxr-admin-user-group
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+      Path: "/"
+
+  ###  DeveloperGroup
+  DeveloperGroup: 
+    Condition: FirstRunStt
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName : pxr-developer-user-group
+      Path: "/"
+      Policies: 
+        - PolicyName: pxr-developer-user-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - applicationinsights:*
+                  - apigateway:*
+                  - cloudformation:*
+                  - cloudsearch:*
+                  - cloudtrail:*
+                  - cloudwatch:*
+                  - codebuild:*
+                  - codecommit:*
+                  - codedeploy:*
+                  - codepipeline:*
+                  - ec2-instance-connect:*
+                  - ec2:*
+                  - elasticfilesystem:*
+                  - elasticloadbalancing:*
+                  - guardduty:*
+                  - kms:*
+                  - lambda:*
+                  - logs:*
+                  - rds-data:*
+                  - rds-db:*
+                  - rds:*
+                  - route53:*
+                  - route53domains:*
+                  - route53resolver:*
+                  - s3-outposts:*
+                  - s3:*
+                  - shield:*
+                  - states:*
+                  - sns:*
+                  - ssm:*
+                  - waf-regional:*
+                  - waf:*
+                  - wafv2:*
+                  - eks:*
+                Resource: "*"
+  ###  MaintenanceGroup
+  MaintenanceGroup: 
+    Condition: FirstRunStt
+    Type: "AWS::IAM::Group"
+    Properties: 
+      GroupName : pxr-maintenance-user-group
+      Path: "/"
+      Policies: 
+        - PolicyName: pxr-maintenance-user-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  #- apigateway:*
+                  #- codebuild:*
+                  #- codecommit:*
+                  #- codedeploy:*
+                  #- codepipeline:*
+                  - cloudwatch:*
+                  - ec2-instance-connect:*
+                  - ec2:*
+                  - rds-db:*
+                  - rds:*
+                  - s3:*
+                  - ssm:*
+                  #- states:*
+                  #- iam:*
+                Resource: "*"
+
+  SgSettingChangeMetricFilter:
+    DependsOn: CloudTrailLogGroup
+    Condition: ProdEnvStt
+    Type: AWS::Logs::MetricFilter
+    Properties: 
+      FilterPattern: "{ ($.eventName = AuthorizeSecurityGroupIngress) || ($.eventName = AuthorizeSecurityGroupEgress) || ($.eventName = RevokeSecurityGroupIngress) || ($.eventName = RevokeSecurityGroupEgress) || ($.eventName = CreateSecurityGroup) || ($.eventName = DeleteSecurityGroup) }"
+      LogGroupName: /aws/CloudTrail/
+      MetricTransformations: 
+        -
+          MetricValue: "1"
+          DefaultValue: "0"
+          #MetricNamespace: !Sub ${PrefixName}-eks
+          MetricNamespace: cloudtrail
+          MetricName: "sg-setting-change"
+  
+  SgSettingChangeAlarm:
+    Condition: ProdEnvStt
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: cloudtrail-sg-setting-change
+      MetricName: "sg-setting-change"
+      Namespace: cloudtrail
+      Statistic: Sum
+      EvaluationPeriods: 1
+      Threshold: 1
+      Period: 300
+      TreatMissingData: breaching
+      ComparisonOperator: GreaterThanOrEqualToThreshold 
+
+  ConsoleSigninErrorMetricFilter:
+    DependsOn: CloudTrailLogGroup
+    Condition: ProdEnvStt
+    Type: AWS::Logs::MetricFilter
+    Properties: 
+      FilterPattern: '{ ($.eventName = ConsoleLogin) && ($.errorMessage = "Failed authentication") }'
+      LogGroupName: /aws/CloudTrail/
+      MetricTransformations: 
+        -
+          MetricValue: "1"
+          DefaultValue: "0"
+          #MetricNamespace: !Sub ${PrefixName}-eks
+          MetricNamespace: cloudtrail
+          MetricName: "console-signin-error"
+
+  ConsaleSigninErrorAlarm:
+    Condition: ProdEnvStt
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: cloudtrail-console-signin-error
+      MetricName: "console-signin-error"
+      Namespace: cloudtrail
+      Statistic: Sum
+      EvaluationPeriods: 1
+      Threshold: 1
+      Period: 300
+      TreatMissingData: breaching
+      ComparisonOperator: GreaterThanOrEqualToThreshold 
+          
+  IamPolicyChangeMetricFilter:
+    DependsOn: CloudTrailLogGroup
+    Condition: ProdEnvStt
+    Type: AWS::Logs::MetricFilter
+    Properties: 
+      FilterPattern: "{($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.eventName=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)||($.eventName=DetachGroupPolicy)}"
+      LogGroupName: /aws/CloudTrail/
+      MetricTransformations: 
+        -
+          MetricValue: "1"
+          DefaultValue: "0"
+          #MetricNamespace: !Sub ${PrefixName}-eks
+          MetricNamespace: cloudtrail
+          MetricName: "iam-policy-change"
+
+  IamPolicyChangeAlarm:
+    Condition: ProdEnvStt
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: cloudtrail-iam-policy-change
+      MetricName: "iam-policy-change"
+      Namespace: cloudtrail
+      Statistic: Sum
+      EvaluationPeriods: 1
+      Threshold: 1
+      Period: 300
+      TreatMissingData: breaching
+      ComparisonOperator: GreaterThanOrEqualToThreshold 
+
+# --------------------------------------------------
+# Outputs Section
+# --------------------------------------------------
+Outputs:
+  IdsScgAlbBus:
+    Value: !GetAtt ScgAlbBus.GroupId
+    Export:
+      Name: !Sub ${strStackPrefixName}-GrpIds-ScgAlbBus-${AWS::Region}
+  ArnAcmCertificateAlbIngress:
+    Value: !Ref AcmCertificateAlbIngress
+    Export:
+      Name: !Sub ${strStackPrefixName}-Arn-AcmCertificateAlbIngress-${AWS::Region}
+  EndPntRdsCluster:
+    Value: !GetAtt RdsCluster.Endpoint.Address
+    Export:
+      Name: !Sub ${strStackPrefixName}-EndPnt-RdsCluster-${AWS::Region}
+  VPCId:
+    Description: VPC ID
+    Value:
+      Ref: Vpc4Pf
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-VPCID'
+  SbnPubA:
+    Description: The subnet ID to use for public web servers
+    Value:
+      Ref: SbnPubA
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-SbnPubA'
+  SbnPubB:
+    Description: The subnet ID to use for public web servers
+    Value:
+      Ref: SbnPubB
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-SbnPubB'
+  SbnPriA:
+    Description: The subnet ID to use for public web servers
+    Value:
+      Ref: SbnPriA
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-SbnPriA'
+  SbnPriB:
+    Description: The subnet ID to use for public web servers
+    Value:
+      Ref: SbnPriB
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-SbnPriB'
+  VpcDefaultSG:
+    Value:
+      !GetAtt Vpc4Pf.DefaultSecurityGroup
+    Export:
+      Name:
+        'Fn::Sub': '${strStackPrefixName}-VpcDefaultSG'
+  logBucket:
+    Condition: ProdEnvStt
+    Value:
+      !Ref S3CloudTrail
+    Export:
+      Name:
+        'log-backup-Bucket'
+        
+
+  
+  
