@@ -3433,14 +3433,14 @@ data:
           "master": {
             "host": "external-db-service",
             "port": 5432,
-            "database": "root_pod",
+            "database": "<database_name>",
             "username": "<user_name>",
             "password": "<password>"
           },
           "slaves": [{
             "host": "external-db-ro-service",
             "port": 5432,
-            "database": "root_pod",
+            "database": "<database_name>",
             "username": "<user_name>",
             "password": "<password>"
           }]
